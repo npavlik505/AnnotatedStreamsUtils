@@ -1,0 +1,14 @@
+Bootstrap: localimage
+From: nv.sif
+
+# before running the build script you must run
+# sh ./prepare-build.sh
+
+# https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nvhpc
+
+%files
+	/home/brooks/github/streams /streams
+
+%post
+	cd /streams/src
+	make
