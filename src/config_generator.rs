@@ -8,7 +8,7 @@ pub(crate) enum ConfigError {
     #[error("Domain requires too much memory: {0}")]
     Memory(Memory),
     #[error("{0}")]
-    Custom(String)
+    Custom(String),
 }
 
 #[derive(Debug, Display, Constructor)]
@@ -43,14 +43,14 @@ pub(crate) struct Memory {
 
 #[derive(Debug, Display, PartialEq, PartialOrd)]
 #[display(fmt = "{} Mb", _0)]
-pub(crate) struct Megabytes(usize);
+pub(crate) struct Megabytes(pub(crate) usize);
 
 impl ConfigGenerator {
     /// check all the parameters of the input file to guarantee that the given input
     /// file will (likely) work in the solver without runtime error
     ///
     /// `max_gpu_mem` must only be specified if you are running the config on a gpu system
-    fn validate(&self, max_gpu_mem: Option<Megabytes>) -> Result<(), ConfigError> {
+    pub(crate) fn validate(&self, max_gpu_mem: Option<Megabytes>) -> Result<(), ConfigError> {
         // make sure that the number of divisions with mpi is acceptable
         let split_remainder = self.x_divisions % self.mpi_x_split;
         if split_remainder != 0 {
@@ -64,13 +64,19 @@ impl ConfigGenerator {
         // from config file
         let nymax_wr = 201;
         if self.y_divisions < nymax_wr {
-            return Err(ConfigError::Custom(format!("y-divisions ({}) must be greater than {}", self.y_divisions, nymax_wr)))
+            return Err(ConfigError::Custom(format!(
+                "y-divisions ({}) must be greater than {}",
+                self.y_divisions, nymax_wr
+            )));
         }
 
         // from config file
         let rly_wr = 2.5;
         if self.y_length < rly_wr {
-            return Err(ConfigError::Custom(format!("y-length ({}) must be greater than {}", self.y_length, rly_wr)))
+            return Err(ConfigError::Custom(format!(
+                "y-length ({}) must be greater than {}",
+                self.y_length, rly_wr
+            )));
         }
 
         Ok(())
@@ -146,19 +152,19 @@ pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> 
   3     6      6       3
  
  MPI_x_split     MPI_z_split
-    8               1 
+ {mpi_x_split}               1 
 
  sensor_threshold   xshock_imp   deflec_shock    pgrad (0==>constant bulk)
   0.1               40.             {angle}              0.
       
  restart   num_iter   cfl   dt_control  print_control  io_type
-   0     50000   .75      1       1         2
+   0        50000       .75      1       1              2
       
  Mach      Reynolds (friction)  temp_ratio   visc_type   Tref (dimensional)   turb_inflow
  {mach}      {re}                   1.            2         160.                0.75
   
  stat_control  xstat_num
-  500     10
+  500           10
 
  xstat_list
    10. 20. 30. 35. 40. 45. 50. 55. 60. 65.
@@ -176,7 +182,8 @@ pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> 
         nz = args.z_divisions,
         mach = args.mach_number,
         re = args.reynolds_number,
-        angle = args.shock_angle
+        angle = args.shock_angle,
+        mpi_x_split = args.mpi_x_split
     );
 
     if !args.dry {

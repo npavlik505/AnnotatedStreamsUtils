@@ -16,9 +16,11 @@ pub(crate) enum Command {
     Sbli(SbliCases),
     /// generate a config file (input.dat) for use in the solver
     ConfigGenerator(ConfigGenerator),
+    /// run the solver once inside the singularity container
+    RunSolver(RunSolver)
 }
 
-#[derive(Parser, Debug, Clone)]
+#[derive(Parser, Debug, Clone, serde::Deserialize, serde::Serialize)]
 /// Fields that are configurable for generating input.dat files for the solver
 pub(crate) struct ConfigGenerator {
     /// path to write the resulting config file to
@@ -64,7 +66,7 @@ pub(crate) struct ConfigGenerator {
     /// will have 1 mpi division along the z axis as some extensions
     /// to the code assume there are no z divisions.
     ///
-    /// The value supplied to this argument MUST be used for the -np 
+    /// The value supplied to this argument MUST be used for the -np
     /// argument in `mpirun`
     #[clap(long, default_value_t = 4)]
     pub(crate) mpi_x_split: usize,
@@ -72,11 +74,15 @@ pub(crate) struct ConfigGenerator {
     #[clap(long)]
     /// skip writing the actual config file
     pub(crate) dry: bool,
+
+    #[clap(long, default_value_t = 50_000)]
+    /// number of steps for the solver to take
+    pub(crate) steps: usize
 }
 
 impl ConfigGenerator {
     /// create a default config to be written to a given path
-    fn with_path(output_path: PathBuf) -> Self {
+    pub(crate) fn with_path(output_path: PathBuf) -> Self {
         // commented values in here are the default values from the solver file
         // that we are overwriting
         Self {
@@ -91,20 +97,48 @@ impl ConfigGenerator {
             //y_length: 12.,
             y_length: 6.,
             //y_divisions: 400,
-            y_divisions: 200,
+            y_divisions: 205,
             //z_length: 6.5,
             z_length: 3.8,
             //z_divisions: 256,
             z_divisions: 150,
             mpi_x_split: 4,
             dry: false,
+            steps: 50_000
         }
     }
 }
 
 #[derive(Parser, Debug, Clone)]
 pub(crate) struct SbliCases {
+    /// the location where all `distribute` files will
+    /// be written
+    pub(crate) output_directory: PathBuf,
+
+    /// a matrix_id that you want to ping after the jobs are
+    /// finished. Should look like: `@user_id:matrix.org`
+    #[clap(long)]
+    pub(crate) matrix: Option<distribute::UserId>,
+
     #[clap(long)]
     /// input databse file to use
-    database_bl: PathBuf,
+    pub(crate) database_bl: PathBuf,
+
+    /// path to the streams .sif file you wish to use
+    /// to run this batch
+    #[clap(long)]
+    pub(crate) solver_sif: PathBuf,
+
+    #[clap(long)]
+    /// copy the .sif file to the output directory so
+    /// that the run can be replicated later. if not
+    /// passed the distribute-jobs.yaml file will reference
+    /// the solver .sif file that may change at a later time
+    pub(crate) copy_sif: bool,
+}
+
+#[derive(Parser, Debug, Clone)]
+pub(crate) struct RunSolver {
+    /// the number of processes that this program is allowed to use
+    nproc: usize
 }

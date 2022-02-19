@@ -2,6 +2,7 @@ mod cli;
 mod config_generator;
 mod prelude;
 mod sbli;
+mod run;
 
 use prelude::*;
 
@@ -13,8 +14,9 @@ fn main() {
     let args = Args::parse();
 
     let out = match args.mode {
-        Command::Sbli(x) => todo!(),
+        Command::Sbli(x) => sbli::sbli_cases(x),
         Command::ConfigGenerator(x) => config_generator::config_generator(x),
+        Command::RunSolver(x) => run::run(x)
     };
 
     if let Err(e) = out {
@@ -28,6 +30,12 @@ enum Error {
     File(FileError),
     #[error("{0}")]
     Config(config_generator::ConfigError),
+    #[error("{0}")]
+    Sbli(sbli::SbliError),
+    #[error("{0}")]
+    SerializationYaml(distribute::serde_yaml::Error),
+    #[error("{0}")]
+    SerializationJson(serde_json::Error),
 }
 
 #[derive(Display, Debug, Constructor)]

@@ -6,4 +6,5 @@ pub(crate) use derive_more::Display;
 pub(crate) use derive_more::From;
 pub(crate) use std::fs;
 pub(crate) use std::io;
+pub(crate) use std::path::Path;
 pub(crate) use std::path::PathBuf;

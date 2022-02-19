@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: nv.sif
+From: base.sif
 
 # before running the build script you must run
 # sh ./prepare-build.sh
@@ -8,7 +8,12 @@ From: nv.sif
 
 %files
 	/home/brooks/github/streams /streams
+	/home/brooks/github/streams-utils /streams-utils
 
 %post
-	cd /streams/src
-	make
+	# hack to add cargo to path
+	export PATH="$PATH":"$HOME/.cargo/bin"
+
+	cargo
+	#cd /streams/src
+	#make
