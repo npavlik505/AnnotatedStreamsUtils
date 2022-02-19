@@ -1,5 +1,6 @@
 Bootstrap: localimage
 From: base.sif
+Stage: build
 
 # before running the build script you must run
 # sh ./prepare-build.sh
@@ -8,12 +9,33 @@ From: base.sif
 
 %files
 	/home/brooks/github/streams /streams
-	/home/brooks/github/streams-utils /streams-utils
+
+	/home/brooks/github/streams-utils/src/ /streams-utils/src
+	/home/brooks/github/streams-utils/Cargo.toml /streams-utils/Cargo.toml
+	/home/brooks/github/streams-utils/Cargo.lock /streams-utils/Cargo.lock
+	
+	/home/brooks/github/distribute /distribute
+	/home/brooks/github/matrix-notify /matrix-notify
 
 %post
 	# hack to add cargo to path
 	export PATH="$PATH":"$HOME/.cargo/bin"
 
-	cargo
-	#cd /streams/src
-	#make
+	# make streams-utils
+	cd /streams-utils
+	cargo build --release
+
+	# make streams
+	cd /streams/src
+	make
+
+Bootstrap: localimage
+From: nv.sif
+	
+%files from build
+	/streams-utils/target/release/streams-utils /streams-utils
+	/streams/src/streams.exe /streams.exe
+
+%apprun distribute
+	cd /
+	/streams-utils run-solver $1
