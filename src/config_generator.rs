@@ -79,6 +79,15 @@ impl ConfigGenerator {
             )));
         }
 
+        if self.y_divisions % self.mpi_x_split != 0 {
+            return Err(ConfigError::Custom(format!(
+                "nymax (y-divisions) @ {} must be divisible by mpi-x-split @ {} (remainder: {})",
+                self.y_divisions,
+                self.mpi_x_split,
+                self.y_divisions % self.mpi_x_split
+            )));
+        }
+
         Ok(())
     }
 
@@ -155,10 +164,10 @@ pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> 
  {mpi_x_split}               1 
 
  sensor_threshold   xshock_imp   deflec_shock    pgrad (0==>constant bulk)
-  0.1               40.             {angle}              0.
+  0.1               15.             {angle}              0.
       
  restart   num_iter   cfl   dt_control  print_control  io_type
-   0        50000       .75      1       1              2
+   0        {steps}      .75      1       1              2
       
  Mach      Reynolds (friction)  temp_ratio   visc_type   Tref (dimensional)   turb_inflow
  {mach}      {re}                   1.            2         160.                0.75
@@ -170,10 +179,14 @@ pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> 
    10. 20. 30. 35. 40. 45. 50. 55. 60. 65.
  
  dtsave dtsave_restart  enable_plot3d   enable_vtk
-  5.       50.                1              1
+  5.       50.                0              1
 
   rand_type
-   -1"#,
+   -1
+
+ save_probe_steps save_span_average_steps
+    {probe_steps}         {span_average_steps}
+   "#,
         lx = args.x_length,
         nx = args.x_divisions,
         ly = args.y_length,
@@ -183,7 +196,10 @@ pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> 
         mach = args.mach_number,
         re = args.reynolds_number,
         angle = args.shock_angle,
-        mpi_x_split = args.mpi_x_split
+        mpi_x_split = args.mpi_x_split,
+        steps = args.steps,
+        probe_steps = args.probe_io_steps,
+        span_average_steps = args.span_average_io_steps
     );
 
     if !args.dry {

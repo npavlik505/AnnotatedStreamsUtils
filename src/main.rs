@@ -1,8 +1,9 @@
+mod binary_to_vtk;
 mod cli;
 mod config_generator;
 mod prelude;
-mod sbli;
 mod run;
+mod sbli;
 
 use prelude::*;
 
@@ -16,7 +17,7 @@ fn main() {
     let out = match args.mode {
         Command::Sbli(x) => sbli::sbli_cases(x),
         Command::ConfigGenerator(x) => config_generator::config_generator(x),
-        Command::RunSolver(x) => run::run(x)
+        Command::RunSolver(x) => run::run(x),
     };
 
     if let Err(e) = out {
@@ -36,6 +37,10 @@ enum Error {
     SerializationYaml(distribute::serde_yaml::Error),
     #[error("{0}")]
     SerializationJson(serde_json::Error),
+    #[error("{0}")]
+    BinaryVtkError(binary_to_vtk::BinaryToVtkError),
+    #[error("{0}")]
+    Vtk(vtk::Error),
 }
 
 #[derive(Display, Debug, Constructor)]

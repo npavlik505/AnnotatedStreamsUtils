@@ -17,7 +17,7 @@ pub(crate) enum Command {
     /// generate a config file (input.dat) for use in the solver
     ConfigGenerator(ConfigGenerator),
     /// run the solver once inside the singularity container
-    RunSolver(RunSolver)
+    RunSolver(RunSolver),
 }
 
 #[derive(Parser, Debug, Clone, serde::Deserialize, serde::Serialize)]
@@ -39,11 +39,11 @@ pub(crate) struct ConfigGenerator {
     pub(crate) shock_angle: f64,
 
     /// total length in the x direction
-    #[clap(long, default_value_t = 30.)]
+    #[clap(long, default_value_t = 27.)]
     pub(crate) x_length: f64,
 
     /// total length in the x direction
-    #[clap(long, default_value_t = 900)]
+    #[clap(long, default_value_t = 840)]
     pub(crate) x_divisions: usize,
 
     /// total length in the y direction
@@ -51,7 +51,7 @@ pub(crate) struct ConfigGenerator {
     pub(crate) y_length: f64,
 
     /// total length in the y direction
-    #[clap(long, default_value_t = 205)]
+    #[clap(long, default_value_t = 208)]
     pub(crate) y_divisions: usize,
 
     /// total length in the z direction
@@ -77,7 +77,19 @@ pub(crate) struct ConfigGenerator {
 
     #[clap(long, default_value_t = 50_000)]
     /// number of steps for the solver to take
-    pub(crate) steps: usize
+    pub(crate) steps: usize,
+
+    #[clap(long, default_value_t = 0)]
+    /// number of steps between writing probe information.
+    /// (0 => never)
+    /// (n >0 => every n steps)
+    pub(crate) probe_io_steps: usize,
+
+    #[clap(long, default_value_t = 100)]
+    /// number of steps between span average flowfields
+    /// (0 => never)
+    /// (n >0 => every n steps)
+    pub(crate) span_average_io_steps: usize,
 }
 
 impl ConfigGenerator {
@@ -91,20 +103,22 @@ impl ConfigGenerator {
             mach_number: 2.28,
             shock_angle: 8.0,
             //x_length: 70.0,
-            x_length: 30.0,
+            x_length: 27.0,
             //x_divisions: 2048,
-            x_divisions: 900,
+            x_divisions: 840,
             //y_length: 12.,
             y_length: 6.,
             //y_divisions: 400,
-            y_divisions: 205,
+            y_divisions: 208,
             //z_length: 6.5,
             z_length: 3.8,
             //z_divisions: 256,
             z_divisions: 150,
             mpi_x_split: 4,
             dry: false,
-            steps: 50_000
+            steps: 50_000,
+            probe_io_steps: 0,
+            span_average_io_steps: 100,
         }
     }
 }
@@ -140,5 +154,5 @@ pub(crate) struct SbliCases {
 #[derive(Parser, Debug, Clone)]
 pub(crate) struct RunSolver {
     /// the number of processes that this program is allowed to use
-    nproc: usize
+    pub(crate) nproc: usize,
 }

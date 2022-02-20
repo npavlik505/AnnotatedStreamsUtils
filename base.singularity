@@ -3,7 +3,7 @@ From: nv.sif
 
 %post
 	apt-get update -y
-	apt-get install curl libssl-dev pkg-config -y
+	apt-get install curl libssl-dev pkg-config git -y
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 	export PATH="$PATH":"$HOME/.cargo/bin"
 

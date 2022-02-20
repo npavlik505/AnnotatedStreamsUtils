@@ -16,10 +16,18 @@ Stage: build
 	
 	/home/brooks/github/distribute /distribute
 	/home/brooks/github/matrix-notify /matrix-notify
+	/home/brooks/github/vtk /vtk
 
 %post
 	# hack to add cargo to path
 	export PATH="$PATH":"$HOME/.cargo/bin"
+
+	# clone the cuda samples directory
+	which nvcc
+	cd /
+	git clone "https://github.com/Fluid-Dynamics-Group/cuda-samples" --depth 1
+	cd /cuda-samples/Samples/0_Introduction/simpleZeroCopy
+	make
 
 	# make streams-utils
 	cd /streams-utils
@@ -27,7 +35,16 @@ Stage: build
 
 	# make streams
 	cd /streams/src
+	# replace (in the makefile)
+	# COMPILE = "gnu"
+	# with
+	# COMPILE = "nvfortran"
+	bash -c 'cat Makefile | sed "s/COMPILE = \"gnu\"/COMPILE = \"nvfortran\"/" &> Makefile2'
+	# for some reason singularity does not like us directly piping the output of
+	# ./Makefile to ./Makefile so we have to use this workaround
+	mv Makefile2 Makefile
 	make
+
 
 Bootstrap: localimage
 From: nv.sif
@@ -35,7 +52,16 @@ From: nv.sif
 %files from build
 	/streams-utils/target/release/streams-utils /streams-utils
 	/streams/src/streams.exe /streams.exe
+	/cuda-samples/bin/x86_64/linux/release/simpleZeroCopy /simpleZeroCopy
 
 %apprun distribute
 	cd /
-	/streams-utils run-solver $1
+
+	echo "executing zero copy to initialize the gpu"
+	/simpleZeroCopy
+
+	echo "finished simple zero copy"
+
+	# doing the rest of the stuff
+	#/streams-utils run-solver $1
+	/streams-utils run-solver 4

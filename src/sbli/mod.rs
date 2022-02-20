@@ -18,10 +18,10 @@ pub(crate) enum SbliError {
     "dest.display()",
     error
 )]
-pub(crate) struct CopyFile{
+pub(crate) struct CopyFile {
     source: PathBuf,
     dest: PathBuf,
-    error: io::Error
+    error: io::Error,
 }
 
 pub(crate) fn sbli_cases(mut args: SbliCases) -> Result<(), Error> {
@@ -98,13 +98,14 @@ fn check_options_copy_files(args: &mut cli::SbliCases) -> Result<(), Error> {
     // if we are not copying over the .sif file (it takes up lots of space)
     // then lets make sure that the path specified is global and not relative
     if !args.copy_sif {
-        args.solver_sif = args.solver_sif
+        args.solver_sif = args
+            .solver_sif
             .canonicalize()
             .map_err(|e| FileError::new(args.solver_sif.clone(), e))?;
     }
 
     if !args.database_bl.exists() {
-        return Err(SbliError::DatabaseBlMissing(args.database_bl.clone()).into())
+        return Err(SbliError::DatabaseBlMissing(args.database_bl.clone()).into());
     }
 
     // error if the directory already exists, otherwise create the directory
@@ -117,7 +118,7 @@ fn check_options_copy_files(args: &mut cli::SbliCases) -> Result<(), Error> {
 
     // copy the database_bl file to the output folder we have created
     let dest_dir = args.output_directory.join("database_bl.dat");
-    fs::copy(&args.database_bl, &dest_dir )
+    fs::copy(&args.database_bl, &dest_dir)
         .map_err(|e| CopyFile::new(args.database_bl.clone(), dest_dir.clone(), e))
         .map_err(|e| SbliError::Copy(e))?;
     args.database_bl = dest_dir;
