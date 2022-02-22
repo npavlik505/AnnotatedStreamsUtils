@@ -25,70 +25,48 @@ pub(crate) struct CopyFile {
 }
 
 pub(crate) fn sbli_cases(mut args: SbliCases) -> Result<(), Error> {
-    // friction reynolds numbers
-    let reynolds_numbers = [200., 225., 250., 275., 300.];
-
-    // angle of the shock (degrees)
-    let shock_angle = [4., 6., 8., 10., 12.];
-
-    // mach numbers (rm)
-    let mach_numbers = [2., 2.2, 2.4, 2.6, 2.8, 3.0];
-
     check_options_copy_files(&mut args)?;
     // remove mutability on args
     let args = args;
 
-    let steps = 100;
-    let mut cases = vec![];
+    match args.mode {
+        cli::SbliMode::Sweep => sweep_cases(args)?,
+        cli::SbliMode::CheckBlowingCondition => check_blowing_condition(args)?
+    };
 
-    for (idx, re) in reynolds_numbers.into_iter().enumerate() {
-        let case_name = format!("reynolds_number_{idx}.json");
-        let case_path = args.output_directory.join(case_name);
-        let mut config = cli::ConfigGenerator::with_path(case_path);
-        config.reynolds_number = re;
-        config.steps = steps;
-        cases.push(config)
-    }
-
-    for (idx, angle) in shock_angle.into_iter().enumerate() {
-        let case_name = format!("shock_angle_{idx}.json");
-        let case_path = args.output_directory.join(case_name);
-        let mut config = cli::ConfigGenerator::with_path(case_path);
-        config.shock_angle = angle;
-        config.steps = steps;
-        cases.push(config)
-    }
-
-    for (idx, mach) in mach_numbers.into_iter().enumerate() {
-        let case_name = format!("mach_number_{idx}.json");
-        let case_path = args.output_directory.join(case_name);
-        let mut config = cli::ConfigGenerator::with_path(case_path);
-        config.mach_number = mach;
-        config.steps = steps;
-        cases.push(config)
-    }
-
-    // pull all of the input.dat files that we need to write to a distribute file
-    let input_files: Vec<PathBuf> = cases
-        .iter()
-        .map(|config| config.output_path.clone())
-        .collect();
-
-    for case in cases {
-        // first, make sure that the case itself is valid
-        let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
-        case.validate(gpu_memory)?;
-
-        let file = fs::File::create(&case.output_path)
-            .map_err(|e| FileError::new(case.output_path.clone(), e))?;
-
-        // write the case data to a file so that the actual input file can be generated later
-        serde_json::to_writer(file, &case)?;
-    }
-
-    distribute_gen(&args, input_files)?;
 
     Ok(())
+}
+
+/// helper function to add a bunch of cases to the cases vector
+/// with two simple callbacks (one to create the name, one to update
+/// the value in the config that is desired)
+fn create_cases<T, V, Val>(
+    create_case_name: T,
+    update_config: V,
+    cases: &mut Vec<cli::ConfigGenerator>,
+    values: &[Val],
+    output_directory: &Path,
+) where
+    T: Fn(usize) -> String,
+    V: Fn(&mut cli::ConfigGenerator, Val),
+    Val: Copy,
+{
+    let steps = 1000;
+    let span_average_steps = 50;
+    let blowing_bc = 1;
+
+    for (idx, update_value) in values.into_iter().enumerate() {
+        //let case_name = format!("reynolds_number_{idx}.json");
+        let case_name = create_case_name(idx);
+        let case_path = output_directory.join(case_name);
+        let mut config = cli::ConfigGenerator::with_path(case_path);
+        update_config(&mut config, *update_value);
+        config.steps = steps;
+        config.span_average_io_steps = span_average_steps;
+        config.sbli_blowing_bc = blowing_bc;
+        cases.push(config)
+    }
 }
 
 /// verify the cli options passed are valid
@@ -130,6 +108,85 @@ fn check_options_copy_files(args: &mut cli::SbliCases) -> Result<(), Error> {
             .map_err(|e| CopyFile::new(args.solver_sif.clone(), dest_dir, e))
             .map_err(|e| SbliError::Copy(e))?;
     }
+
+    Ok(())
+}
+
+fn sweep_cases(args: SbliCases) -> Result<(), Error> {
+    // friction reynolds numbers
+    let reynolds_numbers = [200., 225., 250., 275., 300.];
+
+    // angle of the shock (degrees)
+    let shock_angle = [4., 6., 8., 10., 12.];
+
+    // mach numbers (rm)
+    let mach_numbers = [2., 2.2, 2.4, 2.6, 2.8, 3.0];
+
+    let mut cases = vec![];
+
+    create_cases(
+        |idx| format!("reynolds_number_{idx}.json"),
+        |config, re| config.reynolds_number = re,
+        &mut cases,
+        &reynolds_numbers,
+        &args.output_directory,
+    );
+
+    create_cases(
+        |idx| format!("shock_angle_{idx}.json"),
+        |config, angle| config.shock_angle = angle,
+        &mut cases,
+        &shock_angle,
+        &args.output_directory,
+    );
+
+    create_cases(
+        |idx| format!("mach_number_{idx}.json"),
+        |config, mach| config.mach_number = mach,
+        &mut cases,
+        &mach_numbers,
+        &args.output_directory,
+    );
+
+    // pull all of the input.dat files that we need to write to a distribute file
+    let input_files: Vec<PathBuf> = cases
+        .iter()
+        .map(|config| config.output_path.clone())
+        .collect();
+
+    for case in cases {
+        // first, make sure that the case itself is valid
+        let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
+        case.validate(gpu_memory)?;
+
+        let file = fs::File::create(&case.output_path)
+            .map_err(|e| FileError::new(case.output_path.clone(), e))?;
+
+        // write the case data to a file so that the actual input file can be generated later
+        serde_json::to_writer(file, &case)?;
+    }
+
+    distribute_gen(&args, input_files)?;
+
+    Ok(())
+}
+
+fn check_blowing_condition(args: SbliCases) -> Result<(), Error> {
+    let mut case = cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
+    
+    case.steps = 50_000;
+    case.sbli_blowing_bc = 1;
+
+    let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
+    case.validate(gpu_memory)?;
+
+    let file = fs::File::create(&case.output_path)
+        .map_err(|e| FileError::new(case.output_path.clone(), e))?;
+
+    // write the case data to a file so that the actual input file can be generated later
+    serde_json::to_writer(file, &case)?;
+
+    distribute_gen(&args, vec![case.output_path])?;
 
     Ok(())
 }

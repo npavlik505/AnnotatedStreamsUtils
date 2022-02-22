@@ -186,6 +186,9 @@ pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> 
 
  save_probe_steps save_span_average_steps
     {probe_steps}         {span_average_steps}
+
+ sbli_blowing_bc
+    {sbli_blowing_bc}
    "#,
         lx = args.x_length,
         nx = args.x_divisions,
@@ -199,7 +202,8 @@ pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> 
         mpi_x_split = args.mpi_x_split,
         steps = args.steps,
         probe_steps = args.probe_io_steps,
-        span_average_steps = args.span_average_io_steps
+        span_average_steps = args.span_average_io_steps,
+        sbli_blowing_bc = args.sbli_blowing_bc
     );
 
     if !args.dry {

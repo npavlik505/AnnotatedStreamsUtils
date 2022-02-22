@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 /// running routine for the solver once activated within the container
 pub(crate) fn run(args: cli::RunSolver) -> Result<(), Error> {
+    let start = std::time::Instant::now();
+
     let path = PathBuf::from("/input/input.json");
     let dist_save = PathBuf::from("/distribute_save");
 
@@ -39,6 +41,15 @@ pub(crate) fn run(args: cli::RunSolver) -> Result<(), Error> {
 
     postprocess(&args, &config)?;
 
+    let end = start.elapsed();
+    let hours = end.as_secs() / 3600;
+    let minutes = (end.as_secs() / 60) - (hours * 60);
+    let seconds = end.as_secs() - (hours * 3600) - (minutes * 60);
+    println!(
+        "runtime information (hhhh:mm:ss): {:04}:{:02}:{02}",
+        hours, minutes, seconds
+    );
+
     Ok(())
 }
 
@@ -65,7 +76,6 @@ fn read_mesh_info(path: &Path, ghost_nodes: usize, values: usize) -> Result<Vec<
         .skip(ghost_nodes)
         .take(values)
         .collect();
-    dbg!(&data);
 
     Ok(data)
 }
@@ -134,10 +144,13 @@ fn convert_spans(
     for file in walkdir::WalkDir::new(&spans_folder)
         .into_iter()
         .filter_map(|e| e.ok())
+        // the first item will be the root folder we created
+        // this makes sure we skip any item that is a directory
+        .filter(|e| e.file_type().is_file())
     {
         let path = file.path();
-        let file_name = file.file_name().to_string_lossy();
-        let output_name = format!("{}.vtk", file_name);
+        let file_name = path.file_stem().unwrap().to_string_lossy();
+        let output_name = format!("{}.vtr", file_name);
         let output_path = spans_folder.join(output_name);
 
         // read the data to something we can write a vtk with
@@ -150,8 +163,15 @@ fn convert_spans(
 
         let data = binary_to_vtk::convert_binary_to_vtk_information(&float_bytes, config)?;
 
-        let vtk = vtk::VtkData {data, locations: locations.clone(), spans: spans.clone() };
-        let writer = io::BufWriter::new(fs::File::create(&output_path).map_err(|e| FileError::new(output_path.to_owned(), e))?);
+        let vtk = vtk::VtkData {
+            data,
+            locations: locations.clone(),
+            spans: spans.clone(),
+        };
+        let writer = io::BufWriter::new(
+            fs::File::create(&output_path)
+                .map_err(|e| FileError::new(output_path.to_owned(), e))?,
+        );
         vtk::write_vtk(writer, vtk, true)?;
 
         fs::remove_file(path).unwrap()

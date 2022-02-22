@@ -90,6 +90,14 @@ pub(crate) struct ConfigGenerator {
     /// (0 => never)
     /// (n >0 => every n steps)
     pub(crate) span_average_io_steps: usize,
+
+    #[clap(long, default_value_t = 0)]
+    /// whether or not to use blowing boundary condition on the bottom surface
+    /// in the sbli case
+    ///
+    /// (0) => no (default BC)
+    /// (1) => yes (currently no configuration for the location of the blowing)
+    pub(crate) sbli_blowing_bc: usize,
 }
 
 impl ConfigGenerator {
@@ -119,12 +127,17 @@ impl ConfigGenerator {
             steps: 50_000,
             probe_io_steps: 0,
             span_average_io_steps: 100,
+            sbli_blowing_bc: 0,
         }
     }
 }
 
 #[derive(Parser, Debug, Clone)]
 pub(crate) struct SbliCases {
+    #[clap(arg_enum)]
+    /// mode to run the case generation with
+    pub(crate) mode: SbliMode,
+
     /// the location where all `distribute` files will
     /// be written
     pub(crate) output_directory: PathBuf,
@@ -149,6 +162,14 @@ pub(crate) struct SbliCases {
     /// passed the distribute-jobs.yaml file will reference
     /// the solver .sif file that may change at a later time
     pub(crate) copy_sif: bool,
+}
+
+#[derive(Debug, Clone, clap::ArgEnum, Parser)]
+pub(crate) enum SbliMode {
+    /// generate sweeps for reynolds number, shock angle, and mach number
+    Sweep,
+    /// validate the blowing boundary condition case
+    CheckBlowingCondition,
 }
 
 #[derive(Parser, Debug, Clone)]
