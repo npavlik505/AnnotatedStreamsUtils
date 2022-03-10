@@ -1,14 +1,14 @@
 use crate::prelude::*;
+use utils::bytes_to_float;
 use vtk::DataArray;
-use vtk::ParseDataArray;
-use vtk::VectorPoints;
+use vtk::{Field2D, Scalar2D, Rectilinear2D};
 
-#[derive(ParseDataArray, DataArray)]
+#[derive(DataArray)]
 /// Information available from a span-wise average of the flowfield
 pub struct SpanVtkInformation {
-    rho: VectorPoints,
-    velocity: VectorPoints,
-    energy: VectorPoints,
+    rho: Scalar2D,
+    velocity: Field2D,
+    energy: Scalar2D,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -56,9 +56,9 @@ pub(crate) fn convert_binary_to_vtk_information(
 ) -> Result<SpanVtkInformation, BinaryToVtkError> {
     let mut data = data.into_iter();
 
-    let mut rho_arr = Array4::zeros((config.x_divisions, config.y_divisions, 1, 1));
-    let mut velocity_arr = Array4::zeros((config.x_divisions, config.y_divisions, 1, 3));
-    let mut energy_arr = Array4::zeros((config.x_divisions, config.y_divisions, 1, 1));
+    let mut rho_arr = Array2::zeros((config.x_divisions, config.y_divisions));
+    let mut velocity_arr = Array3::zeros((3, config.x_divisions, config.y_divisions));
+    let mut energy_arr = Array2::zeros((config.x_divisions, config.y_divisions));
 
     let nx_proc = config.x_divisions / config.mpi_x_split;
     let ny = config.y_divisions;
@@ -75,13 +75,13 @@ pub(crate) fn convert_binary_to_vtk_information(
                 // scale the current x value to the number of the process that we are
                 // dealing with
                 let i = (nx_proc * proc_number) + i_proc;
-                *rho_arr.get_mut((i, j, 0, 0)).unwrap() = rho;
+                *rho_arr.get_mut((i, j)).unwrap() = rho;
 
-                *velocity_arr.get_mut((i, j, 0, 0)).unwrap() = u;
-                *velocity_arr.get_mut((i, j, 0, 1)).unwrap() = v;
-                *velocity_arr.get_mut((i, j, 0, 2)).unwrap() = w;
+                *velocity_arr.get_mut((0, i, j)).unwrap() = u;
+                *velocity_arr.get_mut((1, i, j)).unwrap() = v;
+                *velocity_arr.get_mut((2, i, j)).unwrap() = w;
 
-                *energy_arr.get_mut((i, j, 0, 0)).unwrap() = energy;
+                *energy_arr.get_mut((i, j)).unwrap() = energy;
             }
         }
     }
@@ -93,32 +93,12 @@ pub(crate) fn convert_binary_to_vtk_information(
     }
 
     Ok(SpanVtkInformation {
-        rho: VectorPoints::new(rho_arr),
-        velocity: VectorPoints::new(velocity_arr),
-        energy: VectorPoints::new(energy_arr),
+        rho: Scalar2D::new(rho_arr),
+        velocity: Field2D::new(velocity_arr),
+        energy: Scalar2D::new(energy_arr),
     })
 }
 
-/// helper function to convert an array of LE bytes to `f64`
-pub(crate) fn bytes_to_float(bytes: &[u8]) -> Vec<f64> {
-    bytes
-        .chunks(8)
-        .into_iter()
-        .map(|x| {
-            let mut arr = [0; 8];
-
-            if x.len() != 8 {
-                panic!("missing information");
-            }
-
-            x.into_iter()
-                .enumerate()
-                .for_each(|(idx, val)| arr[idx] = *val);
-
-            f64::from_le_bytes(arr)
-        })
-        .collect()
-}
 
 #[test]
 /// ensure that data written to a binary file conforms to the format that we expect

@@ -14,11 +14,19 @@ Stage: build
 	/home/brooks/github/streams-utils/Cargo.toml /streams-utils/Cargo.toml
 	/home/brooks/github/streams-utils/Cargo.lock /streams-utils/Cargo.lock
 	
-	/home/brooks/github/distribute /distribute
-	/home/brooks/github/matrix-notify /matrix-notify
-	/home/brooks/github/vtk /vtk
+	/home/brooks/.git-credentials /root/.git-credentials
 
 %post
+	# this line must run to let git know that there might be a credential
+	# store already on disk
+	git config --global credential.helper store
+	cat /root/.git-credentials
+
+	#cd /root
+	#git clone "https://github.com/Fluid-Dynamics-Group/distribute"
+
+	echo "$HOME"
+
 	# hack to add cargo to path
 	export PATH="$PATH":"$HOME/.cargo/bin"
 
@@ -45,6 +53,8 @@ Stage: build
 	mv Makefile2 Makefile
 	make
 
+	# flush the evidence
+	rm /root/.git-credentials
 
 Bootstrap: localimage
 From: nv.sif

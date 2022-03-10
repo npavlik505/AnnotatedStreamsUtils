@@ -31,7 +31,8 @@ pub(crate) fn sbli_cases(mut args: SbliCases) -> Result<(), Error> {
 
     match args.mode {
         cli::SbliMode::Sweep => sweep_cases(args)?,
-        cli::SbliMode::CheckBlowingCondition => check_blowing_condition(args)?
+        cli::SbliMode::CheckBlowingCondition => check_blowing_condition(args)?,
+        cli::SbliMode::CheckProbes=> check_probes(args)?
     };
 
 
@@ -48,17 +49,17 @@ fn create_cases<T, V, Val>(
     values: &[Val],
     output_directory: &Path,
 ) where
-    T: Fn(usize) -> String,
+    T: Fn(usize, &Val) -> String,
     V: Fn(&mut cli::ConfigGenerator, Val),
     Val: Copy,
 {
-    let steps = 1000;
-    let span_average_steps = 50;
-    let blowing_bc = 1;
+    let steps = 50_000;
+    let span_average_steps = 5;
+    let blowing_bc = 0;
 
     for (idx, update_value) in values.into_iter().enumerate() {
         //let case_name = format!("reynolds_number_{idx}.json");
-        let case_name = create_case_name(idx);
+        let case_name = create_case_name(idx, update_value);
         let case_path = output_directory.join(case_name);
         let mut config = cli::ConfigGenerator::with_path(case_path);
         update_config(&mut config, *update_value);
@@ -112,39 +113,38 @@ fn check_options_copy_files(args: &mut cli::SbliCases) -> Result<(), Error> {
     Ok(())
 }
 
+/// generate a sweep over combinations of shock angles and mach numbers
 fn sweep_cases(args: SbliCases) -> Result<(), Error> {
-    // friction reynolds numbers
-    let reynolds_numbers = [200., 225., 250., 275., 300.];
-
     // angle of the shock (degrees)
-    let shock_angle = [4., 6., 8., 10., 12.];
+    let shock_angle = [6., 8., 10.];
 
     // mach numbers (rm)
-    let mach_numbers = [2., 2.2, 2.4, 2.6, 2.8, 3.0];
+    let mach_numbers = [2., 2.25, 2.5];
 
-    let mut cases = vec![];
+    let mut permutations = Vec::new();
+    let mut cases = Vec::new();
+
+    for angle in shock_angle {
+        for mach in mach_numbers {
+            permutations.push((angle, mach));
+        }
+    }
+
+    let path_format = |idx, values: &(f64, f64)| {
+        let (shock_angle, mach_number) = values;
+        format!("shock_{}_mach_{}.json", shock_angle, mach_number)
+    };
+
+    let adj_value = |config: &mut cli::ConfigGenerator, (angle, mach)| {
+        config.mach_number = mach;
+        config.shock_angle = angle;
+    };
 
     create_cases(
-        |idx| format!("reynolds_number_{idx}.json"),
-        |config, re| config.reynolds_number = re,
+        path_format,
+        adj_value,
         &mut cases,
-        &reynolds_numbers,
-        &args.output_directory,
-    );
-
-    create_cases(
-        |idx| format!("shock_angle_{idx}.json"),
-        |config, angle| config.shock_angle = angle,
-        &mut cases,
-        &shock_angle,
-        &args.output_directory,
-    );
-
-    create_cases(
-        |idx| format!("mach_number_{idx}.json"),
-        |config, mach| config.mach_number = mach,
-        &mut cases,
-        &mach_numbers,
+        &permutations,
         &args.output_directory,
     );
 
@@ -171,11 +171,35 @@ fn sweep_cases(args: SbliCases) -> Result<(), Error> {
     Ok(())
 }
 
+/// validate that the blowing boundary condition on the bottom plate of the 
+/// simulation is working correctly
 fn check_blowing_condition(args: SbliCases) -> Result<(), Error> {
     let mut case = cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
     
     case.steps = 50_000;
     case.sbli_blowing_bc = 1;
+
+    let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
+    case.validate(gpu_memory)?;
+
+    let file = fs::File::create(&case.output_path)
+        .map_err(|e| FileError::new(case.output_path.clone(), e))?;
+
+    // write the case data to a file so that the actual input file can be generated later
+    serde_json::to_writer(file, &case)?;
+
+    distribute_gen(&args, vec![case.output_path])?;
+
+    Ok(())
+}
+
+/// validate that the probe data is being collected as we expect it to be 
+fn check_probes(args: SbliCases) -> Result<(), Error> {
+    let mut case = cli::ConfigGenerator::with_path(args.output_directory.join("check_probes.json"));
+    
+    case.steps = 100;
+    case.probe_io_steps = 1;
+    case.span_average_io_steps = 0;
 
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;

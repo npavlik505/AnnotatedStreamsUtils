@@ -43,7 +43,7 @@ pub(crate) struct ConfigGenerator {
     pub(crate) x_length: f64,
 
     /// total length in the x direction
-    #[clap(long, default_value_t = 840)]
+    #[clap(long, default_value_t = 800)]
     pub(crate) x_divisions: usize,
 
     /// total length in the y direction
@@ -98,6 +98,12 @@ pub(crate) struct ConfigGenerator {
     /// (0) => no (default BC)
     /// (1) => yes (currently no configuration for the location of the blowing)
     pub(crate) sbli_blowing_bc: usize,
+
+    #[clap(long)]
+    /// enable exporting 3D flowfields to VTK files
+    ///
+    /// If not present, no 3D flowfields will be written
+    pub(crate) snapshots_3d: bool,
 }
 
 impl ConfigGenerator {
@@ -113,7 +119,7 @@ impl ConfigGenerator {
             //x_length: 70.0,
             x_length: 27.0,
             //x_divisions: 2048,
-            x_divisions: 840,
+            x_divisions: 800,
             //y_length: 12.,
             y_length: 6.,
             //y_divisions: 400,
@@ -128,6 +134,7 @@ impl ConfigGenerator {
             probe_io_steps: 0,
             span_average_io_steps: 100,
             sbli_blowing_bc: 0,
+            snapshots_3d: true
         }
     }
 }
@@ -170,6 +177,8 @@ pub(crate) enum SbliMode {
     Sweep,
     /// validate the blowing boundary condition case
     CheckBlowingCondition,
+    /// ensure that the probes are working properly
+    CheckProbes,
 }
 
 #[derive(Parser, Debug, Clone)]

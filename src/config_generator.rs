@@ -179,7 +179,7 @@ pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> 
    10. 20. 30. 35. 40. 45. 50. 55. 60. 65.
  
  dtsave dtsave_restart  enable_plot3d   enable_vtk
-  5.       50.                0              1
+  5.       50.                0          {snapshots_3d}
 
   rand_type
    -1
@@ -203,7 +203,8 @@ pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> 
         steps = args.steps,
         probe_steps = args.probe_io_steps,
         span_average_steps = args.span_average_io_steps,
-        sbli_blowing_bc = args.sbli_blowing_bc
+        sbli_blowing_bc = args.sbli_blowing_bc,
+        snapshots_3d = args.snapshots_3d as usize
     );
 
     if !args.dry {

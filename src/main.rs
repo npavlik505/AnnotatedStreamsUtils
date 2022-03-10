@@ -4,6 +4,8 @@ mod config_generator;
 mod prelude;
 mod run;
 mod sbli;
+mod probe_binary;
+mod utils;
 
 use prelude::*;
 
@@ -41,6 +43,8 @@ enum Error {
     BinaryVtkError(binary_to_vtk::BinaryToVtkError),
     #[error("{0}")]
     Vtk(vtk::Error),
+    #[error("{0}")]
+    ProbeBinary(probe_binary::ProbeBinaryError),
 }
 
 #[derive(Display, Debug, Constructor)]

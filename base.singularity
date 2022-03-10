@@ -1,6 +1,11 @@
 Bootstrap: localimage
 From: nv.sif
 
+# This will build a base image from ubuntu - it is much faster
+# to build subsequent images from this if debugging
+#Bootstrap: library
+#From: ubuntu:20.04
+
 %post
 	apt-get update -y
 	apt-get install curl libssl-dev pkg-config git -y

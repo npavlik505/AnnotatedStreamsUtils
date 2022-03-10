@@ -127,19 +127,13 @@ fn convert_spans(
 ) -> Result<(), Error> {
     let spans_folder = data_location.join("spans");
 
-    let locations = vtk::Locations {
-        x_locations: mesh_info.x_data.clone(),
-        y_locations: mesh_info.y_data.clone(),
-        z_locations: vec![0.0],
-    };
-    let spans = vtk::LocationSpans {
-        x_start: 1,
-        x_end: config.x_divisions,
-        y_start: 1,
-        y_end: config.y_divisions,
-        z_start: 1,
-        z_end: 1,
-    };
+    let mesh = vtk::Mesh2D::<vtk::Binary>::new(
+        mesh_info.x_data.clone(),
+        mesh_info.y_data.clone(),
+    );
+
+    let spans = vtk::Spans2D::new( config.x_divisions, config.y_divisions,);
+    let domain = vtk::Rectilinear2D::new(mesh, spans);
 
     for file in walkdir::WalkDir::new(&spans_folder)
         .into_iter()
@@ -157,22 +151,21 @@ fn convert_spans(
 
         let mut file = fs::File::open(path).map_err(|e| FileError::new(path.to_owned(), e))?;
 
+        // five arrays, each taking nx * ny points, and each point uses 8 bytes
         let mut buffer = Vec::with_capacity(8 * config.x_divisions * config.y_divisions * 5);
         file.read_to_end(&mut buffer).unwrap();
-        let float_bytes = binary_to_vtk::bytes_to_float(&buffer);
+        let float_bytes = utils::bytes_to_float(&buffer);
 
         let data = binary_to_vtk::convert_binary_to_vtk_information(&float_bytes, config)?;
 
-        let vtk = vtk::VtkData {
-            data,
-            locations: locations.clone(),
-            spans: spans.clone(),
-        };
+        let vtk = vtk::VtkData::new( domain.clone(), data);
+
         let writer = io::BufWriter::new(
             fs::File::create(&output_path)
                 .map_err(|e| FileError::new(output_path.to_owned(), e))?,
         );
-        vtk::write_vtk(writer, vtk, true)?;
+
+        vtk::write_vtk(writer, vtk)?;
 
         fs::remove_file(path).unwrap()
     }
