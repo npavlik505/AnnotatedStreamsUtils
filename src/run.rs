@@ -39,7 +39,7 @@ pub(crate) fn run(args: cli::RunSolver) -> Result<(), Error> {
 
     println!("STDOUT:\n{}\n\nSTDERR:\n{}", stdout, stderr);
 
-    postprocess(&args, &config)?;
+    postprocess(&config)?;
 
     let end = start.elapsed();
     let hours = end.as_secs() / 3600;
@@ -109,7 +109,7 @@ impl MeshInfo {
 }
 
 /// general parent postprocessing routine to be called after the solver has finished
-fn postprocess(run_args: &cli::RunSolver, config: &cli::ConfigGenerator) -> Result<(), Error> {
+fn postprocess(config: &cli::ConfigGenerator) -> Result<(), Error> {
     let data_location = PathBuf::from("/distribute_save");
     let mesh_info = MeshInfo::from_base_path(&data_location, config)?;
 
@@ -127,12 +127,9 @@ fn convert_spans(
 ) -> Result<(), Error> {
     let spans_folder = data_location.join("spans");
 
-    let mesh = vtk::Mesh2D::<vtk::Binary>::new(
-        mesh_info.x_data.clone(),
-        mesh_info.y_data.clone(),
-    );
+    let mesh = vtk::Mesh2D::<vtk::Binary>::new(mesh_info.x_data.clone(), mesh_info.y_data.clone());
 
-    let spans = vtk::Spans2D::new( config.x_divisions, config.y_divisions,);
+    let spans = vtk::Spans2D::new(config.x_divisions, config.y_divisions);
     let domain = vtk::Rectilinear2D::new(mesh, spans);
 
     for file in walkdir::WalkDir::new(&spans_folder)
@@ -158,7 +155,7 @@ fn convert_spans(
 
         let data = binary_to_vtk::convert_binary_to_vtk_information(&float_bytes, config)?;
 
-        let vtk = vtk::VtkData::new( domain.clone(), data);
+        let vtk = vtk::VtkData::new(domain.clone(), data);
 
         let writer = io::BufWriter::new(
             fs::File::create(&output_path)

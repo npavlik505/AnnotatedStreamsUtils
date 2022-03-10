@@ -1,6 +1,7 @@
 use clap::Parser;
 use clap::Subcommand;
 use std::path::PathBuf;
+use crate::prelude::*;
 
 /// utilities for working with the streams solver
 #[derive(Parser, Debug)]
@@ -18,9 +19,11 @@ pub(crate) enum Command {
     ConfigGenerator(ConfigGenerator),
     /// run the solver once inside the singularity container
     RunSolver(RunSolver),
+    /// parse probe data to .mat files
+    Probe(ParseProbe),
 }
 
-#[derive(Parser, Debug, Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Parser, Debug, Clone, Deserialize, Serialize)]
 /// Fields that are configurable for generating input.dat files for the solver
 pub(crate) struct ConfigGenerator {
     /// path to write the resulting config file to
@@ -134,7 +137,7 @@ impl ConfigGenerator {
             probe_io_steps: 0,
             span_average_io_steps: 100,
             sbli_blowing_bc: 0,
-            snapshots_3d: true
+            snapshots_3d: true,
         }
     }
 }
@@ -185,4 +188,17 @@ pub(crate) enum SbliMode {
 pub(crate) struct RunSolver {
     /// the number of processes that this program is allowed to use
     pub(crate) nproc: usize,
+}
+
+#[derive(Parser, Debug, Clone)]
+pub(crate) struct ParseProbe {
+    /// mode to run the case generation with
+    pub(crate) probe_directory: PathBuf,
+
+    /// location where .mat files will be written
+    pub(crate) output_directory: PathBuf,
+
+    /// config json file that was used to generate probe data
+    #[clap(long)]
+    pub(crate) config: PathBuf,
 }

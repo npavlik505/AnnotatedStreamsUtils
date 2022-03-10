@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use utils::bytes_to_float;
 use vtk::DataArray;
-use vtk::{Field2D, Scalar2D, Rectilinear2D};
+use vtk::{Field2D, Scalar2D};
 
 #[derive(DataArray)]
 /// Information available from a span-wise average of the flowfield
@@ -99,13 +98,12 @@ pub(crate) fn convert_binary_to_vtk_information(
     })
 }
 
-
 #[test]
 /// ensure that data written to a binary file conforms to the format that we expect
 /// it to, and that there are no missing / extra bytes in the file that should
 /// not be there
 fn check_binary_with_config() {
-    let data = bytes_to_float(include_bytes!(
+    let data = utils::bytes_to_float(include_bytes!(
         "../static/span_average_00010_average.binary"
     ));
 

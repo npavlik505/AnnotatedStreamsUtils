@@ -18,5 +18,3 @@ pub(crate) fn bytes_to_float(bytes: &[u8]) -> Vec<f64> {
         })
         .collect()
 }
-
-

@@ -2,9 +2,10 @@ mod binary_to_vtk;
 mod cli;
 mod config_generator;
 mod prelude;
+mod probe;
+mod probe_binary;
 mod run;
 mod sbli;
-mod probe_binary;
 mod utils;
 
 use prelude::*;
@@ -20,6 +21,7 @@ fn main() {
         Command::Sbli(x) => sbli::sbli_cases(x),
         Command::ConfigGenerator(x) => config_generator::config_generator(x),
         Command::RunSolver(x) => run::run(x),
+        Command::Probe(x) => probe::probe(x),
     };
 
     if let Err(e) = out {

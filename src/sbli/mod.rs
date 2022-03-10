@@ -32,9 +32,8 @@ pub(crate) fn sbli_cases(mut args: SbliCases) -> Result<(), Error> {
     match args.mode {
         cli::SbliMode::Sweep => sweep_cases(args)?,
         cli::SbliMode::CheckBlowingCondition => check_blowing_condition(args)?,
-        cli::SbliMode::CheckProbes=> check_probes(args)?
+        cli::SbliMode::CheckProbes => check_probes(args)?,
     };
-
 
     Ok(())
 }
@@ -130,7 +129,7 @@ fn sweep_cases(args: SbliCases) -> Result<(), Error> {
         }
     }
 
-    let path_format = |idx, values: &(f64, f64)| {
+    let path_format = |_idx, values: &(f64, f64)| {
         let (shock_angle, mach_number) = values;
         format!("shock_{}_mach_{}.json", shock_angle, mach_number)
     };
@@ -171,11 +170,12 @@ fn sweep_cases(args: SbliCases) -> Result<(), Error> {
     Ok(())
 }
 
-/// validate that the blowing boundary condition on the bottom plate of the 
+/// validate that the blowing boundary condition on the bottom plate of the
 /// simulation is working correctly
 fn check_blowing_condition(args: SbliCases) -> Result<(), Error> {
-    let mut case = cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
-    
+    let mut case =
+        cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
+
     case.steps = 50_000;
     case.sbli_blowing_bc = 1;
 
@@ -193,10 +193,10 @@ fn check_blowing_condition(args: SbliCases) -> Result<(), Error> {
     Ok(())
 }
 
-/// validate that the probe data is being collected as we expect it to be 
+/// validate that the probe data is being collected as we expect it to be
 fn check_probes(args: SbliCases) -> Result<(), Error> {
     let mut case = cli::ConfigGenerator::with_path(args.output_directory.join("check_probes.json"));
-    
+
     case.steps = 100;
     case.probe_io_steps = 1;
     case.span_average_io_steps = 0;
