@@ -1,7 +1,7 @@
+use crate::prelude::*;
 use clap::Parser;
 use clap::Subcommand;
 use std::path::PathBuf;
-use crate::prelude::*;
 
 /// utilities for working with the streams solver
 #[derive(Parser, Debug)]
@@ -21,6 +21,11 @@ pub(crate) enum Command {
     RunSolver(RunSolver),
     /// parse probe data to .mat files
     Probe(ParseProbe),
+    /// convert a span average VTK file to a .mat file for analysis
+    VtkToMat(VtkToMat),
+    /// convert a partial solver folder with span binaries to VTK files.
+    /// usually this is performed automatically by the `run-solver` subcommand
+    SpansToVtk(SpansToVtk),
 }
 
 #[derive(Parser, Debug, Clone, Deserialize, Serialize)]
@@ -140,6 +145,14 @@ impl ConfigGenerator {
             snapshots_3d: true,
         }
     }
+
+    /// load the config data at a given path with `serde_json`
+    pub(crate) fn from_path(path: &Path) -> Result<Self, Error> {
+        // load the config file specified
+        let config_bytes = fs::read(&path).map_err(|e| FileError::new(path.to_owned(), e))?;
+        let config: cli::ConfigGenerator = serde_json::from_slice(&config_bytes)?;
+        Ok(config)
+    }
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -182,6 +195,8 @@ pub(crate) enum SbliMode {
     CheckBlowingCondition,
     /// ensure that the probes are working properly
     CheckProbes,
+    /// run a single case
+    OneCase,
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -190,7 +205,7 @@ pub(crate) struct RunSolver {
     pub(crate) nproc: usize,
 }
 
-#[derive(Parser, Debug, Clone)]
+#[derive(Parser, Debug, Clone, Constructor)]
 pub(crate) struct ParseProbe {
     /// mode to run the case generation with
     pub(crate) probe_directory: PathBuf,
@@ -201,4 +216,28 @@ pub(crate) struct ParseProbe {
     /// config json file that was used to generate probe data
     #[clap(long)]
     pub(crate) config: PathBuf,
+}
+
+#[derive(Parser, Debug, Clone, Constructor)]
+pub(crate) struct VtkToMat {
+    /// all the input files to write to the output directory
+    pub(crate) input_files: Vec<PathBuf>,
+
+    #[clap(long)]
+    pub(crate) config: PathBuf,
+
+    /// .mat file that is exported
+    #[clap(long)]
+    pub(crate) output_file: PathBuf,
+}
+
+#[derive(Parser, Debug, Clone, Constructor)]
+pub(crate) struct SpansToVtk {
+    /// the path to the solver results. Should contain the input.json file, x.dat, y.dat, z.dat
+    /// as well as a ./spans/ folder containing .binary files to convert
+    pub(crate) solver_results: PathBuf,
+
+    #[clap(long)]
+    /// remove the old binary files after converting to 
+    pub(crate) clean_binary: bool,
 }

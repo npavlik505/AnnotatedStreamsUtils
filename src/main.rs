@@ -7,6 +7,8 @@ mod probe_binary;
 mod run;
 mod sbli;
 mod utils;
+mod vtk_to_mat;
+mod spans_to_vtk;
 
 use prelude::*;
 
@@ -22,6 +24,8 @@ fn main() {
         Command::ConfigGenerator(x) => config_generator::config_generator(x),
         Command::RunSolver(x) => run::run(x),
         Command::Probe(x) => probe::probe(x),
+        Command::VtkToMat(x) => vtk_to_mat::vtk_to_mat(x),
+        Command::SpansToVtk(x) => spans_to_vtk::spans_to_vtk(x)
     };
 
     if let Err(e) = out {
@@ -47,6 +51,8 @@ enum Error {
     Vtk(vtk::Error),
     #[error("{0}")]
     ProbeBinary(probe_binary::ProbeBinaryError),
+    #[error("Could not write the file using mat5: {0}")]
+    Mat5(mat5::Error),
 }
 
 #[derive(Display, Debug, Constructor)]

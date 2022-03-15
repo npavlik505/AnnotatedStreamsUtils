@@ -63,8 +63,7 @@ pub(crate) fn parse_file_group<W: Write>(
     files: &[PathBuf],
     nz: usize,
     writer: W,
-) -> Result<(), ProbeBinaryError> 
-{
+) -> Result<(), ProbeBinaryError> {
     let parse_results: Result<Vec<(usize, ProbeFile)>, _> = files
         .into_par_iter()
         .enumerate()

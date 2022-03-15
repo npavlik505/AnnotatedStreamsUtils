@@ -2,14 +2,14 @@
 
 use crate::prelude::*;
 
+/// for a given configuration file and probe directory, parse the probe binary information and
+/// transform the data to .mat files
 pub(crate) fn probe(args: cli::ParseProbe) -> Result<(), Error> {
-    // load the config file specified
-    let config_bytes =
-        fs::read(&args.config).map_err(|e| FileError::new(args.config.clone(), e))?;
-    let config: cli::ConfigGenerator = serde_json::from_slice(&config_bytes)?;
+    let config = cli::ConfigGenerator::from_path(&args.config)?;
 
     // group all of the probes data together
-    let paths = fs::read_dir(&args.probe_directory).map_err(|e| FileError::new(args.probe_directory.clone(), e))?
+    let paths = fs::read_dir(&args.probe_directory)
+        .map_err(|e| FileError::new(args.probe_directory.clone(), e))?
         .into_iter()
         .filter_map(|entry_res| entry_res.ok())
         .map(|entry: fs::DirEntry| entry.path())
@@ -30,22 +30,45 @@ pub(crate) fn probe(args: cli::ParseProbe) -> Result<(), Error> {
 
     // helper function to create a writer for the given .mat file destination path and parse the data to
     // that file
-    fn parse_probe_helper(probe_info: Vec<ProbeInfo>, config: &cli::ConfigGenerator, path: &Path) -> Result<(), Error> {
-        let writer = io::BufWriter::new(std::fs::File::create(path).map_err(|e| FileError::new(path.to_owned(), e))?);
-        let paths = probe_info.into_iter().map(|info| info.path).collect::<Vec<_>>();
+    fn parse_probe_helper(
+        probe_info: Vec<ProbeInfo>,
+        config: &cli::ConfigGenerator,
+        path: &Path,
+    ) -> Result<(), Error> {
+        let writer = io::BufWriter::new(
+            std::fs::File::create(path).map_err(|e| FileError::new(path.to_owned(), e))?,
+        );
+        let paths = probe_info
+            .into_iter()
+            .map(|info| info.path)
+            .collect::<Vec<_>>();
 
         crate::probe_binary::parse_file_group(paths.as_slice(), config.z_divisions, writer)?;
         Ok(())
     }
 
-    parse_probe_helper(grouping.one, &config, &args.output_directory.join("probe_1.mat"))?;
-    parse_probe_helper(grouping.two, &config, &args.output_directory.join("probe_2.mat"))?;
-    parse_probe_helper(grouping.three, &config, &args.output_directory.join("probe_3.mat"))?;
+    parse_probe_helper(
+        grouping.one,
+        &config,
+        &args.output_directory.join("probe_1.mat"),
+    )?;
+    parse_probe_helper(
+        grouping.two,
+        &config,
+        &args.output_directory.join("probe_2.mat"),
+    )?;
+    parse_probe_helper(
+        grouping.three,
+        &config,
+        &args.output_directory.join("probe_3.mat"),
+    )?;
 
     Ok(())
 }
 
 #[derive(PartialEq, Eq, Debug)]
+/// metadata parsed from probe filesystem path on where it is
+/// and the timestep at which the data was collected
 struct ProbeInfo {
     path: PathBuf,
     step_number: usize,
@@ -60,19 +83,19 @@ struct ProbeGrouping {
     three: Vec<ProbeInfo>,
 }
 
-fn group_probes_by_number(probe_paths: impl Iterator<Item=PathBuf>) -> ProbeGrouping {
+fn group_probes_by_number(probe_paths: impl Iterator<Item = PathBuf>) -> ProbeGrouping {
     let mut one = Vec::new();
     let mut two = Vec::new();
-    let mut three= Vec::new();
+    let mut three = Vec::new();
 
     probe_paths
         //.into_iter()
         .map(probe_metadata)
         .for_each(|probe_meta: ProbeInfo| {
             // match the probe number to the container that it belongs to
-            //  
+            //
             // this could be made more robust with hashmaps but I elect for it to
-            // be more explicit for clairty 
+            // be more explicit for clairty
             if probe_meta.probe_number == 1 {
                 one.push(probe_meta);
             } else if probe_meta.probe_number == 2 {
@@ -80,9 +103,12 @@ fn group_probes_by_number(probe_paths: impl Iterator<Item=PathBuf>) -> ProbeGrou
             } else if probe_meta.probe_number == 3 {
                 three.push(probe_meta);
             } else {
-                panic!("unknown probe number parsed ({}) for path {}", probe_meta.probe_number, probe_meta.path.display());
+                panic!(
+                    "unknown probe number parsed ({}) for path {}",
+                    probe_meta.probe_number,
+                    probe_meta.path.display()
+                );
             }
-            
         });
 
     // make sure they are ordered by the step number
@@ -96,10 +122,13 @@ fn group_probes_by_number(probe_paths: impl Iterator<Item=PathBuf>) -> ProbeGrou
 /// parse the probe number and step at which a binary file of probe data was written at
 // TODO: better error handling in this function
 fn probe_metadata(probe: PathBuf) -> ProbeInfo {
-    let filename = probe.file_name().expect(&format!(
-        "probe file {} was missing a file name",
-        probe.display()
-    )).to_string_lossy();
+    let filename = probe
+        .file_name()
+        .expect(&format!(
+            "probe file {} was missing a file name",
+            probe.display()
+        ))
+        .to_string_lossy();
 
     // based on the fortran code the file name follows this format
     // span_probe_[1 char]_[5 char step number].binary
@@ -112,23 +141,37 @@ fn probe_metadata(probe: PathBuf) -> ProbeInfo {
     let probe_num_start = header.len() + sep.len();
     let cycle_num_start = probe_num_start + sep.len() + probe_number_length;
 
-    let probe_number_str = filename.get(probe_num_start..probe_num_start + probe_number_length).unwrap();
-    let probe_step_str = filename.get(cycle_num_start..cycle_num_start + cycle_number_length).unwrap();
+    let probe_number_str = filename
+        .get(probe_num_start..probe_num_start + probe_number_length)
+        .unwrap();
+    let probe_step_str = filename
+        .get(cycle_num_start..cycle_num_start + cycle_number_length)
+        .unwrap();
 
-    let probe_number = probe_number_str.parse().expect(&format!("failed to parse probe number for file name {} - probe number string to parse was {}", filename, probe_number_str));
-    let step_number = probe_step_str.parse().expect(&format!("failed to parse probe step for file name {} - probe number string to parse was {}", filename, probe_step_str));
+    let probe_number = probe_number_str.parse().expect(&format!(
+        "failed to parse probe number for file name {} - probe number string to parse was {}",
+        filename, probe_number_str
+    ));
+    let step_number = probe_step_str.parse().expect(&format!(
+        "failed to parse probe step for file name {} - probe number string to parse was {}",
+        filename, probe_step_str
+    ));
 
     ProbeInfo {
         path: probe,
         step_number,
-        probe_number
+        probe_number,
     }
 }
 
 #[test]
 fn check_probe_parse() {
     let path = PathBuf::from("./some/probe/path/span_probe_1_99999.binary");
-    let expected = ProbeInfo { path: path.clone(), step_number: 99999, probe_number: 1};
+    let expected = ProbeInfo {
+        path: path.clone(),
+        step_number: 99999,
+        probe_number: 1,
+    };
     let parsed_info = probe_metadata(path);
     assert_eq!(expected, parsed_info);
 }

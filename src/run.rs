@@ -7,6 +7,7 @@ pub(crate) fn run(args: cli::RunSolver) -> Result<(), Error> {
     let path = PathBuf::from("/input/input.json");
     let dist_save = PathBuf::from("/distribute_save");
 
+    // initialize some base directories within the folder we will work in
     create_dirs(&dist_save)?;
 
     // copy input.json to the output
@@ -81,14 +82,15 @@ fn read_mesh_info(path: &Path, ghost_nodes: usize, values: usize) -> Result<Vec<
 }
 
 /// information on the meshing `dx` `dy` `dz` from the streams output files
-struct MeshInfo {
+#[derive(mat5::MatFile, Debug)]
+pub(crate) struct MeshInfo {
     x_data: Vec<f64>,
     y_data: Vec<f64>,
     z_data: Vec<f64>,
 }
 
 impl MeshInfo {
-    fn from_base_path(base: &Path, config: &cli::ConfigGenerator) -> Result<Self, FileError> {
+    pub(crate) fn from_base_path(base: &Path, config: &cli::ConfigGenerator) -> Result<Self, FileError> {
         let xg = base.join("x.dat");
         let yg = base.join("y.dat");
         let zg = base.join("z.dat");
@@ -114,20 +116,41 @@ fn postprocess(config: &cli::ConfigGenerator) -> Result<(), Error> {
     let mesh_info = MeshInfo::from_base_path(&data_location, config)?;
 
     // convert all the binary spans to vtk files
-    convert_spans(&data_location, config, &mesh_info)?;
+    convert_spans(&data_location, config, &mesh_info, true)?;
+
+    // write the probes to a folder + create matfiles folder
+    write_probes(&data_location)?;
+
+    // write the mesh information to the matfiles folder
+    let mesh_path = data_location.join("matfiles/mesh.mat");
+    let writer = fs::File::create(&mesh_path)
+        .map_err(|e| FileError::new(mesh_path, e))?;
+    mat5::MatFile::write_contents(&mesh_info, writer)?;
 
     Ok(())
 }
 
+/// helper function for assembling all the elements to write all binary data to .mat files
+fn write_probes(location: &Path) -> Result<(), Error> {
+    let probe_folder = location.join("csv_data");
+    let output_folder = location.join("matfiles");
+    let config = location.join("/input/input.json");
+    let args = cli::ParseProbe::new(probe_folder, output_folder, config);
+    crate::probe::probe(args)?;
+    Ok(())
+}
+
 /// Convert all .binary files in the ./spans directory to Vtk files using mesh information
-fn convert_spans(
+pub(crate) fn convert_spans(
     data_location: &Path,
     config: &cli::ConfigGenerator,
     mesh_info: &MeshInfo,
+    remove_binary: bool
 ) -> Result<(), Error> {
     let spans_folder = data_location.join("spans");
 
-    let mesh = vtk::Mesh2D::<vtk::Binary>::new(mesh_info.x_data.clone(), mesh_info.y_data.clone());
+    // currently not possible to write arrays in binary for 2D files
+    let mesh = vtk::Mesh2D::<vtk::Ascii>::new(mesh_info.x_data.clone(), mesh_info.y_data.clone());
 
     let spans = vtk::Spans2D::new(config.x_divisions, config.y_divisions);
     let domain = vtk::Rectilinear2D::new(mesh, spans);
@@ -138,8 +161,10 @@ fn convert_spans(
         // the first item will be the root folder we created
         // this makes sure we skip any item that is a directory
         .filter(|e| e.file_type().is_file())
+        .filter(|e| e.path().extension().map(|ext| ext != "vtr").unwrap_or(false))
     {
         let path = file.path();
+        
         let file_name = path.file_stem().unwrap().to_string_lossy();
         let output_name = format!("{}.vtr", file_name);
         let output_path = spans_folder.join(output_name);
@@ -164,7 +189,9 @@ fn convert_spans(
 
         vtk::write_vtk(writer, vtk)?;
 
-        fs::remove_file(path).unwrap()
+        if remove_binary {
+            fs::remove_file(path).unwrap()
+        }
     }
 
     Ok(())

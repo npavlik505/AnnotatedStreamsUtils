@@ -33,6 +33,7 @@ pub(crate) fn sbli_cases(mut args: SbliCases) -> Result<(), Error> {
         cli::SbliMode::Sweep => sweep_cases(args)?,
         cli::SbliMode::CheckBlowingCondition => check_blowing_condition(args)?,
         cli::SbliMode::CheckProbes => check_probes(args)?,
+        cli::SbliMode::OneCase=> one_case(args)?,
     };
 
     Ok(())
@@ -52,9 +53,6 @@ fn create_cases<T, V, Val>(
     V: Fn(&mut cli::ConfigGenerator, Val),
     Val: Copy,
 {
-    let steps = 50_000;
-    let span_average_steps = 5;
-    let blowing_bc = 0;
 
     for (idx, update_value) in values.into_iter().enumerate() {
         //let case_name = format!("reynolds_number_{idx}.json");
@@ -62,9 +60,6 @@ fn create_cases<T, V, Val>(
         let case_path = output_directory.join(case_name);
         let mut config = cli::ConfigGenerator::with_path(case_path);
         update_config(&mut config, *update_value);
-        config.steps = steps;
-        config.span_average_io_steps = span_average_steps;
-        config.sbli_blowing_bc = blowing_bc;
         cases.push(config)
     }
 }
@@ -123,6 +118,11 @@ fn sweep_cases(args: SbliCases) -> Result<(), Error> {
     let mut permutations = Vec::new();
     let mut cases = Vec::new();
 
+    // other configurable information
+    let steps = 50_000;
+    let span_average_steps = 20;
+    let probe_io_steps = 20;
+
     for angle in shock_angle {
         for mach in mach_numbers {
             permutations.push((angle, mach));
@@ -134,9 +134,15 @@ fn sweep_cases(args: SbliCases) -> Result<(), Error> {
         format!("shock_{}_mach_{}.json", shock_angle, mach_number)
     };
 
+    // set up how each value will change on a per-case basis
     let adj_value = |config: &mut cli::ConfigGenerator, (angle, mach)| {
         config.mach_number = mach;
         config.shock_angle = angle;
+
+        // constant parameters
+        config.probe_io_steps = probe_io_steps;
+        config.span_average_io_steps = span_average_steps;
+        config.steps = steps;
     };
 
     create_cases(
@@ -198,8 +204,8 @@ fn check_probes(args: SbliCases) -> Result<(), Error> {
     let mut case = cli::ConfigGenerator::with_path(args.output_directory.join("check_probes.json"));
 
     case.steps = 100;
-    case.probe_io_steps = 1;
-    case.span_average_io_steps = 0;
+    case.probe_io_steps = 5;
+    case.span_average_io_steps = 5;
 
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
@@ -214,6 +220,30 @@ fn check_probes(args: SbliCases) -> Result<(), Error> {
 
     Ok(())
 }
+
+/// validate that the blowing boundary condition on the bottom plate of the
+/// simulation is working correctly
+fn one_case(args: SbliCases) -> Result<(), Error> {
+    let mut case =
+        cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
+
+    case.steps = 30_000;
+    case.sbli_blowing_bc = 0;
+
+    let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
+    case.validate(gpu_memory)?;
+
+    let file = fs::File::create(&case.output_path)
+        .map_err(|e| FileError::new(case.output_path.clone(), e))?;
+
+    // write the case data to a file so that the actual input file can be generated later
+    serde_json::to_writer(file, &case)?;
+
+    distribute_gen(&args, vec![case.output_path])?;
+
+    Ok(())
+}
+
 
 /// create a distribute-jobs.yaml file from the input configuration files
 fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> Result<(), Error> {

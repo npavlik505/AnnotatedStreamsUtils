@@ -1,13 +1,15 @@
 use crate::prelude::*;
 use vtk::DataArray;
+use vtk::ParseArray;
 use vtk::{Field2D, Scalar2D};
 
-#[derive(DataArray)]
+#[derive(DataArray, ParseArray)]
+#[vtk_parse(spans = "vtk::Spans2D")]
 /// Information available from a span-wise average of the flowfield
 pub struct SpanVtkInformation {
-    rho: Scalar2D,
-    velocity: Field2D,
-    energy: Scalar2D,
+    pub(crate) rho: Scalar2D,
+    pub(crate) velocity: Field2D,
+    pub(crate) energy: Scalar2D,
 }
 
 #[derive(Debug, thiserror::Error)]
