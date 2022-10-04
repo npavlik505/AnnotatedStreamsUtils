@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 byteorder = "1.4.3"
-clap = { version = "3.1.0", features = ["derive"] }
+clap = { version = "4.0.0", features = ["derive"] }
 derive_more = "0.99.17"
 ndarray = "0.15.4"
 serde = { version = "1.0.136", features = ["derive"] }
@@ -15,12 +15,12 @@ serde_json = "1.0.79"
 thiserror = "1.0.30"
 walkdir = "2.3.2"
 rayon = "1.5.1"
+anyhow = "1.0.65"
+xshell = "0.2.2"
 
 [dependencies.vtk]
 git = "https://github.com/Fluid-Dynamics-Group/vtk"
-rev = "2585cefcd688bd200db9bcc9c5a79802e9f3514b"
-#branch = "remove-vectorpoints"
-#branch = "master"
+rev = "e240643f92d48c123b6ae0bbd62c9b5cfa40c759"
 
 [dependencies.distribute]
 #path = "../distribute"

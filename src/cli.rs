@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use clap::Parser;
 use clap::Subcommand;
+use clap::ValueEnum;
 use std::path::PathBuf;
 
 /// utilities for working with the streams solver
@@ -17,8 +18,10 @@ pub(crate) enum Command {
     Sbli(SbliCases),
     /// generate a config file (input.dat) for use in the solver
     ConfigGenerator(ConfigGenerator),
-    /// run the solver once inside the singularity container
+    /// run the solver once inside the apptainer container
     RunContainer(RunContainer),
+    /// run an the apptainer solver locally
+    RunLocal(RunLocal),
     /// parse probe data to .mat files
     Probe(ParseProbe),
     /// convert a span average VTK file to a .mat file for analysis
@@ -28,7 +31,7 @@ pub(crate) enum Command {
     SpansToVtk(SpansToVtk),
 }
 
-#[derive(Parser, Debug, Clone, Deserialize, Serialize)]
+#[derive(Parser, Debug, Clone)]
 /// Fields that are configurable for generating input.dat files for the solver
 pub(crate) struct ConfigGenerator {
     /// path to write the resulting config file to
@@ -146,18 +149,18 @@ impl ConfigGenerator {
         }
     }
 
-    /// load the config data at a given path with `serde_json`
-    pub(crate) fn from_path(path: &Path) -> Result<Self, Error> {
-        // load the config file specified
-        let config_bytes = fs::read(&path).map_err(|e| FileError::new(path.to_owned(), e))?;
-        let config: cli::ConfigGenerator = serde_json::from_slice(&config_bytes)?;
-        Ok(config)
+    pub(crate) fn into_serializable(self) -> crate::config_generator::Config {
+        let Self { reynolds_number, mach_number, shock_angle, x_length, x_divisions, y_length, y_divisions, z_length, z_divisions,
+            mpi_x_split, steps, probe_io_steps, span_average_io_steps, sbli_blowing_bc, snapshots_3d, ..} = self;
+
+        crate::config_generator::Config { reynolds_number, mach_number, shock_angle, x_length, x_divisions, y_length, y_divisions, z_length, z_divisions,
+                    mpi_x_split, steps, probe_io_steps, span_average_io_steps, sbli_blowing_bc, snapshots_3d }
     }
 }
 
 #[derive(Parser, Debug, Clone)]
 pub(crate) struct SbliCases {
-    #[clap(arg_enum)]
+    #[clap(value_enum)]
     /// mode to run the case generation with
     pub(crate) mode: SbliMode,
 
@@ -187,7 +190,7 @@ pub(crate) struct SbliCases {
     pub(crate) copy_sif: bool,
 }
 
-#[derive(Debug, Clone, clap::ArgEnum, Parser)]
+#[derive(Debug, Clone, Parser, ValueEnum)]
 pub(crate) enum SbliMode {
     /// generate sweeps for reynolds number, shock angle, and mach number
     Sweep,
@@ -203,6 +206,20 @@ pub(crate) enum SbliMode {
 pub(crate) struct RunContainer {
     /// the number of processes that this program is allowed to use
     pub(crate) nproc: usize,
+}
+
+#[derive(Parser, Debug, Clone)]
+pub(crate) struct RunLocal {
+    /// the number of processes that this program is allowed to use
+    pub(crate) nproc: usize,
+
+    #[clap(long)]
+    /// working dir to run the solver in
+    pub(crate) workdir: PathBuf,
+
+    #[clap(long)]
+    /// input.json file to load into the solver
+    pub(crate) config: PathBuf
 }
 
 #[derive(Parser, Debug, Clone, Constructor)]

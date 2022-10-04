@@ -16,21 +16,20 @@ use clap::Parser;
 use cli::Args;
 use cli::Command;
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let out = match args.mode {
-        Command::Sbli(x) => sbli::sbli_cases(x),
-        Command::ConfigGenerator(x) => config_generator::config_generator(x),
-        Command::RunContainer(x) => run::run(x),
-        Command::Probe(x) => probe::probe(x),
-        Command::VtkToMat(x) => vtk_to_mat::vtk_to_mat(x),
-        Command::SpansToVtk(x) => spans_to_vtk::spans_to_vtk(x)
+    match args.mode {
+        Command::Sbli(x) => sbli::sbli_cases(x)?,
+        Command::ConfigGenerator(x) => config_generator::config_generator(x)?,
+        Command::RunContainer(x) => run::run_container(x)?,
+        Command::RunLocal(x) => run::run_local(x)?,
+        Command::Probe(x) => probe::probe(x)?,
+        Command::VtkToMat(x) => vtk_to_mat::vtk_to_mat(x)?,
+        Command::SpansToVtk(x) => spans_to_vtk::spans_to_vtk(x)?
     };
 
-    if let Err(e) = out {
-        println!("Error: {}", e);
-    }
+    Ok(())
 }
 
 #[derive(thiserror::Error, Debug, From)]

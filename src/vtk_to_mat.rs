@@ -2,7 +2,7 @@ use crate::prelude::*;
 use ndarray::s;
 
 pub(crate) fn vtk_to_mat(mut args: cli::VtkToMat) -> Result<(), Error> {
-    let config = cli::ConfigGenerator::from_path(&args.config)?;
+    let config = Config::from_path(&args.config)?;
 
     // sort all the input files
     args.input_files.sort_unstable();

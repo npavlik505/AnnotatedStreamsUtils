@@ -5,7 +5,7 @@ use crate::prelude::*;
 /// for a given configuration file and probe directory, parse the probe binary information and
 /// transform the data to .mat files
 pub(crate) fn probe(args: cli::ParseProbe) -> Result<(), Error> {
-    let config = cli::ConfigGenerator::from_path(&args.config)?;
+    let config = Config::from_path(&args.config)?;
 
     // group all of the probes data together
     let paths = fs::read_dir(&args.probe_directory)
@@ -32,7 +32,7 @@ pub(crate) fn probe(args: cli::ParseProbe) -> Result<(), Error> {
     // that file
     fn parse_probe_helper(
         probe_info: Vec<ProbeInfo>,
-        config: &cli::ConfigGenerator,
+        config: &Config,
         path: &Path,
     ) -> Result<(), Error> {
         let writer = io::BufWriter::new(

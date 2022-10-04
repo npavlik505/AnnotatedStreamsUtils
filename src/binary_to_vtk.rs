@@ -53,7 +53,7 @@ pub(crate) enum BinaryToVtkError {
 /// ```
 pub(crate) fn convert_binary_to_vtk_information(
     data: &[f64],
-    config: &cli::ConfigGenerator,
+    config: &Config,
 ) -> Result<SpanVtkInformation, BinaryToVtkError> {
     let mut data = data.into_iter();
 
@@ -110,7 +110,7 @@ fn check_binary_with_config() {
     ));
 
     let config_bytes = include_bytes!("../static/span_average_input.json");
-    let config: cli::ConfigGenerator = serde_json::from_slice(config_bytes).unwrap();
+    let config: Config = serde_json::from_slice(config_bytes).unwrap();
 
     let formatted_data = convert_binary_to_vtk_information(&data, &config);
 

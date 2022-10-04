@@ -8,22 +8,19 @@ Stage: build
 # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nvhpc
 
 %files
-	/home/brooks/github/streams /streams
+	${STREAMS_DIR} /streams
 
-	/home/brooks/github/streams-utils/src/ /streams-utils/src
-	/home/brooks/github/streams-utils/Cargo.toml /streams-utils/Cargo.toml
-	/home/brooks/github/streams-utils/Cargo.lock /streams-utils/Cargo.lock
+	${STREAMS_UTILS_DIR}/src/ /streams-utils/src
+	${STREAMS_UTILS_DIR}/Cargo.toml /streams-utils/Cargo.toml
+	${STREAMS_UTILS_DIR}/Cargo.lock /streams-utils/Cargo.lock
 	
-	/home/brooks/.git-credentials /root/.git-credentials
+	$HOME/.git-credentials /root/.git-credentials
 
 %post
 	# this line must run to let git know that there might be a credential
 	# store already on disk
 	git config --global credential.helper store
 	cat /root/.git-credentials
-
-	#cd /root
-	#git clone "https://github.com/Fluid-Dynamics-Group/distribute"
 
 	echo "$HOME"
 

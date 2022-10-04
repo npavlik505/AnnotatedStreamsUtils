@@ -1,72 +1,28 @@
 use crate::prelude::*;
+mod container;
+mod local;
 
-/// running routine for the solver once activated within the container
-pub(crate) fn run(args: cli::RunContainer) -> Result<(), Error> {
-    let start = std::time::Instant::now();
+pub(crate) use container::run_container;
+pub(crate) use local::run_local;
 
-    let path = PathBuf::from("/input/input.json");
-    let dist_save = PathBuf::from("/distribute_save");
-
-    // initialize some base directories within the folder we will work in
-    create_dirs(&dist_save)?;
-
-    // copy input.json to the output
-    fs::copy(&path, "/distribute_save/input.json").unwrap();
-    fs::copy("/input/database_bl.dat", "/distribute_save/database_bl.dat").unwrap();
-
-    // read in the config json file
-    let file = fs::File::open(&path).map_err(|e| FileError::new(path, e))?;
-    let mut config: cli::ConfigGenerator = serde_json::from_reader(file)?;
-    config.output_path = PathBuf::from("/distribute_save/input.dat");
-
-    // change the current working directory to the distribute_save directory. That way, all the
-    // file that we need to run and work with will be output here
-    let target_dir = PathBuf::from("/distribute_save");
-    std::env::set_current_dir(&target_dir).map_err(|e| FileError::new(target_dir, e))?;
-
-    // then, generate the actual config for an output to the solver
-    crate::config_generator::config_generator(config.clone())?;
-
-    // mpirun -np $NPROC /streams.exe
-    let output = std::process::Command::new("mpirun")
-        .arg("-np")
-        .arg(args.nproc.to_string())
-        .arg("/streams.exe")
-        .output()
-        .map_err(|e| FileError::new(PathBuf::from("/streams.exe"), e))?;
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let stderr = String::from_utf8_lossy(&output.stderr);
-
-    println!("STDOUT:\n{}\n\nSTDERR:\n{}", stdout, stderr);
-
-    postprocess(&config)?;
-
-    let end = start.elapsed();
-    let hours = end.as_secs() / 3600;
-    let minutes = (end.as_secs() / 60) - (hours * 60);
-    let seconds = end.as_secs() - (hours * 3600) - (minutes * 60);
-    println!(
-        "runtime information (hhhh:mm:ss): {:04}:{:02}:{02}",
-        hours, minutes, seconds
-    );
-
-    Ok(())
-}
+use anyhow::Result;
 
 /// create all the folders that data is written to in the solver
-fn create_dirs(base: &Path) -> Result<(), FileError> {
+fn create_dirs(base: &Path) -> Result<()> {
     let csv = base.join("csv_data");
-    fs::create_dir(&csv).map_err(|e| FileError::new(csv, e))?;
+    fs::create_dir(&csv)
+        .with_context(|| format!("failed to create dir {}", csv.display()))?;
 
     let spans = base.join("spans");
-    fs::create_dir(&spans).map_err(|e| FileError::new(spans, e))?;
+    fs::create_dir(&spans)
+        .with_context(|| format!("failed to create dir {}", csv.display()))?;
 
     Ok(())
 }
 
-fn read_mesh_info(path: &Path, ghost_nodes: usize, values: usize) -> Result<Vec<f64>, FileError> {
-    let file_data = fs::read_to_string(path).map_err(|e| FileError::new(path.to_path_buf(), e))?;
+fn read_mesh_info(path: &Path, ghost_nodes: usize, values: usize) -> Result<Vec<f64>> {
+    let file_data = fs::read_to_string(path)
+        .with_context(|| format!("could not read contents of file {}", path.display()))?;
 
     let data = file_data
         .split('\n')
@@ -90,7 +46,7 @@ pub(crate) struct MeshInfo {
 }
 
 impl MeshInfo {
-    pub(crate) fn from_base_path(base: &Path, config: &cli::ConfigGenerator) -> Result<Self, FileError> {
+    pub(crate) fn from_base_path(base: &Path, config: &Config) -> Result<Self> {
         let xg = base.join("x.dat");
         let yg = base.join("y.dat");
         let zg = base.join("z.dat");
@@ -111,7 +67,7 @@ impl MeshInfo {
 }
 
 /// general parent postprocessing routine to be called after the solver has finished
-fn postprocess(config: &cli::ConfigGenerator) -> Result<(), Error> {
+fn postprocess(config: &Config) -> Result<()> {
     let data_location = PathBuf::from("/distribute_save");
     let mesh_info = MeshInfo::from_base_path(&data_location, config)?;
 
@@ -124,7 +80,7 @@ fn postprocess(config: &cli::ConfigGenerator) -> Result<(), Error> {
     // write the mesh information to the matfiles folder
     let mesh_path = data_location.join("matfiles/mesh.mat");
     let writer = fs::File::create(&mesh_path)
-        .map_err(|e| FileError::new(mesh_path, e))?;
+        .with_context(|| format!("failed to create directory for mesh information: {}", mesh_path.display()))?;
     mat5::MatFile::write_contents(&mesh_info, writer)?;
 
     Ok(())
@@ -143,7 +99,7 @@ fn write_probes(location: &Path) -> Result<(), Error> {
 /// Convert all .binary files in the ./spans directory to Vtk files using mesh information
 pub(crate) fn convert_spans(
     data_location: &Path,
-    config: &cli::ConfigGenerator,
+    config: &Config,
     mesh_info: &MeshInfo,
     remove_binary: bool
 ) -> Result<(), Error> {

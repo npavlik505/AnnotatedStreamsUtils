@@ -162,10 +162,14 @@ fn sweep_cases(args: SbliCases) -> Result<(), Error> {
     for case in cases {
         // first, make sure that the case itself is valid
         let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
+
+        let output_path = case.output_path.clone();
+        let case = case.into_serializable();
+
         case.validate(gpu_memory)?;
 
-        let file = fs::File::create(&case.output_path)
-            .map_err(|e| FileError::new(case.output_path.clone(), e))?;
+        let file = fs::File::create(&output_path)
+            .map_err(|e| FileError::new(output_path, e))?;
 
         // write the case data to a file so that the actual input file can be generated later
         serde_json::to_writer(file, &case)?;
@@ -185,23 +189,30 @@ fn check_blowing_condition(args: SbliCases) -> Result<(), Error> {
     case.steps = 50_000;
     case.sbli_blowing_bc = 1;
 
+    let output_path = case.output_path.clone();
+    let case = case.into_serializable();
+
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
-    let file = fs::File::create(&case.output_path)
-        .map_err(|e| FileError::new(case.output_path.clone(), e))?;
+    let file = fs::File::create(&output_path)
+        .map_err(|e| FileError::new(output_path.clone(), e))?;
+
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer(file, &case)?;
 
-    distribute_gen(&args, vec![case.output_path])?;
+    distribute_gen(&args, vec![output_path])?;
 
     Ok(())
 }
 
 /// validate that the probe data is being collected as we expect it to be
 fn check_probes(args: SbliCases) -> Result<(), Error> {
-    let mut case = cli::ConfigGenerator::with_path(args.output_directory.join("check_probes.json"));
+    let case = cli::ConfigGenerator::with_path(args.output_directory.join("check_probes.json"));
+
+    let output_path = case.output_path.clone();
+    let mut case = case.into_serializable();
 
     case.steps = 100;
     case.probe_io_steps = 5;
@@ -210,13 +221,13 @@ fn check_probes(args: SbliCases) -> Result<(), Error> {
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
-    let file = fs::File::create(&case.output_path)
-        .map_err(|e| FileError::new(case.output_path.clone(), e))?;
+    let file = fs::File::create(&output_path)
+        .map_err(|e| FileError::new(output_path.clone(), e))?;
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer(file, &case)?;
 
-    distribute_gen(&args, vec![case.output_path])?;
+    distribute_gen(&args, vec![output_path])?;
 
     Ok(())
 }
@@ -224,8 +235,11 @@ fn check_probes(args: SbliCases) -> Result<(), Error> {
 /// validate that the blowing boundary condition on the bottom plate of the
 /// simulation is working correctly
 fn one_case(args: SbliCases) -> Result<(), Error> {
-    let mut case =
+    let case =
         cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
+
+    let output_path = case.output_path.clone();
+    let mut case = case.into_serializable();
 
     case.steps = 30_000;
     case.sbli_blowing_bc = 0;
@@ -233,13 +247,13 @@ fn one_case(args: SbliCases) -> Result<(), Error> {
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
-    let file = fs::File::create(&case.output_path)
-        .map_err(|e| FileError::new(case.output_path.clone(), e))?;
+    let file = fs::File::create(&output_path)
+        .map_err(|e| FileError::new(output_path.clone(), e))?;
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer(file, &case)?;
 
-    distribute_gen(&args, vec![case.output_path])?;
+    distribute_gen(&args, vec![output_path])?;
 
     Ok(())
 }

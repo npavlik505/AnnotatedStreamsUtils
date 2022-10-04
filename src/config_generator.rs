@@ -45,7 +45,188 @@ pub(crate) struct Memory {
 #[display(fmt = "{} Mb", _0)]
 pub(crate) struct Megabytes(pub(crate) usize);
 
-impl ConfigGenerator {
+
+pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
+    let output_path = args.output_path.clone();
+    let dry = args.dry;
+
+    let config = args.into_serializable();
+
+    // 11 gb to megabytes
+    // 11 gb is what is available on the 2080 TI available in the lab
+    let gpu_memory = Some(Megabytes(11 * 10usize.pow(3)));
+
+    // validate that the parameters can be run on the gpu
+    config.validate(gpu_memory)?;
+
+    if !dry {
+        _config_generator(&config, output_path)
+    } else {
+        Ok(())
+    }
+}
+
+/// create a streams config file to be used in the solver
+pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow::Result<()> {
+
+    let output = format!(
+        r#"!=============================================================
+!
+! ███████╗████████╗██████╗ ███████╗ █████╗ ███╗   ███╗███████╗
+! ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██╔══██╗████╗ ████║██╔════╝
+! ███████╗   ██║   ██████╔╝█████╗  ███████║██╔████╔██║███████╗
+! ╚════██║   ██║   ██╔══██╗██╔══╝  ██╔══██║██║╚██╔╝██║╚════██║
+! ███████║   ██║   ██║  ██║███████╗██║  ██║██║ ╚═╝ ██║███████║
+! ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+!
+! Supersonic TuRbulEnt Accelerated navier stokes Solver
+!
+! input file
+!
+!=============================================================
+
+ flow_type (0==>channel, 1==>BL, 2==>SBLI)
+   2   
+
+  Lx(rlx)             Ly(rly)         Lz(rlz)
+  {lx}          {ly}         {lz}
+ 
+  Nx(nxmax)     Ny(nymax)     Nz(nzmax)
+  {nx}          {ny}        {nz}
+ 
+ Ny_wr(nymax_wr)     Ly_wr(rly_wr)      dy+_w  jbgrid
+  201                   2.5             .7       0
+
+ ng  visc_ord  ep_ord  weno_par (1==>ord_1,2==>ord_3, 3==>ord_5, 4==>ord_7)
+  3     6      6       3
+ 
+ MPI_x_split     MPI_z_split
+ {mpi_x_split}               1 
+
+ sensor_threshold   xshock_imp   deflec_shock    pgrad (0==>constant bulk)
+  0.1               15.             {angle}              0.
+      
+ restart   num_iter   cfl   dt_control  print_control  io_type
+   0        {steps}      .75      1       1              2
+      
+ Mach      Reynolds (friction)  temp_ratio   visc_type   Tref (dimensional)   turb_inflow
+ {mach}      {re}                   1.            2         160.                0.75
+  
+ stat_control  xstat_num
+  500           10
+
+ xstat_list
+   10. 20. 30. 35. 40. 45. 50. 55. 60. 65.
+ 
+ dtsave dtsave_restart  enable_plot3d   enable_vtk
+  5.       50.                0          {snapshots_3d}
+
+  rand_type
+   -1
+
+ save_probe_steps save_span_average_steps
+    {probe_steps}         {span_average_steps}
+
+ sbli_blowing_bc
+    {sbli_blowing_bc}
+   "#,
+        lx = config.x_length,
+        nx = config.x_divisions,
+        ly = config.y_length,
+        ny = config.y_divisions,
+        lz = config.z_length,
+        nz = config.z_divisions,
+        mach = config.mach_number,
+        re = config.reynolds_number,
+        angle = config.shock_angle,
+        mpi_x_split = config.mpi_x_split,
+        steps = config.steps,
+        probe_steps = config.probe_io_steps,
+        span_average_steps = config.span_average_io_steps,
+        sbli_blowing_bc = config.sbli_blowing_bc,
+        snapshots_3d = config.snapshots_3d as usize
+    );
+
+    std::fs::write(&output_path, output.as_bytes())
+        .with_context(||format!("failed to write to file {} ", output_path.display()))?;
+
+    Ok(())
+}
+
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub(crate) struct Config {
+    /// (friction) Reynolds number (Reynolds in input file)
+    pub(crate) reynolds_number: f64,
+
+    /// Mach number (Mach in input file, rm in code)
+    pub(crate) mach_number: f64,
+
+    /// Shock angle (degrees) (deflec_shock in input file)
+    pub(crate) shock_angle: f64,
+
+    /// total length in the x direction
+    pub(crate) x_length: f64,
+
+    /// total length in the x direction
+    pub(crate) x_divisions: usize,
+
+    /// total length in the y direction
+    pub(crate) y_length: f64,
+
+    /// total length in the y direction
+    pub(crate) y_divisions: usize,
+
+    /// total length in the z direction
+    pub(crate) z_length: f64,
+
+    /// total length in the z direction
+    pub(crate) z_divisions: usize,
+
+    /// number of MPI divisions along the x axis. The config generated
+    /// will have 1 mpi division along the z axis as some extensions
+    /// to the code assume there are no z divisions.
+    ///
+    /// The value supplied to this argument MUST be used for the -np
+    /// argument in `mpirun`
+    pub(crate) mpi_x_split: usize,
+
+    /// number of steps for the solver to take
+    pub(crate) steps: usize,
+
+    /// number of steps between writing probe information.
+    /// (0 => never)
+    /// (n >0 => every n steps)
+    pub(crate) probe_io_steps: usize,
+
+    /// number of steps between span average flowfields
+    /// (0 => never)
+    /// (n >0 => every n steps)
+    pub(crate) span_average_io_steps: usize,
+
+    /// whether or not to use blowing boundary condition on the bottom surface
+    /// in the sbli case
+    ///
+    /// (0) => no (default BC)
+    /// (1) => yes (currently no configuration for the location of the blowing)
+    pub(crate) sbli_blowing_bc: usize,
+
+    /// enable exporting 3D flowfields to VTK files
+    ///
+    /// If not present, no 3D flowfields will be written
+    pub(crate) snapshots_3d: bool,
+}
+
+
+impl Config {
+    /// load the config data at a given path with `serde_json`
+    pub(crate) fn from_path(path: &Path) -> Result<Self, Error> {
+        // load the config file specified
+        let config_bytes = fs::read(&path).map_err(|e| FileError::new(path.to_owned(), e))?;
+        let config: Config= serde_json::from_slice(&config_bytes)?;
+        Ok(config)
+    }
+
     /// check all the parameters of the input file to guarantee that the given input
     /// file will (likely) work in the solver without runtime error
     ///
@@ -118,100 +299,4 @@ impl ConfigGenerator {
 
         Ok(())
     }
-}
-
-/// create a streams config file to be used in the solver
-pub(crate) fn config_generator(args: cli::ConfigGenerator) -> Result<(), Error> {
-    // 11 gb to megabytes
-    // 11 gb is what is available on the 2080 TI available in the lab
-    let gpu_memory = Some(Megabytes(11 * 10usize.pow(3)));
-
-    // validate that the parameters can be run on the gpu
-    args.validate(gpu_memory)?;
-
-    let output = format!(
-        r#"!=============================================================
-!
-! ███████╗████████╗██████╗ ███████╗ █████╗ ███╗   ███╗███████╗
-! ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██╔══██╗████╗ ████║██╔════╝
-! ███████╗   ██║   ██████╔╝█████╗  ███████║██╔████╔██║███████╗
-! ╚════██║   ██║   ██╔══██╗██╔══╝  ██╔══██║██║╚██╔╝██║╚════██║
-! ███████║   ██║   ██║  ██║███████╗██║  ██║██║ ╚═╝ ██║███████║
-! ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-!
-! Supersonic TuRbulEnt Accelerated navier stokes Solver
-!
-! input file
-!
-!=============================================================
-
- flow_type (0==>channel, 1==>BL, 2==>SBLI)
-   2   
-
-  Lx(rlx)             Ly(rly)         Lz(rlz)
-  {lx}          {ly}         {lz}
- 
-  Nx(nxmax)     Ny(nymax)     Nz(nzmax)
-  {nx}          {ny}        {nz}
- 
- Ny_wr(nymax_wr)     Ly_wr(rly_wr)      dy+_w  jbgrid
-  201                   2.5             .7       0
-
- ng  visc_ord  ep_ord  weno_par (1==>ord_1,2==>ord_3, 3==>ord_5, 4==>ord_7)
-  3     6      6       3
- 
- MPI_x_split     MPI_z_split
- {mpi_x_split}               1 
-
- sensor_threshold   xshock_imp   deflec_shock    pgrad (0==>constant bulk)
-  0.1               15.             {angle}              0.
-      
- restart   num_iter   cfl   dt_control  print_control  io_type
-   0        {steps}      .75      1       1              2
-      
- Mach      Reynolds (friction)  temp_ratio   visc_type   Tref (dimensional)   turb_inflow
- {mach}      {re}                   1.            2         160.                0.75
-  
- stat_control  xstat_num
-  500           10
-
- xstat_list
-   10. 20. 30. 35. 40. 45. 50. 55. 60. 65.
- 
- dtsave dtsave_restart  enable_plot3d   enable_vtk
-  5.       50.                0          {snapshots_3d}
-
-  rand_type
-   -1
-
- save_probe_steps save_span_average_steps
-    {probe_steps}         {span_average_steps}
-
- sbli_blowing_bc
-    {sbli_blowing_bc}
-   "#,
-        lx = args.x_length,
-        nx = args.x_divisions,
-        ly = args.y_length,
-        ny = args.y_divisions,
-        lz = args.z_length,
-        nz = args.z_divisions,
-        mach = args.mach_number,
-        re = args.reynolds_number,
-        angle = args.shock_angle,
-        mpi_x_split = args.mpi_x_split,
-        steps = args.steps,
-        probe_steps = args.probe_io_steps,
-        span_average_steps = args.span_average_io_steps,
-        sbli_blowing_bc = args.sbli_blowing_bc,
-        snapshots_3d = args.snapshots_3d as usize
-    );
-
-    if !args.dry {
-        // write the contents to the file
-        fs::write(&args.output_path, output.as_bytes())
-            .map_err(|e| FileError::new(args.output_path, e))?;
-    }
-
-    Ok(())
 }
