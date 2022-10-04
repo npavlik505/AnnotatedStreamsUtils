@@ -10,12 +10,10 @@ use anyhow::Result;
 /// create all the folders that data is written to in the solver
 fn create_dirs(base: &Path) -> Result<()> {
     let csv = base.join("csv_data");
-    fs::create_dir(&csv)
-        .with_context(|| format!("failed to create dir {}", csv.display()))?;
+    fs::create_dir(&csv).with_context(|| format!("failed to create dir {}", csv.display()))?;
 
     let spans = base.join("spans");
-    fs::create_dir(&spans)
-        .with_context(|| format!("failed to create dir {}", csv.display()))?;
+    fs::create_dir(&spans).with_context(|| format!("failed to create dir {}", csv.display()))?;
 
     Ok(())
 }
@@ -79,8 +77,12 @@ fn postprocess(config: &Config) -> Result<()> {
 
     // write the mesh information to the matfiles folder
     let mesh_path = data_location.join("matfiles/mesh.mat");
-    let writer = fs::File::create(&mesh_path)
-        .with_context(|| format!("failed to create directory for mesh information: {}", mesh_path.display()))?;
+    let writer = fs::File::create(&mesh_path).with_context(|| {
+        format!(
+            "failed to create directory for mesh information: {}",
+            mesh_path.display()
+        )
+    })?;
     mat5::MatFile::write_contents(&mesh_info, writer)?;
 
     Ok(())
@@ -101,7 +103,7 @@ pub(crate) fn convert_spans(
     data_location: &Path,
     config: &Config,
     mesh_info: &MeshInfo,
-    remove_binary: bool
+    remove_binary: bool,
 ) -> Result<(), Error> {
     let spans_folder = data_location.join("spans");
 
@@ -117,10 +119,15 @@ pub(crate) fn convert_spans(
         // the first item will be the root folder we created
         // this makes sure we skip any item that is a directory
         .filter(|e| e.file_type().is_file())
-        .filter(|e| e.path().extension().map(|ext| ext != "vtr").unwrap_or(false))
+        .filter(|e| {
+            e.path()
+                .extension()
+                .map(|ext| ext != "vtr")
+                .unwrap_or(false)
+        })
     {
         let path = file.path();
-        
+
         let file_name = path.file_stem().unwrap().to_string_lossy();
         let output_name = format!("{}.vtr", file_name);
         let output_path = spans_folder.join(output_name);

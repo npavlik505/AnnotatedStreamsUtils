@@ -45,7 +45,6 @@ pub(crate) struct Memory {
 #[display(fmt = "{} Mb", _0)]
 pub(crate) struct Megabytes(pub(crate) usize);
 
-
 pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
     let output_path = args.output_path.clone();
     let dry = args.dry;
@@ -68,7 +67,6 @@ pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
 
 /// create a streams config file to be used in the solver
 pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow::Result<()> {
-
     let output = format!(
         r#"!=============================================================
 !
@@ -148,11 +146,10 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
     );
 
     std::fs::write(&output_path, output.as_bytes())
-        .with_context(||format!("failed to write to file {} ", output_path.display()))?;
+        .with_context(|| format!("failed to write to file {} ", output_path.display()))?;
 
     Ok(())
 }
-
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) struct Config {
@@ -217,13 +214,12 @@ pub(crate) struct Config {
     pub(crate) snapshots_3d: bool,
 }
 
-
 impl Config {
     /// load the config data at a given path with `serde_json`
     pub(crate) fn from_path(path: &Path) -> Result<Self, Error> {
         // load the config file specified
         let config_bytes = fs::read(&path).map_err(|e| FileError::new(path.to_owned(), e))?;
-        let config: Config= serde_json::from_slice(&config_bytes)?;
+        let config: Config = serde_json::from_slice(&config_bytes)?;
         Ok(config)
     }
 

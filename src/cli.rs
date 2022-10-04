@@ -150,11 +150,42 @@ impl ConfigGenerator {
     }
 
     pub(crate) fn into_serializable(self) -> crate::config_generator::Config {
-        let Self { reynolds_number, mach_number, shock_angle, x_length, x_divisions, y_length, y_divisions, z_length, z_divisions,
-            mpi_x_split, steps, probe_io_steps, span_average_io_steps, sbli_blowing_bc, snapshots_3d, ..} = self;
+        let Self {
+            reynolds_number,
+            mach_number,
+            shock_angle,
+            x_length,
+            x_divisions,
+            y_length,
+            y_divisions,
+            z_length,
+            z_divisions,
+            mpi_x_split,
+            steps,
+            probe_io_steps,
+            span_average_io_steps,
+            sbli_blowing_bc,
+            snapshots_3d,
+            ..
+        } = self;
 
-        crate::config_generator::Config { reynolds_number, mach_number, shock_angle, x_length, x_divisions, y_length, y_divisions, z_length, z_divisions,
-                    mpi_x_split, steps, probe_io_steps, span_average_io_steps, sbli_blowing_bc, snapshots_3d }
+        crate::config_generator::Config {
+            reynolds_number,
+            mach_number,
+            shock_angle,
+            x_length,
+            x_divisions,
+            y_length,
+            y_divisions,
+            z_length,
+            z_divisions,
+            mpi_x_split,
+            steps,
+            probe_io_steps,
+            span_average_io_steps,
+            sbli_blowing_bc,
+            snapshots_3d,
+        }
     }
 }
 
@@ -219,7 +250,7 @@ pub(crate) struct RunLocal {
 
     #[clap(long)]
     /// input.json file to load into the solver
-    pub(crate) config: PathBuf
+    pub(crate) config: PathBuf,
 }
 
 #[derive(Parser, Debug, Clone, Constructor)]
@@ -255,6 +286,6 @@ pub(crate) struct SpansToVtk {
     pub(crate) solver_results: PathBuf,
 
     #[clap(long)]
-    /// remove the old binary files after converting to 
+    /// remove the old binary files after converting to
     pub(crate) clean_binary: bool,
 }

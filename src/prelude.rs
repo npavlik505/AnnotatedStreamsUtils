@@ -1,10 +1,10 @@
 pub(crate) use crate::binary_to_vtk;
 pub(crate) use crate::cli;
-pub(crate) use crate::utils;
+pub(crate) use crate::config_generator::Config;
 pub(crate) use crate::run;
+pub(crate) use crate::utils;
 pub(crate) use crate::Error;
 pub(crate) use crate::FileError;
-pub(crate) use crate::config_generator::Config;
 
 pub(crate) use std::fs;
 pub(crate) use std::io;

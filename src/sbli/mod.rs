@@ -33,7 +33,7 @@ pub(crate) fn sbli_cases(mut args: SbliCases) -> Result<(), Error> {
         cli::SbliMode::Sweep => sweep_cases(args)?,
         cli::SbliMode::CheckBlowingCondition => check_blowing_condition(args)?,
         cli::SbliMode::CheckProbes => check_probes(args)?,
-        cli::SbliMode::OneCase=> one_case(args)?,
+        cli::SbliMode::OneCase => one_case(args)?,
     };
 
     Ok(())
@@ -53,7 +53,6 @@ fn create_cases<T, V, Val>(
     V: Fn(&mut cli::ConfigGenerator, Val),
     Val: Copy,
 {
-
     for (idx, update_value) in values.into_iter().enumerate() {
         //let case_name = format!("reynolds_number_{idx}.json");
         let case_name = create_case_name(idx, update_value);
@@ -168,8 +167,7 @@ fn sweep_cases(args: SbliCases) -> Result<(), Error> {
 
         case.validate(gpu_memory)?;
 
-        let file = fs::File::create(&output_path)
-            .map_err(|e| FileError::new(output_path, e))?;
+        let file = fs::File::create(&output_path).map_err(|e| FileError::new(output_path, e))?;
 
         // write the case data to a file so that the actual input file can be generated later
         serde_json::to_writer(file, &case)?;
@@ -195,9 +193,8 @@ fn check_blowing_condition(args: SbliCases) -> Result<(), Error> {
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
-    let file = fs::File::create(&output_path)
-        .map_err(|e| FileError::new(output_path.clone(), e))?;
-
+    let file =
+        fs::File::create(&output_path).map_err(|e| FileError::new(output_path.clone(), e))?;
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer(file, &case)?;
@@ -221,8 +218,8 @@ fn check_probes(args: SbliCases) -> Result<(), Error> {
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
-    let file = fs::File::create(&output_path)
-        .map_err(|e| FileError::new(output_path.clone(), e))?;
+    let file =
+        fs::File::create(&output_path).map_err(|e| FileError::new(output_path.clone(), e))?;
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer(file, &case)?;
@@ -247,8 +244,8 @@ fn one_case(args: SbliCases) -> Result<(), Error> {
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
-    let file = fs::File::create(&output_path)
-        .map_err(|e| FileError::new(output_path.clone(), e))?;
+    let file =
+        fs::File::create(&output_path).map_err(|e| FileError::new(output_path.clone(), e))?;
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer(file, &case)?;
@@ -257,7 +254,6 @@ fn one_case(args: SbliCases) -> Result<(), Error> {
 
     Ok(())
 }
-
 
 /// create a distribute-jobs.yaml file from the input configuration files
 fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> Result<(), Error> {

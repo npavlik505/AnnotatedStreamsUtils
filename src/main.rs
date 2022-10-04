@@ -6,9 +6,9 @@ mod probe;
 mod probe_binary;
 mod run;
 mod sbli;
+mod spans_to_vtk;
 mod utils;
 mod vtk_to_mat;
-mod spans_to_vtk;
 
 use prelude::*;
 
@@ -26,7 +26,7 @@ fn main() -> anyhow::Result<()> {
         Command::RunLocal(x) => run::run_local(x)?,
         Command::Probe(x) => probe::probe(x)?,
         Command::VtkToMat(x) => vtk_to_mat::vtk_to_mat(x)?,
-        Command::SpansToVtk(x) => spans_to_vtk::spans_to_vtk(x)?
+        Command::SpansToVtk(x) => spans_to_vtk::spans_to_vtk(x)?,
     };
 
     Ok(())

@@ -10,39 +10,64 @@ struct Solver {
 }
 
 impl Solver {
-    fn new(working_dir: PathBuf)  -> Result<Self> {
+    fn new(working_dir: PathBuf) -> Result<Self> {
         //
         // create folders for input
         //
         let input = working_dir.join("input");
         if input.exists() {
-            std::fs::remove_dir_all(&input)
-                .with_context(|| format!("failed to remove full directory at {} for input", input.display()))?;
+            std::fs::remove_dir_all(&input).with_context(|| {
+                format!(
+                    "failed to remove full directory at {} for input",
+                    input.display()
+                )
+            })?;
         }
 
-        std::fs::create_dir(&input)
-            .with_context(|| format!("failed to create directory at {} for input", input.display()))?;
+        std::fs::create_dir(&input).with_context(|| {
+            format!(
+                "failed to create directory at {} for input",
+                input.display()
+            )
+        })?;
 
         //
         // create folders for distribute save
         //
         let dist_save = working_dir.join("distribute_save");
         if dist_save.exists() {
-            std::fs::remove_dir_all(&dist_save)
-                .with_context(|| format!("failed to remove full directory at {} for distribute save", dist_save.display()))?;
+            std::fs::remove_dir_all(&dist_save).with_context(|| {
+                format!(
+                    "failed to remove full directory at {} for distribute save",
+                    dist_save.display()
+                )
+            })?;
         }
-        std::fs::create_dir(&dist_save)
-            .with_context(|| format!("failed to create directory at {} for distribute save", dist_save.display()))?;
+        std::fs::create_dir(&dist_save).with_context(|| {
+            format!(
+                "failed to create directory at {} for distribute save",
+                dist_save.display()
+            )
+        })?;
 
-        let s = Solver { working_dir, input, dist_save };
+        let s = Solver {
+            working_dir,
+            input,
+            dist_save,
+        };
 
         Ok(s)
     }
 
     fn load_input_file(&self, host_path: &Path, container_name: &str) -> Result<()> {
         let container_path = self.input.join(container_name);
-        std::fs::copy(host_path, &container_path)
-            .with_context(|| format!("failed to copy {} to {}", host_path.display(), container_path.display()))?;
+        std::fs::copy(host_path, &container_path).with_context(|| {
+            format!(
+                "failed to copy {} to {}",
+                host_path.display(),
+                container_path.display()
+            )
+        })?;
 
         Ok(())
     }

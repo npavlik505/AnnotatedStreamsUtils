@@ -13,17 +13,22 @@ pub(crate) fn vtk_to_mat(mut args: cli::VtkToMat) -> Result<(), Error> {
 
     for (idx, file) in args.input_files.into_iter().enumerate() {
         println!("reading {}", file.display());
-        let vtk_data : vtk::VtkData<vtk::Rectilinear2D<vtk::Binary>, crate::binary_to_vtk::SpanVtkInformation> = vtk::read_vtk(&file)?;
+        let vtk_data: vtk::VtkData<
+            vtk::Rectilinear2D<vtk::Binary>,
+            crate::binary_to_vtk::SpanVtkInformation,
+        > = vtk::read_vtk(&file)?;
 
         // unpack data from the arrays
-        let rho : ndarray::Array2<f64>= vtk_data.data.rho.into();
-        let velocity : ndarray::Array3<f64> = vtk_data.data.velocity.into();
+        let rho: ndarray::Array2<f64> = vtk_data.data.rho.into();
+        let velocity: ndarray::Array3<f64> = vtk_data.data.velocity.into();
         let u = velocity.slice(s!(0usize, .., ..));
         let v = velocity.slice(s!(1usize, .., ..));
         let w = velocity.slice(s!(2usize, .., ..));
 
         // store that new data in the array at the appropriate time step
-        span_averages.slice_mut(s![idx, 0usize, .., ..]).assign(&rho);
+        span_averages
+            .slice_mut(s![idx, 0usize, .., ..])
+            .assign(&rho);
         span_averages.slice_mut(s![idx, 1usize, .., ..]).assign(&u);
         span_averages.slice_mut(s![idx, 2usize, .., ..]).assign(&v);
         span_averages.slice_mut(s![idx, 3usize, .., ..]).assign(&w);
@@ -32,14 +37,15 @@ pub(crate) fn vtk_to_mat(mut args: cli::VtkToMat) -> Result<(), Error> {
     let spans = SpanAverages::new(span_averages);
 
     let writer = std::io::BufWriter::new(
-        std::fs::File::create(&args.output_file).map_err(|e| FileError::new(args.output_file, e))?
+        std::fs::File::create(&args.output_file)
+            .map_err(|e| FileError::new(args.output_file, e))?,
     );
-    mat5::MatFile::write_contents(&spans,  writer)?;
+    mat5::MatFile::write_contents(&spans, writer)?;
 
     Ok(())
 }
 
 #[derive(Debug, Constructor, mat5::MatFile)]
 struct SpanAverages {
-    span_averages: Array4
+    span_averages: Array4,
 }

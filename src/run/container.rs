@@ -27,8 +27,12 @@ pub(crate) fn run_container(args: cli::RunContainer) -> anyhow::Result<()> {
     // change the current working directory to the distribute_save directory. That way, all the
     // file that we need to run and work with will be output here
     let target_dir = PathBuf::from("/distribute_save");
-    std::env::set_current_dir(&target_dir)
-        .with_context( || format!("could not change current working directory to {}", target_dir.display()))?;
+    std::env::set_current_dir(&target_dir).with_context(|| {
+        format!(
+            "could not change current working directory to {}",
+            target_dir.display()
+        )
+    })?;
 
     // then, generate the actual config for an output to the solver
     crate::config_generator::_config_generator(&config, input_dat)?;
@@ -42,7 +46,8 @@ pub(crate) fn run_container(args: cli::RunContainer) -> anyhow::Result<()> {
     let nproc = args.nproc.to_string();
     let exec = xshell::cmd!(sh, "mpirun -np {nproc} /streams.exe");
 
-    let output = exec.output()
+    let output = exec
+        .output()
         .with_context(|| "execution of solver failed and no output is available")?;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
