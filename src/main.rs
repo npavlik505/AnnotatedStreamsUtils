@@ -22,7 +22,7 @@ fn main() {
     let out = match args.mode {
         Command::Sbli(x) => sbli::sbli_cases(x),
         Command::ConfigGenerator(x) => config_generator::config_generator(x),
-        Command::RunSolver(x) => run::run(x),
+        Command::RunContainer(x) => run::run(x),
         Command::Probe(x) => probe::probe(x),
         Command::VtkToMat(x) => vtk_to_mat::vtk_to_mat(x),
         Command::SpansToVtk(x) => spans_to_vtk::spans_to_vtk(x)

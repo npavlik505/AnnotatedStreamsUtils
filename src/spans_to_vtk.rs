@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::run;
 
 /// convert a general solver folder full of span binaries to vtk files
 pub(crate) fn spans_to_vtk(args: cli::SpansToVtk) -> Result<(), Error> {

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// running routine for the solver once activated within the container
-pub(crate) fn run(args: cli::RunSolver) -> Result<(), Error> {
+pub(crate) fn run(args: cli::RunContainer) -> Result<(), Error> {
     let start = std::time::Instant::now();
 
     let path = PathBuf::from("/input/input.json");

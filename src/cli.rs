@@ -18,7 +18,7 @@ pub(crate) enum Command {
     /// generate a config file (input.dat) for use in the solver
     ConfigGenerator(ConfigGenerator),
     /// run the solver once inside the singularity container
-    RunSolver(RunSolver),
+    RunContainer(RunContainer),
     /// parse probe data to .mat files
     Probe(ParseProbe),
     /// convert a span average VTK file to a .mat file for analysis
@@ -200,7 +200,7 @@ pub(crate) enum SbliMode {
 }
 
 #[derive(Parser, Debug, Clone)]
-pub(crate) struct RunSolver {
+pub(crate) struct RunContainer {
     /// the number of processes that this program is allowed to use
     pub(crate) nproc: usize,
 }
