@@ -1,2 +1,4 @@
 /target
 *.sif
+**/input.json
+output/
