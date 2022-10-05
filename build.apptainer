@@ -18,26 +18,26 @@ Stage: build
 	$HOME/.git-credentials /root/.git-credentials
 
 %post
-	# this line must run to let git know that there might be a credential
-	# store already on disk
-	git config --global credential.helper store
-	cat /root/.git-credentials
+	## this line must run to let git know that there might be a credential
+	## store already on disk
+	#git config --global credential.helper store
+	#cat /root/.git-credentials
 
-	echo "$HOME"
+	#echo "$HOME"
 
-	# hack to add cargo to path
-	export PATH="$PATH":"$HOME/.cargo/bin"
+	## hack to add cargo to path
+	#export PATH="$PATH":"$HOME/.cargo/bin"
 
-	# clone the cuda samples directory
-	which nvcc
-	cd /
-	git clone "https://github.com/Fluid-Dynamics-Group/cuda-samples" --depth 1
-	cd /cuda-samples/Samples/0_Introduction/simpleZeroCopy
-	make
+	## clone the cuda samples directory
+	#which nvcc
+	#cd /
+	#git clone "https://github.com/Fluid-Dynamics-Group/cuda-samples" --depth 1
+	#cd /cuda-samples/Samples/0_Introduction/simpleZeroCopy
+	#make
 
-	# make streams-utils
-	cd /streams-utils
-	cargo build --release
+	## make streams-utils
+	#cd /streams-utils
+	#cargo build --release
 
 	# make streams
 	cd /streams/src
@@ -56,7 +56,8 @@ Stage: build
 	echo "compiling python extensions"
 
 	# https://forums.developer.nvidia.com/t/compiling-python-wrappers-with-f2py-and-cuda-fortran/157217
-	LDFLAGS="-Mcuda -fPIC" NPY_DISTUTILS_APPEND_FLAGS=1 make f2py
+	#LDFLAGS="-Mcuda,-fPIC" NPY_DISTUTILS_APPEND_FLAGS=1 make f2py
+	LDFLAGS="-Mcuda=cuda11.5 -DUSE_CUDA -DCUDA_ASYNC" NPY_DISTUTILS_APPEND_FLAGS=1 make f2py
 	ls -al
 
 	# flush the evidence
