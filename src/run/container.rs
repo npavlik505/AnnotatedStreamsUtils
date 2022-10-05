@@ -9,7 +9,7 @@ pub(crate) fn run_container(args: cli::RunContainer) -> anyhow::Result<()> {
 
     let path = PathBuf::from("/input/input.json");
     let dist_save = PathBuf::from("/distribute_save");
-    let input_dat = PathBuf::from("/input/input.dat");
+    let input_dat = PathBuf::from("/distribute_save/input.dat");
 
     // initialize some base directories within the folder we will work in
     create_dirs(&dist_save)?;
@@ -44,16 +44,20 @@ pub(crate) fn run_container(args: cli::RunContainer) -> anyhow::Result<()> {
     let sh = xshell::Shell::new()?;
 
     let nproc = args.nproc.to_string();
+    // TODO: make this command share the current stdout
     let exec = xshell::cmd!(sh, "mpirun -np {nproc} /streams.exe");
 
-    let output = exec
-        .output()
-        .with_context(|| "execution of solver failed and no output is available")?;
+    println!("Now running solver, STDOUT will be hidden until it finishes");
+    exec.run()?;
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let stderr = String::from_utf8_lossy(&output.stderr);
+    //let output = exec
+    //    .output()
+    //    .with_context(|| "execution of solver failed and no output is available")?;
 
-    println!("STDOUT:\n{}\n\nSTDERR:\n{}", stdout, stderr);
+    //let stdout = String::from_utf8_lossy(&output.stdout);
+    //let stderr = String::from_utf8_lossy(&output.stderr);
+
+    //println!("STDOUT:\n{}\n\nSTDERR:\n{}", stdout, stderr);
 
     postprocess(&config)?;
 

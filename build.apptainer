@@ -14,6 +14,7 @@ Stage: build
 	${STREAMS_UTILS_DIR}/Cargo.toml /streams-utils/Cargo.toml
 	${STREAMS_UTILS_DIR}/Cargo.lock /streams-utils/Cargo.lock
 	
+	# required to build distribute as a dependency
 	$HOME/.git-credentials /root/.git-credentials
 
 %post
@@ -49,26 +50,47 @@ Stage: build
 	# ./Makefile to ./Makefile so we have to use this workaround
 	mv Makefile2 Makefile
 	make
+	ls -al
+
+	echo "COMPILED STREAMS FILES!"
+	echo "compiling python extensions"
+
+	# https://forums.developer.nvidia.com/t/compiling-python-wrappers-with-f2py-and-cuda-fortran/157217
+	LDFLAGS="-Mcuda -fPIC" NPY_DISTUTILS_APPEND_FLAGS=1 make f2py
+	ls -al
 
 	# flush the evidence
 	rm /root/.git-credentials
 
-Bootstrap: localimage
-From: nv.sif
-	
-%files from build
-	/streams-utils/target/release/streams-utils /streams-utils
-	/streams/src/streams.exe /streams.exe
-	/cuda-samples/bin/x86_64/linux/release/simpleZeroCopy /simpleZeroCopy
-
-%apprun distribute
-	cd /
-
-	echo "executing zero copy to initialize the gpu"
-	/simpleZeroCopy
-
-	echo "finished simple zero copy"
-
-	# doing the rest of the stuff
-	#/streams-utils run-solver $1
-	/streams-utils run-solver 4
+#Bootstrap: localimage
+#From: nv.sif 
+## use base here so that we have access to python still
+#	
+#%files from build
+#	/streams-utils/target/release/streams-utils /streams-utils
+#	/streams/src/streams.exe /streams.exe
+#
+#	/cuda-samples/bin/x86_64/linux/release/simpleZeroCopy /simpleZeroCopy
+#
+#	# python files to run streams
+#	/streams/src/libstreams.cpython-310-x86_64-linux-gnu.so /libstreams.cpython-310-x86_64-linux-gnu.so
+#	/streams/src/libstreams.cpython-38-x86_64-linux-gnu.so /libstreams.cpython-38-x86_64-linux-gnu.so
+#	/streams/src/*.o /
+#	/streams/src/pybind.py /pybind.py
+#
+#%post
+#	apt-get update -y
+#	apt-get install python3 -y
+#
+#%apprun distribute
+#	cd /
+#	ls -al
+#
+#	echo "executing zero copy to initialize the gpu"
+#	/simpleZeroCopy
+#
+#	echo "finished simple zero copy!"
+#
+#	# doing the rest of the stuff
+#	#/streams-utils run-solver $1
+#	/streams-utils run-container  4

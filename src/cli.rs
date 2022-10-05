@@ -115,6 +115,10 @@ pub(crate) struct ConfigGenerator {
     ///
     /// If not present, no 3D flowfields will be written
     pub(crate) snapshots_3d: bool,
+
+    #[clap(long)]
+    /// save output to json format
+    pub(crate) json: bool,
 }
 
 impl ConfigGenerator {
@@ -146,6 +150,7 @@ impl ConfigGenerator {
             span_average_io_steps: 100,
             sbli_blowing_bc: 0,
             snapshots_3d: true,
+            json: false
         }
     }
 
@@ -202,7 +207,7 @@ pub(crate) struct SbliCases {
     /// a matrix_id that you want to ping after the jobs are
     /// finished. Should look like: `@user_id:matrix.org`
     #[clap(long)]
-    pub(crate) matrix: Option<distribute::UserId>,
+    pub(crate) matrix: Option<distribute::OwnedUserId>,
 
     #[clap(long)]
     /// input databse file to use
@@ -251,6 +256,10 @@ pub(crate) struct RunLocal {
     #[clap(long)]
     /// input.json file to load into the solver
     pub(crate) config: PathBuf,
+
+    #[clap(long)]
+    /// path to database.bl file required to run streams
+    pub(crate) database: PathBuf,
 }
 
 #[derive(Parser, Debug, Clone, Constructor)]

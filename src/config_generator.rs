@@ -48,6 +48,7 @@ pub(crate) struct Megabytes(pub(crate) usize);
 pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
     let output_path = args.output_path.clone();
     let dry = args.dry;
+    let json = args.json;
 
     let config = args.into_serializable();
 
@@ -59,7 +60,15 @@ pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
     config.validate(gpu_memory)?;
 
     if !dry {
-        _config_generator(&config, output_path)
+        if json {
+            let file = std::fs::File::create(&output_path)
+                .with_context(||format!("failed to create json output file at {}", output_path.display()))?;
+            serde_json::to_writer(file, &config)
+                .with_context(|| format!("failed to serialize data to json file. This should not happen"))?;
+            Ok(())
+        } else {
+            _config_generator(&config, output_path)
+        }
     } else {
         Ok(())
     }

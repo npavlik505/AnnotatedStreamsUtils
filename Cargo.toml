@@ -12,7 +12,7 @@ derive_more = "0.99.17"
 ndarray = "0.15.4"
 serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"
-thiserror = "1.0.30"
+thiserror = "1.0.37"
 walkdir = "2.3.2"
 rayon = "1.5.1"
 anyhow = "1.0.65"
@@ -25,8 +25,9 @@ rev = "e240643f92d48c123b6ae0bbd62c9b5cfa40c759"
 [dependencies.distribute]
 #path = "../distribute"
 git = "https://github.com/Fluid-Dynamics-Group/distribute"
-branch = "matrix-notify-git"
+rev = "46271558d633bd8b8ffc6853b67aacf0b5b0d060"
 default-features = false
+features = ["config"]
 
 [dependencies.mat5]
 git = "https://github.com/Fluid-Dynamics-Group/mat5"

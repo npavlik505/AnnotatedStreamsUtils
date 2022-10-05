@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use cli::SbliCases;
 
+use anyhow::Result;
+
 #[derive(thiserror::Error, Debug)]
 pub(crate) enum SbliError {
     #[error("The output path {} already exists. Its contents would be overwritten by this run.", .0.display())]
@@ -24,7 +26,7 @@ pub(crate) struct CopyFile {
     error: io::Error,
 }
 
-pub(crate) fn sbli_cases(mut args: SbliCases) -> Result<(), Error> {
+pub(crate) fn sbli_cases(mut args: SbliCases) -> Result<()> {
     check_options_copy_files(&mut args)?;
     // remove mutability on args
     let args = args;
@@ -107,7 +109,7 @@ fn check_options_copy_files(args: &mut cli::SbliCases) -> Result<(), Error> {
 }
 
 /// generate a sweep over combinations of shock angles and mach numbers
-fn sweep_cases(args: SbliCases) -> Result<(), Error> {
+fn sweep_cases(args: SbliCases) -> Result<()> {
     // angle of the shock (degrees)
     let shock_angle = [6., 8., 10.];
 
@@ -167,7 +169,8 @@ fn sweep_cases(args: SbliCases) -> Result<(), Error> {
 
         case.validate(gpu_memory)?;
 
-        let file = fs::File::create(&output_path).map_err(|e| FileError::new(output_path, e))?;
+        let file = fs::File::create(&output_path)
+            .with_context(|| format!("failed to create file at {}", output_path.display()))?;
 
         // write the case data to a file so that the actual input file can be generated later
         serde_json::to_writer(file, &case)?;
@@ -180,7 +183,7 @@ fn sweep_cases(args: SbliCases) -> Result<(), Error> {
 
 /// validate that the blowing boundary condition on the bottom plate of the
 /// simulation is working correctly
-fn check_blowing_condition(args: SbliCases) -> Result<(), Error> {
+fn check_blowing_condition(args: SbliCases) -> Result<()> {
     let mut case =
         cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
 
@@ -193,8 +196,8 @@ fn check_blowing_condition(args: SbliCases) -> Result<(), Error> {
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
-    let file =
-        fs::File::create(&output_path).map_err(|e| FileError::new(output_path.clone(), e))?;
+    let file = fs::File::create(&output_path)
+        .with_context(|| format!("failed to create file at {}", output_path.display()))?;
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer(file, &case)?;
@@ -205,7 +208,7 @@ fn check_blowing_condition(args: SbliCases) -> Result<(), Error> {
 }
 
 /// validate that the probe data is being collected as we expect it to be
-fn check_probes(args: SbliCases) -> Result<(), Error> {
+fn check_probes(args: SbliCases) -> Result<()> {
     let case = cli::ConfigGenerator::with_path(args.output_directory.join("check_probes.json"));
 
     let output_path = case.output_path.clone();
@@ -218,8 +221,8 @@ fn check_probes(args: SbliCases) -> Result<(), Error> {
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
-    let file =
-        fs::File::create(&output_path).map_err(|e| FileError::new(output_path.clone(), e))?;
+    let file = fs::File::create(&output_path)
+        .with_context(|| format!("failed to create file at {}", output_path.display()))?;
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer(file, &case)?;
@@ -231,7 +234,7 @@ fn check_probes(args: SbliCases) -> Result<(), Error> {
 
 /// validate that the blowing boundary condition on the bottom plate of the
 /// simulation is working correctly
-fn one_case(args: SbliCases) -> Result<(), Error> {
+fn one_case(args: SbliCases) -> Result<()> {
     let case =
         cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
 
@@ -244,8 +247,9 @@ fn one_case(args: SbliCases) -> Result<(), Error> {
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
-    let file =
-        fs::File::create(&output_path).map_err(|e| FileError::new(output_path.clone(), e))?;
+    let file = fs::File::create(&output_path)
+        .with_context(|| format!("failed to create file at {}", output_path.display()))?;
+
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer(file, &case)?;
@@ -256,7 +260,7 @@ fn one_case(args: SbliCases) -> Result<(), Error> {
 }
 
 /// create a distribute-jobs.yaml file from the input configuration files
-fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> Result<(), Error> {
+fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> anyhow::Result<()> {
     let capabilities = vec!["gpu", "apptainer"]
         .into_iter()
         .map(|x| x.into())
@@ -277,36 +281,39 @@ fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> Result<()
 
     // initialization specification
     let mounts = vec![];
-    let init = distribute::singularity::Initialize::new(
+    let init = distribute::apptainer::Initialize::new(
         args.solver_sif.clone(),
-        vec![distribute::common::File {
-            path: args.database_bl.clone(),
-            alias: Some("database_bl.dat".into()),
-        }],
+        vec![distribute::common::File::with_alias(
+            &args.database_bl,
+            "database_bl.dat",
+        )?],
         mounts,
     );
 
-    let jobs = input_files
+    let jobs : Result<Vec<_>> = input_files
         .into_iter()
         .map(|file| {
             let job_name = file.file_stem().unwrap().to_string_lossy().to_string();
-            distribute::singularity::Job::new(
+            let job = distribute::apptainer::Job::new(
                 job_name,
-                vec![distribute::common::File {
-                    path: file,
-                    alias: Some("input.json".into()),
-                }],
-            )
+                vec![distribute::common::File::with_alias(
+                    file,
+                    "input.json",
+                )?],
+            );
+            Ok(job)
         })
         .collect();
+    let jobs = jobs?;
 
-    let singularity = distribute::singularity::Description::new(init, jobs);
-    let jobs = distribute::Jobs::Singularity { meta, singularity };
+    let apptainer = distribute::apptainer::Description::new(init, jobs);
+    let jobs = distribute::ApptainerConfig::new(meta,apptainer);
 
     let jobs_path = args.output_directory.join("distribute-jobs.yaml");
-    let file = fs::File::create(&jobs_path).map_err(|e| FileError::new(jobs_path, e))?;
+    let file = fs::File::create(&jobs_path)
+        .with_context(|| format!("failed to write jobs file at {}", jobs_path.display()))?;
 
-    jobs.to_writer(file)?;
+    distribute::Jobs::from(jobs).to_writer(file)?;
 
     Ok(())
 }

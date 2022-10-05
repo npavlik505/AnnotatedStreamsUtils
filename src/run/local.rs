@@ -79,7 +79,9 @@ impl Solver {
         let input_path = &self.input;
         let nproc = nproc.to_string();
 
-        let exec = cmd!(sh, "apptainer run --bind {results_path}:/distribute_save,{input_path}:/input --app distribute ./streams.sif {nproc}");
+        let exec = cmd!(sh, "apptainer run --nv --bind {results_path}:/distribute_save,{input_path}:/input --app distribute ./streams.sif {nproc}")
+            // ignore the output status so we get more STDOUT information?
+            .ignore_status();
 
         exec.run()?;
 
@@ -97,6 +99,7 @@ pub(crate) fn run_local(args: cli::RunLocal) -> Result<()> {
     let solver = Solver::new(args.workdir)?;
 
     solver.load_input_file(&args.config, "input.json")?;
+    solver.load_input_file(&args.database, "database_bl.dat")?;
 
     solver.run(args.nproc)?;
 
