@@ -72,14 +72,14 @@ impl Solver {
         Ok(())
     }
 
-    fn run(&self, nproc: usize) -> Result<()> {
+    fn run(&self, nproc: usize, python_mount: String) -> Result<()> {
         let sh = Shell::new()?;
 
         let results_path = &self.dist_save;
         let input_path = &self.input;
         let nproc = nproc.to_string();
 
-        let exec = cmd!(sh, "apptainer run --nv --bind {results_path}:/distribute_save,{input_path}:/input --app distribute ./streams.sif {nproc}")
+        let exec = cmd!(sh, "apptainer run --nv --bind {results_path}:/distribute_save,{input_path}:/input{python_mount} --app distribute ./streams.sif {nproc}")
             // ignore the output status so we get more STDOUT information?
             .ignore_status();
 
@@ -101,7 +101,15 @@ pub(crate) fn run_local(args: cli::RunLocal) -> Result<()> {
     solver.load_input_file(&args.config, "input.json")?;
     solver.load_input_file(&args.database, "database_bl.dat")?;
 
-    solver.run(args.nproc)?;
+    // if a directory was specified to run the solver then we format it to a binding for the
+    // `apptainer run` comamnd, otherwise an empty string will not change the output
+    let python_mount = if let Some(mount_path) = args.python_mount {
+        format!(",{}/runtimesolver", mount_path.to_string_lossy().into_owned())
+    } else {
+        "".to_string()
+    };
+
+    solver.run(args.nproc, python_mount)?;
 
     Ok(())
 }

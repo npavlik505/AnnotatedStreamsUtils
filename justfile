@@ -38,4 +38,4 @@ run:
 # get a shell inside the container
 # requires the ./output directory to be created, and a ./streams.sif file to be made
 shell:
-	apptainer shell --bind ./output/distribute_save:/distribute_save,./output/input:/input ./streams.sif
+	apptainer shell --nv --bind ./output/distribute_save:/distribute_save,./output/input:/input ./streams.sif

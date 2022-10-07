@@ -221,6 +221,9 @@ pub(crate) struct Config {
     ///
     /// If not present, no 3D flowfields will be written
     pub(crate) snapshots_3d: bool,
+
+    /// run the python solver with bindings, not the fortran solver
+    pub(crate) use_python: bool,
 }
 
 impl Config {

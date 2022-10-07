@@ -119,6 +119,10 @@ pub(crate) struct ConfigGenerator {
     #[clap(long)]
     /// save output to json format
     pub(crate) json: bool,
+
+    #[clap(long)]
+    /// run the solver with python bindings instead of fortran mode
+    pub(crate) use_python: bool,
 }
 
 impl ConfigGenerator {
@@ -150,7 +154,8 @@ impl ConfigGenerator {
             span_average_io_steps: 100,
             sbli_blowing_bc: 0,
             snapshots_3d: true,
-            json: false
+            json: false,
+            use_python: false
         }
     }
 
@@ -171,6 +176,7 @@ impl ConfigGenerator {
             span_average_io_steps,
             sbli_blowing_bc,
             snapshots_3d,
+            use_python,
             ..
         } = self;
 
@@ -190,6 +196,7 @@ impl ConfigGenerator {
             span_average_io_steps,
             sbli_blowing_bc,
             snapshots_3d,
+            use_python
         }
     }
 }
@@ -260,6 +267,11 @@ pub(crate) struct RunLocal {
     #[clap(long)]
     /// path to database.bl file required to run streams
     pub(crate) database: PathBuf,
+
+    #[clap(long)]
+    /// mount some python code into the container to run instead of the 
+    /// code contained in the solver image
+    pub(crate) python_mount: Option<PathBuf>,
 }
 
 #[derive(Parser, Debug, Clone, Constructor)]

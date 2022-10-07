@@ -42,22 +42,32 @@ pub(crate) fn run_container(args: cli::RunContainer) -> anyhow::Result<()> {
     //
 
     let sh = xshell::Shell::new()?;
-
     let nproc = args.nproc.to_string();
-    // TODO: make this command share the current stdout
-    let exec = xshell::cmd!(sh, "mpirun -np {nproc} /streams.exe");
 
-    println!("Now running solver, STDOUT will be hidden until it finishes");
-    exec.run()?;
+    if config.use_python {
+        let runtime_py = PathBuf::from("/runtimesolver/");
+        let static_py = PathBuf::from("/python/");
 
-    //let output = exec
-    //    .output()
-    //    .with_context(|| "execution of solver failed and no output is available")?;
+        let solver_py = if runtime_py.exists() { 
+            println!("running python bindings with runtime solver");
+            runtime_py
+        } else { 
+            println!("running static python bindings");
+            static_py 
+        };
 
-    //let stdout = String::from_utf8_lossy(&output.stdout);
-    //let stderr = String::from_utf8_lossy(&output.stderr);
+        let exec = xshell::cmd!(sh, "mpirun -np {nproc} {solver_py}/main.exe");
 
-    //println!("STDOUT:\n{}\n\nSTDERR:\n{}", stdout, stderr);
+        println!("Now running solver, STDOUT will be hidden until it finishes");
+        exec.run()?;
+
+    } else {
+        // TODO: make this command share the current stdout
+        let exec = xshell::cmd!(sh, "mpirun -np {nproc} /streams.exe");
+
+        println!("Now running solver, STDOUT will be hidden until it finishes");
+        exec.run()?;
+    }
 
     postprocess(&config)?;
 
