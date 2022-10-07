@@ -36,6 +36,13 @@ run:
 		16
 
 # get a shell inside the container
-# requires the ./output directory to be created, and a ./streams.sif file to be made
+# requires the ./output directory (with its associated folders) to be created, 
+# and a ./streams.sif file to be made
 shell:
 	apptainer shell --nv --bind ./output/distribute_save:/distribute_save,./output/input:/input ./streams.sif
+
+# get a shell inside the container
+# and bind your $STREAMS_DIR environment variable to the folder
+# /streams
+local:
+	apptainer shell --nv --bind $STREAMS_DIR:/streams ./streams.sif
