@@ -56,7 +56,7 @@ pub(crate) fn run_container(args: cli::RunContainer) -> anyhow::Result<()> {
             static_py 
         };
 
-        let exec = xshell::cmd!(sh, "mpirun -np {nproc} {solver_py}/main.exe");
+        let exec = xshell::cmd!(sh, "mpirun -np {nproc} {solver_py}/main.py");
 
         println!("Now running solver, STDOUT will be hidden until it finishes");
         exec.run()?;

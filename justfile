@@ -24,15 +24,17 @@ config_output := "./output/input.json"
 config:
 	echo {{config_output}}
 	cargo r -- config-generator {{config_output}} \
-		--steps 100 \
+		--steps 10000 \
 		--x-divisions 600 \
-		--json
+		--json \
+		--use-python
 
 run:
 	cargo r -- run-local \
 		--workdir ./output/ \
 		--config ./output/input.json \
 		--database $STREAMS_DIR/examples/supersonic_sbli/database_bl.dat \
+		--python-mount $STREAMS_DIR/python \
 		16
 
 # get a shell inside the container
