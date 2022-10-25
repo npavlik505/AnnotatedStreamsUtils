@@ -24,9 +24,10 @@ config_output := "./output/input.json"
 config:
 	echo {{config_output}}
 	cargo r -- config-generator {{config_output}} \
-		--steps 10000 \
+		--steps 50000 \
 		--x-divisions 600 \
 		--json \
+		--span-average-io-steps 50 \
 		--use-python
 
 run:
