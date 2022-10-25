@@ -11,12 +11,14 @@ base:
 	mkdir -p ~/apptainer
 
 	rm -f base.sif 
-	time APPTAINER_TMPDIR=~/apptainer sudo -E apptainer build --nv base.sif base.apptainer
+	export APPTAINER_TMPDIR=~/apptainer
+	time sudo -E apptainer build --nv base.sif base.apptainer
 	du -sh base.sif
 
 build:
 	rm -f streams.sif
-	time APPTAINER_TMPDIR=~/apptainer sudo -E apptainer build --nv streams.sif build.apptainer
+	export APPTAINER_TMPDIR=~/apptainer
+	time sudo -E apptainer build --nv streams.sif build.apptainer
 	du -sh streams.sif
 
 # build a config json file as input to the solver
