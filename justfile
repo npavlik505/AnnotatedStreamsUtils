@@ -1,5 +1,5 @@
 nv: 
-	mkdir -p ~/apptainer
+	mkdir -p $APPTAINER_TMPDIR
 
 	rm -f nv.sif
 
@@ -8,16 +8,16 @@ nv:
 		"docker://nvcr.io/nvidia/nvhpc:22.1-devel-cuda_multi-ubuntu20.04"
 
 base:
-	mkdir -p ~/apptainer
+	mkdir -p $APPTAINER_TMPDIR
 
 	rm -f base.sif 
-	export APPTAINER_TMPDIR=~/apptainer
+	echo $APPTAINER_TMPDIR
 	time sudo -E apptainer build --nv base.sif base.apptainer
 	du -sh base.sif
 
 build:
 	rm -f streams.sif
-	export APPTAINER_TMPDIR=~/apptainer
+	echo $APPTAINER_TMPDIR
 	time sudo -E apptainer build --nv streams.sif build.apptainer
 	du -sh streams.sif
 
