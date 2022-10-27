@@ -32,17 +32,17 @@ module H5Helpers
 	end
 
 	function load_hdf5_scalar_series(h5file::HDF5.File, name::String)
-		dset :: Vector{Float32}= h5file[name][1, :];
+		dset = h5file[name][1, :];
 		return permutedims(dset,  reverse(1:ndims(dset)))
 	end
 
-	function load_hdf5_2d_series(h5file::HDF5.File, name::String)
-        dset :: Matrix{Float32}= h5file[name][:, :];
+    function load_hdf5_2d_series(h5file::HDF5.File, name::String)
+        dset = h5file[name][:, :];
 		return permutedims(dset,  reverse(1:ndims(dset)))
 	end
 
 	function load_hdf5_scalar_series(h5file::HDF5.File, name::String, range)
-		dset :: Vector{Float32}= h5file[name][1, range];
+		dset = h5file[name][1, range];
 		return permutedims(dset,  reverse(1:ndims(dset)))
 	end
 end

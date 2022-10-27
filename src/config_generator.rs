@@ -76,6 +76,14 @@ pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
 
 /// create a streams config file to be used in the solver
 pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow::Result<()> {
+    const CFL : f64 = 0.75;
+
+    let cfl = if let Some(fixed_dt) = config.fixed_dt {
+        -1. * fixed_dt
+    } else {
+        CFL
+    };
+
     let output = format!(
         r#"!=============================================================
 !
@@ -114,7 +122,7 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
   0.1               15.             {angle}              0.
       
  restart   num_iter   cfl   dt_control  print_control  io_type
-   0        {steps}      .75      1       1              2
+   0        {steps}      {cfl}      1       1              2
       
  Mach      Reynolds (friction)  temp_ratio   visc_type   Tref (dimensional)   turb_inflow
  {mach}      {re}                   1.            2         160.                0.75
@@ -151,7 +159,8 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
         probe_steps = config.probe_io_steps,
         span_average_steps = config.span_average_io_steps,
         sbli_blowing_bc = config.sbli_blowing_bc,
-        snapshots_3d = config.snapshots_3d as usize
+        snapshots_3d = config.snapshots_3d as usize,
+        cfl = cfl
     );
 
     std::fs::write(&output_path, output.as_bytes())
@@ -224,6 +233,12 @@ pub(crate) struct Config {
 
     /// run the python solver with bindings, not the fortran solver
     pub(crate) use_python: bool,
+
+    /// specify a fixed timestep to use
+    pub(crate) fixed_dt: Option<f64>,
+
+    /// how often to export full flowfields to hdf5 files (PYTHON ONLY!)
+    pub(crate) python_flowfield_steps: Option<usize>
 }
 
 impl Config {

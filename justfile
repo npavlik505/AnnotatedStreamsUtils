@@ -26,11 +26,13 @@ config_output := "./output/input.json"
 config:
 	echo {{config_output}}
 	cargo r -- config-generator {{config_output}} \
-		--steps 50000 \
+		--steps 15 \
 		--x-divisions 600 \
 		--json \
-		--span-average-io-steps 50 \
-		--use-python
+		--span-average-io-steps 2 \
+		--python-flowfield-steps 2 \
+		--use-python \
+		--fixed-dt 0.001
 
 run:
 	cargo r -- run-local \

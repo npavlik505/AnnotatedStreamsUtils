@@ -52,6 +52,12 @@ analysis.load_hdf5_vector_field
 # ╔═╡ 82397291-17e1-4fe3-8013-4869ac102ee2
 load_hdf5_vector_field = analysis.load_hdf5_vector_field
 
+# ╔═╡ 4a94a12b-2c2a-4166-9b55-14f5cd0fa514
+pwd()
+
+# ╔═╡ 72281877-92fe-49e8-aee5-5ae524512e15
+Base.Filesystem.abspath("../output/distribute_save/flowfields.h5")
+
 # ╔═╡ 9888ce70-102a-4bfc-8fe5-e52caa42a6f1
 h5file = h5open("../output/distribute_save/flowfields.h5")
 
@@ -66,6 +72,12 @@ size(span_averages)
 
 # ╔═╡ 52c93fe7-87f0-487b-9cf7-cfc86b2e6aa5
 numwrites, nvec, nx, ny, nz = size(state)
+
+# ╔═╡ b73336ba-e435-4616-968d-a90cc3167ee7
+shear_stress = analysis.load_hdf5_2d_series(h5file, "shear_stress")
+
+# ╔═╡ cf91f279-e20e-40c4-a967-f88e2bae82c9
+shear_stress[15,:]
 
 # ╔═╡ 3d57e1af-000d-47a2-b5a1-738d88cc4ecf
 nz
@@ -124,7 +136,8 @@ begin
 	width = height / ny * nx
 	local fig = Figure(resolution=(width,height), dpi=300)
 
-	data = span_averages[1, 2, :, :]
+	# data = span_averages[1, 2, :, :]
+	data = state[1, 1, :, :, 10]
 
 	local ax = Axis(fig[1,1], 
 		title = "Normalized Wall Density",
@@ -251,7 +264,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "7efe9ddddeb3c8f21185cff5176d0674b58a449a"
+project_hash = "61a3a0dfa4d1980865cabf9ade6a4aaa90aaf5af"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1450,11 +1463,15 @@ version = "3.5.0+0"
 # ╠═8a301a53-b256-481e-acab-e92d62d8e083
 # ╠═2c6fbb9a-6cd2-4048-8212-13281b703958
 # ╠═82397291-17e1-4fe3-8013-4869ac102ee2
+# ╠═4a94a12b-2c2a-4166-9b55-14f5cd0fa514
+# ╠═72281877-92fe-49e8-aee5-5ae524512e15
 # ╠═9888ce70-102a-4bfc-8fe5-e52caa42a6f1
 # ╠═0913ce05-3d16-4592-95c9-63a92c8de0ad
 # ╠═c93925f2-c477-44f1-97bf-4f6ac429a1da
 # ╠═36af2f54-4456-48fa-9a38-4ce1f22135aa
 # ╠═52c93fe7-87f0-487b-9cf7-cfc86b2e6aa5
+# ╠═b73336ba-e435-4616-968d-a90cc3167ee7
+# ╠═cf91f279-e20e-40c4-a967-f88e2bae82c9
 # ╠═3d57e1af-000d-47a2-b5a1-738d88cc4ecf
 # ╠═f6b3c778-f4ce-4270-8c1f-4260dfc4659b
 # ╠═99424040-1bb8-4c48-ac59-61cdff8e7a52

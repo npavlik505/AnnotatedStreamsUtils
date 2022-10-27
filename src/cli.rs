@@ -123,6 +123,14 @@ pub(crate) struct ConfigGenerator {
     #[clap(long)]
     /// run the solver with python bindings instead of fortran mode
     pub(crate) use_python: bool,
+
+    /// specify a fixed timestep to use
+    #[clap(long)]
+    pub(crate) fixed_dt: Option<f64>,
+
+    /// how often to export full flowfields to hdf5 files (PYTHON ONLY!)
+    #[clap(long)]
+    pub(crate) python_flowfield_steps: Option<usize>
 }
 
 impl ConfigGenerator {
@@ -155,7 +163,9 @@ impl ConfigGenerator {
             sbli_blowing_bc: 0,
             snapshots_3d: true,
             json: false,
-            use_python: false
+            use_python: false,
+            fixed_dt: None,
+            python_flowfield_steps: None
         }
     }
 
@@ -177,6 +187,8 @@ impl ConfigGenerator {
             sbli_blowing_bc,
             snapshots_3d,
             use_python,
+            fixed_dt,
+            python_flowfield_steps,
             ..
         } = self;
 
@@ -196,7 +208,9 @@ impl ConfigGenerator {
             span_average_io_steps,
             sbli_blowing_bc,
             snapshots_3d,
-            use_python
+            use_python,
+            fixed_dt,
+            python_flowfield_steps,
         }
     }
 }
