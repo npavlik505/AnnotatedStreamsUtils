@@ -130,7 +130,15 @@ pub(crate) struct ConfigGenerator {
 
     /// how often to export full flowfields to hdf5 files (PYTHON ONLY!)
     #[clap(long)]
-    pub(crate) python_flowfield_steps: Option<usize>
+    pub(crate) python_flowfield_steps: Option<usize>,
+
+    /// (currently not well understood): it is required that nymax-wr > y-divisions 
+    #[clap(long, default_value_t = 201)]
+    pub(crate) nymax_wr: usize,
+
+    /// (currently not well understood): it is required that rly-wr > y-length
+    #[clap(long, default_value_t = 2.5)]
+    pub(crate) rly_wr: f64,
 }
 
 impl ConfigGenerator {
@@ -165,7 +173,9 @@ impl ConfigGenerator {
             json: false,
             use_python: false,
             fixed_dt: None,
-            python_flowfield_steps: None
+            python_flowfield_steps: None,
+            rly_wr: 2.5,
+            nymax_wr: 201,
         }
     }
 
@@ -189,6 +199,8 @@ impl ConfigGenerator {
             use_python,
             fixed_dt,
             python_flowfield_steps,
+            rly_wr,
+            nymax_wr,
             ..
         } = self;
 
@@ -211,6 +223,8 @@ impl ConfigGenerator {
             use_python,
             fixed_dt,
             python_flowfield_steps,
+            rly_wr,
+            nymax_wr,
         }
     }
 }

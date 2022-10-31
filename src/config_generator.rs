@@ -110,7 +110,7 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
   {nx}          {ny}        {nz}
  
  Ny_wr(nymax_wr)     Ly_wr(rly_wr)      dy+_w  jbgrid
-  201                   2.5             .7       0
+ {nymax_wr}                   {rly_wr}             .7       0
 
  ng  visc_ord  ep_ord  weno_par (1==>ord_1,2==>ord_3, 3==>ord_5, 4==>ord_7)
   3     6      6       3
@@ -160,7 +160,9 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
         span_average_steps = config.span_average_io_steps,
         sbli_blowing_bc = config.sbli_blowing_bc,
         snapshots_3d = config.snapshots_3d as usize,
-        cfl = cfl
+        cfl = cfl,
+        nymax_wr = config.nymax_wr,
+        rly_wr = config.rly_wr
     );
 
     std::fs::write(&output_path, output.as_bytes())
@@ -181,21 +183,33 @@ pub(crate) struct Config {
     pub(crate) shock_angle: f64,
 
     /// total length in the x direction
+    ///
+    /// in streams, this parameter is rlx
     pub(crate) x_length: f64,
 
     /// total length in the x direction
+    ///
+    /// in streams, this parameter is nxmax
     pub(crate) x_divisions: usize,
 
-    /// total length in the y direction
+    /// total length in the y direction.
+    ///
+    /// in streams, this parameter is rly
     pub(crate) y_length: f64,
 
     /// total length in the y direction
+    ///
+    /// in streams, this parameter is nymax
     pub(crate) y_divisions: usize,
 
     /// total length in the z direction
+    ///
+    /// in streams, this parameter is rlz
     pub(crate) z_length: f64,
 
     /// total length in the z direction
+    ///
+    /// in streams, this parameter is nzmax
     pub(crate) z_divisions: usize,
 
     /// number of MPI divisions along the x axis. The config generated
@@ -238,7 +252,13 @@ pub(crate) struct Config {
     pub(crate) fixed_dt: Option<f64>,
 
     /// how often to export full flowfields to hdf5 files (PYTHON ONLY!)
-    pub(crate) python_flowfield_steps: Option<usize>
+    pub(crate) python_flowfield_steps: Option<usize>,
+
+    /// (currently not well understood): it is required that nymax-wr > y-divisions 
+    pub(crate) nymax_wr: usize,
+
+    /// (currently not well understood): it is required that rly-wr > y-length
+    pub(crate) rly_wr: f64,
 }
 
 impl Config {
@@ -274,12 +294,17 @@ impl Config {
             )));
         }
 
-        // from config file
-        let rly_wr = 2.5;
-        if self.y_length < rly_wr {
+        if self.y_length <= self.rly_wr {
             return Err(ConfigError::Custom(format!(
-                "y-length ({}) must be greater than {}",
-                self.y_length, rly_wr
+                "y-length ({}) must be greater than rly-wr {}",
+                self.y_length, self.rly_wr
+            )));
+        }
+
+        if self.y_divisions <= self.nymax_wr {
+            return Err(ConfigError::Custom(format!(
+                "y-divisions ({}) must be greater than nymax-wr {}",
+                self.y_divisions , self.nymax_wr
             )));
         }
 
