@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.13
+# v0.19.14
 
 using Markdown
 using InteractiveUtils
@@ -31,26 +31,11 @@ function ingredients(path::String)
 	m
 end
 
-# ╔═╡ 759a1541-5618-487b-8eab-fef509010de8
-# ingredients("./src/analysis.jl")
-
 # ╔═╡ 1c484032-7c09-45f0-a50c-95082ac6b921
 analysis = ingredients("./src/analysis.jl").analysis
 
 # ╔═╡ aa909845-6bda-468b-b797-daeb05ad4fb4
 names(analysis)
-
-# ╔═╡ 76f118aa-c488-422c-a5eb-cc2d08830759
-analysis.test()
-
-# ╔═╡ 8a301a53-b256-481e-acab-e92d62d8e083
-analysis.load_hdf5_vector_field
-
-# ╔═╡ 2c6fbb9a-6cd2-4048-8212-13281b703958
-# import .analysis: load_hdf5_vector_field
-
-# ╔═╡ 82397291-17e1-4fe3-8013-4869ac102ee2
-load_hdf5_vector_field = analysis.load_hdf5_vector_field
 
 # ╔═╡ 4a94a12b-2c2a-4166-9b55-14f5cd0fa514
 pwd()
@@ -58,47 +43,35 @@ pwd()
 # ╔═╡ 72281877-92fe-49e8-aee5-5ae524512e15
 Base.Filesystem.abspath("../output/distribute_save/flowfields.h5")
 
-# ╔═╡ 9888ce70-102a-4bfc-8fe5-e52caa42a6f1
-h5file = h5open("../output/distribute_save/flowfields.h5")
+# ╔═╡ 06af6a34-6cf4-448a-9dda-53b2de0ba7eb
+loader = analysis.DataLoader("../output/distribute_save")
 
-# ╔═╡ 0913ce05-3d16-4592-95c9-63a92c8de0ad
-state = load_hdf5_vector_field(h5file, "velocity");
+# ╔═╡ e7cd911e-22ec-46ba-8122-e15e1fb67719
+velocity3d = analysis.velocity3d(loader, true)
+
+# ╔═╡ d6f90d6a-10e8-42ac-b490-a44317891a71
+size(velocity3d)
 
 # ╔═╡ c93925f2-c477-44f1-97bf-4f6ac429a1da
-span_averages = load_hdf5_vector_field(h5file, "span_average")
+span_averages = analysis.span_averages(loader, false);
 
 # ╔═╡ 36af2f54-4456-48fa-9a38-4ce1f22135aa
 size(span_averages)
 
 # ╔═╡ 52c93fe7-87f0-487b-9cf7-cfc86b2e6aa5
-numwrites, nvec, nx, ny, nz = size(state)
+numwrites, nvec, nx, ny, nz = size(velocity3d)
 
 # ╔═╡ b73336ba-e435-4616-968d-a90cc3167ee7
-shear_stress = analysis.load_hdf5_2d_series(h5file, "shear_stress")
+shear_stress = analysis.shear_stress(loader, false)
+
+# ╔═╡ c7c2fc88-27c5-407f-aba7-933cd9715b9e
+span_times = analysis.spans_times(loader, false)
 
 # ╔═╡ cf91f279-e20e-40c4-a967-f88e2bae82c9
 shear_stress[15,:]
 
 # ╔═╡ 3d57e1af-000d-47a2-b5a1-738d88cc4ecf
 nz
-
-# ╔═╡ f6b3c778-f4ce-4270-8c1f-4260dfc4659b
-rho = state[1, 1, :, :, :];
-
-# ╔═╡ 99424040-1bb8-4c48-ac59-61cdff8e7a52
-size(rho)
-
-# ╔═╡ b51b398f-6fb1-4337-93ec-cf65d640c6e2
-rho
-
-# ╔═╡ 449b14c3-0014-42e7-ab73-57c117d2a4f2
-rho_avg = dropdims(sum(rho, dims = 3) / nz, dims=3)
-
-# ╔═╡ d6e36187-3a4b-4172-bfa8-506538154950
-sum(rho, dims=1)
-
-# ╔═╡ b17681ef-fab5-4353-b03f-d5cb1b60c840
-rho_slice = rho[:, :, 1]
 
 # ╔═╡ a6d90dfa-e11c-4d62-97c8-6d43c9e0d962
 lx = 27.
@@ -130,17 +103,23 @@ function animate(save_folder::String, format_name::Function, data::Array{T, 3}):
 	)
 end
 
+# ╔═╡ 2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
+size(span_averages)
+
 # ╔═╡ da6c4d34-25bf-461a-beac-5581213272e9
 begin
 	height = 800.
-	width = height / ny * nx
+	width = (height/2) / ny * nx
 	local fig = Figure(resolution=(width,height), dpi=300)
 
-	# data = span_averages[1, 2, :, :]
-	data = state[1, 1, :, :, 10]
+
+	idx = 70
+	data = span_averages[idx, 2, :, :] ./ span_averages[idx, 1, :, :]
+	data_shear = shear_stress[idx, :]
+	curr_time = span_times[idx]
 
 	local ax = Axis(fig[1,1], 
-		title = "Normalized Wall Density",
+		title = "Span average x velocity t = $curr_time sec",
 		xlabel = "x",
 		ylabel = "y"
 	)
@@ -158,12 +137,33 @@ begin
 	)
 	Colorbar(fig[1,2], plt)
 
+	local ax_shear = Axis(fig[2,1], 
+		title = "wall shear stress",
+		xlabel = "x",
+		ylabel = "τ"
+	)
+
+	scatter!(
+		ax_shear,
+		xgrid,
+		data_shear,
+		markersize = 4
+	)
+
+	ylims!(ax_shear, -.005, 0.018)
+
 	fig
 end
 
 # ╔═╡ 19b6df33-f67e-4677-9b38-89a4aa3ed422
 function export_all(animate::Animate{T}, fig::Makie.Figure, ax::Makie.Axis) where T<: AbstractFloat
 	nwrite, nx, ny = size(animate.data)
+
+	if Base.Filesystem.ispath(animate.save_folder)
+		Base.Filesystem.rm(animate.save_folder, force=true, recursive=true)
+	end
+
+	Base.Filesystem.mkdir(animate.save_folder)
 
 	local maxcolor = max(abs(minimum(data)), abs(maximum(data)))
 	
@@ -191,6 +191,8 @@ function export_all(animate::Animate{T}, fig::Makie.Figure, ax::Makie.Axis) wher
 end
 
 # ╔═╡ 95d691d2-289e-48a0-8261-e06a35c34edc
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 
 	local fig = Figure(resolution=(width,height), dpi=300)
@@ -208,8 +210,11 @@ begin
 
 	export_all(rho_animate, fig, ax)
 end
+  ╠═╡ =#
 
 # ╔═╡ a1139e90-31c7-4eff-b60e-c4f95636b8db
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 
 	local fig = Figure(resolution=(width,height), dpi=300)
@@ -227,21 +232,10 @@ begin
 
 	export_all(u_animate, fig, ax)
 end
+  ╠═╡ =#
 
 # ╔═╡ 88888948-ad23-469b-a2a1-280b85d2d08f
 max(abs(minimum(data)), abs(maximum(data)))
-
-# ╔═╡ bba73ec9-c8e6-4a61-b861-71cff02ca405
-Point2f
-
-# ╔═╡ 87dd5f14-3b47-45b5-b729-8a5d41a67f3c
-begin 
-	local time = Observable(0.0)
-	@lift("$($time)")
-end
-
-# ╔═╡ 93cb1cc2-6c67-474f-9cf1-97b2ab48abad
-rand(Point2f, 10)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1456,29 +1450,20 @@ version = "3.5.0+0"
 # ╠═a524e54e-050a-46d2-ae47-d91b54bf3b2f
 # ╠═72a38c24-8f03-47b8-bce1-604e8a26a19e
 # ╠═c3f5306c-4994-11ed-3c5a-f5804205840d
-# ╠═759a1541-5618-487b-8eab-fef509010de8
 # ╠═1c484032-7c09-45f0-a50c-95082ac6b921
 # ╠═aa909845-6bda-468b-b797-daeb05ad4fb4
-# ╠═76f118aa-c488-422c-a5eb-cc2d08830759
-# ╠═8a301a53-b256-481e-acab-e92d62d8e083
-# ╠═2c6fbb9a-6cd2-4048-8212-13281b703958
-# ╠═82397291-17e1-4fe3-8013-4869ac102ee2
 # ╠═4a94a12b-2c2a-4166-9b55-14f5cd0fa514
 # ╠═72281877-92fe-49e8-aee5-5ae524512e15
-# ╠═9888ce70-102a-4bfc-8fe5-e52caa42a6f1
-# ╠═0913ce05-3d16-4592-95c9-63a92c8de0ad
+# ╠═06af6a34-6cf4-448a-9dda-53b2de0ba7eb
+# ╠═e7cd911e-22ec-46ba-8122-e15e1fb67719
+# ╠═d6f90d6a-10e8-42ac-b490-a44317891a71
 # ╠═c93925f2-c477-44f1-97bf-4f6ac429a1da
 # ╠═36af2f54-4456-48fa-9a38-4ce1f22135aa
 # ╠═52c93fe7-87f0-487b-9cf7-cfc86b2e6aa5
 # ╠═b73336ba-e435-4616-968d-a90cc3167ee7
+# ╠═c7c2fc88-27c5-407f-aba7-933cd9715b9e
 # ╠═cf91f279-e20e-40c4-a967-f88e2bae82c9
 # ╠═3d57e1af-000d-47a2-b5a1-738d88cc4ecf
-# ╠═f6b3c778-f4ce-4270-8c1f-4260dfc4659b
-# ╠═99424040-1bb8-4c48-ac59-61cdff8e7a52
-# ╠═b51b398f-6fb1-4337-93ec-cf65d640c6e2
-# ╠═449b14c3-0014-42e7-ab73-57c117d2a4f2
-# ╠═d6e36187-3a4b-4172-bfa8-506538154950
-# ╠═b17681ef-fab5-4353-b03f-d5cb1b60c840
 # ╠═a6d90dfa-e11c-4d62-97c8-6d43c9e0d962
 # ╠═22cb7ad5-9b24-45c2-b384-8b746a4bb36d
 # ╠═f2b5eac5-f65c-4b1a-8409-cb8e26226dc5
@@ -1488,10 +1473,8 @@ version = "3.5.0+0"
 # ╠═19b6df33-f67e-4677-9b38-89a4aa3ed422
 # ╠═95d691d2-289e-48a0-8261-e06a35c34edc
 # ╠═a1139e90-31c7-4eff-b60e-c4f95636b8db
+# ╠═2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
 # ╠═da6c4d34-25bf-461a-beac-5581213272e9
 # ╠═88888948-ad23-469b-a2a1-280b85d2d08f
-# ╠═bba73ec9-c8e6-4a61-b861-71cff02ca405
-# ╠═87dd5f14-3b47-45b5-b729-8a5d41a67f3c
-# ╠═93cb1cc2-6c67-474f-9cf1-97b2ab48abad
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
