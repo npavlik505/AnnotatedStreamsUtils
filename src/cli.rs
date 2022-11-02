@@ -29,6 +29,8 @@ pub(crate) enum Command {
     /// convert a partial solver folder with span binaries to VTK files.
     /// usually this is performed automatically by the `run-solver` subcommand
     SpansToVtk(SpansToVtk),
+    /// convert a flowfields.h5 file into a series of vtk files
+    HDF5ToVtk(HDF5ToVtk)
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -337,4 +339,15 @@ pub(crate) struct SpansToVtk {
     #[clap(long)]
     /// remove the old binary files after converting to
     pub(crate) clean_binary: bool,
+}
+
+#[derive(Parser, Debug, Clone, Constructor)]
+pub(crate) struct HDF5ToVtk {
+    /// the path to the solver results. 
+    ///
+    /// if run with streams-utils, this will be `./distribute_save` locally. 
+    ///
+    /// This folder should contain a flowfields.h5 file. Results are written to a `vtks` folder
+    /// within solver-results
+    pub(crate) solver_results: PathBuf,
 }

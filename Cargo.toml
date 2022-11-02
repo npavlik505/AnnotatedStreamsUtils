@@ -17,10 +17,11 @@ walkdir = "2.3.2"
 rayon = "1.5.1"
 anyhow = "1.0.65"
 xshell = "0.2.2"
+hdf5 = "0.8.1"
 
 [dependencies.vtk]
 git = "https://github.com/Fluid-Dynamics-Group/vtk"
-rev = "e240643f92d48c123b6ae0bbd62c9b5cfa40c759"
+rev = "843391937497ef9d1ecf29d73be7699a33df5668"
 
 [dependencies.distribute]
 #path = "../distribute"
@@ -32,3 +33,11 @@ features = ["config"]
 [dependencies.mat5]
 git = "https://github.com/Fluid-Dynamics-Group/mat5"
 branch = "master"
+
+[profile.release]
+debug = true
+#
+# TODO: I think this may need to go in a .cargo file
+#[target.x86_64-unknown-linux-gnu]
+#linker = "/usr/bin/clang"
+#rustflags = ["-Clink-arg=-fuse-ld=lld", "-Clink-arg=-Wl,--no-rosegment"]

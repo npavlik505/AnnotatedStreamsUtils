@@ -7,9 +7,9 @@ use vtk::{Field2D, Scalar2D};
 #[vtk_parse(spans = "vtk::Spans2D")]
 /// Information available from a span-wise average of the flowfield
 pub struct SpanVtkInformation {
-    pub(crate) rho: Scalar2D,
-    pub(crate) velocity: Field2D,
-    pub(crate) energy: Scalar2D,
+    pub(crate) rho: Scalar2D<f64>,
+    pub(crate) velocity: Field2D<f64>,
+    pub(crate) energy: Scalar2D<f64>,
 }
 
 #[derive(Debug, thiserror::Error)]

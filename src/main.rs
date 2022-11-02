@@ -9,6 +9,7 @@ mod sbli;
 mod spans_to_vtk;
 mod utils;
 mod vtk_to_mat;
+mod hdf5_to_vtk;
 
 use prelude::*;
 
@@ -27,6 +28,7 @@ fn main() -> anyhow::Result<()> {
         Command::Probe(x) => probe::probe(x)?,
         Command::VtkToMat(x) => vtk_to_mat::vtk_to_mat(x)?,
         Command::SpansToVtk(x) => spans_to_vtk::spans_to_vtk(x)?,
+        Command::HDF5ToVtk(x) => hdf5_to_vtk::hdf5_to_vtk(x)?,
     };
 
     Ok(())

@@ -38,9 +38,9 @@ fn read_mesh_info(path: &Path, ghost_nodes: usize, values: usize) -> Result<Vec<
 /// information on the meshing `dx` `dy` `dz` from the streams output files
 #[derive(mat5::MatFile, Debug)]
 pub(crate) struct MeshInfo {
-    x_data: Vec<f64>,
-    y_data: Vec<f64>,
-    z_data: Vec<f64>,
+    pub(crate) x_data: Vec<f64>,
+    pub(crate) y_data: Vec<f64>,
+    pub(crate) z_data: Vec<f64>,
 }
 
 impl MeshInfo {
@@ -108,7 +108,7 @@ pub(crate) fn convert_spans(
     let spans_folder = data_location.join("spans");
 
     // currently not possible to write arrays in binary for 2D files
-    let mesh = vtk::Mesh2D::<vtk::Ascii>::new(mesh_info.x_data.clone(), mesh_info.y_data.clone());
+    let mesh = vtk::Mesh2D::<_, vtk::Ascii>::new(mesh_info.x_data.clone(), mesh_info.y_data.clone());
 
     let spans = vtk::Spans2D::new(config.x_divisions, config.y_divisions);
     let domain = vtk::Rectilinear2D::new(mesh, spans);

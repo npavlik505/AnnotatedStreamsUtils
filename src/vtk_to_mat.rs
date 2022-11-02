@@ -14,7 +14,7 @@ pub(crate) fn vtk_to_mat(mut args: cli::VtkToMat) -> Result<(), Error> {
     for (idx, file) in args.input_files.into_iter().enumerate() {
         println!("reading {}", file.display());
         let vtk_data: vtk::VtkData<
-            vtk::Rectilinear2D<vtk::Binary>,
+            vtk::Rectilinear2D<f64, vtk::Binary>,
             crate::binary_to_vtk::SpanVtkInformation,
         > = vtk::read_vtk(&file)?;
 
