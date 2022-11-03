@@ -112,6 +112,20 @@ pub(crate) struct ConfigGenerator {
     /// (1) => yes (currently no configuration for the location of the blowing)
     pub(crate) sbli_blowing_bc: usize,
 
+    #[clap(long, default_value_t = -1)]
+    #[arg(requires="slot_end")]
+    /// the x location at which the slot starts blowing
+    ///
+    /// required if slot-end is set
+    pub(crate) slot_start: isize,
+
+    #[clap(long, default_value_t = -1)]
+    #[arg(requires="slot_end")]
+    /// the x location at which the slot stop blowing
+    ///
+    /// required if slot-start is set
+    pub(crate) slot_end: isize,
+
     #[clap(long)]
     /// enable exporting 3D flowfields to VTK files
     ///
@@ -170,7 +184,11 @@ impl ConfigGenerator {
             steps: 50_000,
             probe_io_steps: 0,
             span_average_io_steps: 100,
+            // < blowing BC boundary conditions >
             sbli_blowing_bc: 0,
+            slot_start: -1,
+            slot_end: -1,
+            // < end blowing BC boundary conditions >
             snapshots_3d: true,
             json: false,
             use_python: false,
@@ -203,6 +221,8 @@ impl ConfigGenerator {
             python_flowfield_steps,
             rly_wr,
             nymax_wr,
+            slot_start,
+            slot_end,
             ..
         } = self;
 
@@ -227,8 +247,14 @@ impl ConfigGenerator {
             python_flowfield_steps,
             rly_wr,
             nymax_wr,
+            slot_start,
+            slot_end,
         }
     }
+}
+
+#[derive(Debug, Clone, Parser)]
+pub(crate) struct BlowingSlot {
 }
 
 #[derive(Parser, Debug, Clone)]

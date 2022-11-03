@@ -142,8 +142,8 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
  save_probe_steps save_span_average_steps
     {probe_steps}         {span_average_steps}
 
- sbli_blowing_bc
-    {sbli_blowing_bc}
+ sbli_blowing_bc        slot_start_x_global     slot_start_z_global
+ {sbli_blowing_bc}      {slot_start}            {slot_end}
    "#,
         lx = config.x_length,
         nx = config.x_divisions,
@@ -162,7 +162,9 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
         snapshots_3d = config.snapshots_3d as usize,
         cfl = cfl,
         nymax_wr = config.nymax_wr,
-        rly_wr = config.rly_wr
+        rly_wr = config.rly_wr,
+        slot_start = config.slot_start,
+        slot_end = config.slot_end,
     );
 
     std::fs::write(&output_path, output.as_bytes())
@@ -239,6 +241,10 @@ pub(crate) struct Config {
     /// (0) => no (default BC)
     /// (1) => yes (currently no configuration for the location of the blowing)
     pub(crate) sbli_blowing_bc: usize,
+
+    pub(crate) slot_start: isize,
+
+    pub(crate) slot_end: isize,
 
     /// enable exporting 3D flowfields to VTK files
     ///
