@@ -142,8 +142,8 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
  save_probe_steps save_span_average_steps
     {probe_steps}         {span_average_steps}
 
- sbli_blowing_bc        slot_start_x_global     slot_start_z_global
- {sbli_blowing_bc}      {slot_start}            {slot_end}
+ sbli_blowing_bc        slot_start_x_global     slot_end_x_global
+ {sbli_blowing_bc}              {slot_start}                {slot_end}
    "#,
         lx = config.x_length,
         nx = config.x_divisions,

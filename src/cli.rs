@@ -110,20 +110,24 @@ pub(crate) struct ConfigGenerator {
     ///
     /// (0) => no (default BC)
     /// (1) => yes (currently no configuration for the location of the blowing)
+    #[arg(requires="slot_start")]
+    #[arg(requires="slot_end")]
     pub(crate) sbli_blowing_bc: usize,
 
     #[clap(long, default_value_t = -1)]
     #[arg(requires="slot_end")]
+    #[arg(requires="sbli_blowing_bc")]
     /// the x location at which the slot starts blowing
     ///
-    /// required if slot-end is set
+    /// required if slot-end or sbli-blowing-bc is set
     pub(crate) slot_start: isize,
 
     #[clap(long, default_value_t = -1)]
     #[arg(requires="slot_end")]
+    #[arg(requires="sbli_blowing_bc")]
     /// the x location at which the slot stop blowing
     ///
-    /// required if slot-start is set
+    /// required if slot-start or sbli-blowing-bc is set
     pub(crate) slot_end: isize,
 
     #[clap(long)]

@@ -237,6 +237,54 @@ end
 # ╔═╡ 88888948-ad23-469b-a2a1-280b85d2d08f
 max(abs(minimum(data)), abs(maximum(data)))
 
+# ╔═╡ e4801414-8818-4eb9-a4fd-07b26a781c44
+NX_MAX = 100
+
+# ╔═╡ 47993d3d-2d82-40a5-9bcd-6e76d908f91c
+NX = 25
+
+# ╔═╡ b6f07343-e63f-4ee5-bc39-21d1218ed98c
+function find_slot_params(rank, xg_start, xg_end)
+	mpi_xstart = NX * rank
+	mpi_xend = mpi_xstart + NX
+
+	if (mpi_xstart <= xg_end) && (xg_start <= mpi_xend)
+		true_slot_start = xg_start - mpi_xstart
+		slot_start_local = max(1, true_slot_start)
+		length = xg_end - xg_start
+		slot_end_local = min(true_slot_start + length, NX)
+	else
+		slot_start_local = -1
+		length = 0
+		slot_end_local = -1
+	end
+
+	LEN = mpi_xend - mpi_xstart
+	println("mpi start ", mpi_xstart, " mpi end ", mpi_xend, "(length) ", LEN)
+	println("slot start local is ", slot_start_local)
+	println("slot length is ", length )
+	println("slot end local is ", slot_end_local)
+	
+end
+
+# ╔═╡ cd661476-6ee2-4ba1-85e3-f72fc82eb770
+X_START = 20
+
+# ╔═╡ d4ee70a5-4e12-48cc-aac1-478df764ecd3
+X_END = 21
+
+# ╔═╡ 23697cd2-8ccb-4c76-a0d0-ce264b357a55
+find_slot_params(0, X_START, X_END)
+
+# ╔═╡ 8da26436-cc20-4fb2-9912-6efa77c6cfdf
+find_slot_params(1, X_START, X_END)
+
+# ╔═╡ c4c97865-712b-409c-8682-f569af8823ef
+find_slot_params(2, X_START, X_END)
+
+# ╔═╡ 9975b300-3174-4bfe-83c4-3f93aef4bcf8
+find_slot_params(3, X_START, X_END)
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -1476,5 +1524,14 @@ version = "3.5.0+0"
 # ╠═2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
 # ╠═da6c4d34-25bf-461a-beac-5581213272e9
 # ╠═88888948-ad23-469b-a2a1-280b85d2d08f
+# ╠═b6f07343-e63f-4ee5-bc39-21d1218ed98c
+# ╠═e4801414-8818-4eb9-a4fd-07b26a781c44
+# ╠═47993d3d-2d82-40a5-9bcd-6e76d908f91c
+# ╠═cd661476-6ee2-4ba1-85e3-f72fc82eb770
+# ╠═d4ee70a5-4e12-48cc-aac1-478df764ecd3
+# ╠═23697cd2-8ccb-4c76-a0d0-ce264b357a55
+# ╠═8da26436-cc20-4fb2-9912-6efa77c6cfdf
+# ╠═c4c97865-712b-409c-8682-f569af8823ef
+# ╠═9975b300-3174-4bfe-83c4-3f93aef4bcf8
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
