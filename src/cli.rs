@@ -159,6 +159,18 @@ pub(crate) struct ConfigGenerator {
     /// (currently not well understood): it is required that rly-wr > y-length
     #[clap(long, default_value_t = 2.5)]
     pub(crate) rly_wr: f64,
+
+    #[clap(long)]
+    #[arg(requires="probe_locations_z")]
+    /// X locations for vertical probes (along different values of y) at a (X, _, Z) location. 
+    /// You must provide the same number of x locations here as you do z locations in `--probe-locations-z`
+    pub(crate) probe_locations_x: Vec<usize>,
+
+    #[clap(long)]
+    #[arg(requires="probe_locations_x")]
+    /// Z locations for vertical probes (along different values of y) at a (X, _, Z) location.
+    /// You must provide the same number of z locations here as you do x locations in `--probe-locations-x`
+    pub(crate) probe_locations_z: Vec<usize>,
 }
 
 impl ConfigGenerator {
@@ -200,6 +212,8 @@ impl ConfigGenerator {
             python_flowfield_steps: None,
             rly_wr: 2.5,
             nymax_wr: 201,
+            probe_locations_x: Vec::new(),
+            probe_locations_z: Vec::new(),
         }
     }
 
@@ -227,6 +241,8 @@ impl ConfigGenerator {
             nymax_wr,
             slot_start,
             slot_end,
+            probe_locations_x,
+            probe_locations_z,
             ..
         } = self;
 
@@ -253,6 +269,8 @@ impl ConfigGenerator {
             nymax_wr,
             slot_start,
             slot_end,
+            probe_locations_x,
+            probe_locations_z,
         }
     }
 }
@@ -307,8 +325,8 @@ pub(crate) enum SbliMode {
 
 #[derive(Parser, Debug, Clone)]
 pub(crate) struct RunContainer {
-    /// the number of processes that this program is allowed to use
-    pub(crate) nproc: usize,
+    // no arguments required, the number of MPI processes
+    // allowed is set based on the number required by the input file
 }
 
 #[derive(Parser, Debug, Clone)]

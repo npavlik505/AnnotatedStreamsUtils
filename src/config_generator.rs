@@ -265,6 +265,14 @@ pub(crate) struct Config {
 
     /// (currently not well understood): it is required that rly-wr > y-length
     pub(crate) rly_wr: f64,
+
+    /// X locations for vertical probes (along different values of y) at a (X, _, Z) location. 
+    /// You must provide the same number of x locations here as you do z locations in `--probe-locations-z`
+    pub(crate) probe_locations_x: Vec<usize>,
+
+    /// Z locations for vertical probes (along different values of y) at a (X, _, Z) location.
+    /// You must provide the same number of z locations here as you do x locations in `--probe-locations-x`
+    pub(crate) probe_locations_z: Vec<usize>,
 }
 
 impl Config {
@@ -320,6 +328,16 @@ impl Config {
                 self.y_divisions,
                 self.mpi_x_split,
                 self.y_divisions % self.mpi_x_split
+            )));
+        }
+
+        // make sure that the coordinates of the x probe and z probe make sense. There should
+        // be equal numbers of points for x probes as there are for z probes.
+        if self.probe_locations_x.len() != self.probe_locations_z.len() {
+            return Err(ConfigError::Custom(format!(
+                "There were not equal numbers of probe  locations ( (x,z) coordinates from --probe-locations-x and --probe_locations_z) there were {} x locations and {} locations.",
+                self.probe_locations_x.len(),
+                self.probe_locations_z.len(),
             )));
         }
 

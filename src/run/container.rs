@@ -4,7 +4,7 @@ use super::create_dirs;
 use super::postprocess;
 
 /// running routine for the solver once activated within the container
-pub(crate) fn run_container(args: cli::RunContainer) -> anyhow::Result<()> {
+pub(crate) fn run_container(_args: cli::RunContainer) -> anyhow::Result<()> {
     let start = std::time::Instant::now();
 
     let path = PathBuf::from("/input/input.json");
@@ -42,7 +42,9 @@ pub(crate) fn run_container(args: cli::RunContainer) -> anyhow::Result<()> {
     //
 
     let sh = xshell::Shell::new()?;
-    let nproc = args.nproc.to_string();
+
+    // choose the nproc
+    let nproc = (config.mpi_x_split * 1).to_string();
 
     if config.use_python {
         let runtime_py = PathBuf::from("/runtimesolver/");

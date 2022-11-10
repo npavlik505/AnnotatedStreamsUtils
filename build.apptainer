@@ -104,5 +104,4 @@ From: base.sif
 	echo "finished simple zero copy!"
 
 	# doing the rest of the stuff
-	#/streams-utils run-solver $1
-	/streams-utils run-container  4
+	/streams-utils run-container

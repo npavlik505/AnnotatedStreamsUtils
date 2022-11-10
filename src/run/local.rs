@@ -4,6 +4,7 @@ pub(crate) use anyhow::Result;
 use xshell::{cmd, Shell};
 
 struct Solver {
+    #[allow(dead_code)]
     working_dir: PathBuf,
     input: PathBuf,
     dist_save: PathBuf,
