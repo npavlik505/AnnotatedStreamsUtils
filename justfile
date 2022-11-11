@@ -26,21 +26,14 @@ config_output := "./output/input.json"
 config:
 	echo {{config_output}}
 	cargo r -- config-generator {{config_output}} \
-		--steps 18000 \
+		--steps 50000 \
 		--x-divisions 600 \
 		--y-divisions 208 \
 		--json \
 		--mpi-x-split 4 \
-		--span-average-io-steps 5 \
-		--python-flowfield-steps 99 \
-		--use-python \
-		--slot-start 110 \
-		--slot-end  140 \
-		--sbli-blowing-bc 1 \
-		--probe-locations-x 5 \
-		--probe-locations-z 75 \
-		--probe-locations-x 155 \
-		--probe-locations-z 75
+		--span-average-io-steps 50 \
+		--python-flowfield-steps 1000 \
+		--use-python
 
 run:
 	cargo r -- run-local \

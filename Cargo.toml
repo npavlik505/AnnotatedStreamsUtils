@@ -21,7 +21,7 @@ hdf5 = "0.8.1"
 
 [dependencies.vtk]
 git = "https://github.com/Fluid-Dynamics-Group/vtk"
-rev = "843391937497ef9d1ecf29d73be7699a33df5668"
+rev = "57a18eafc3bade61fcc69cf9959a9bd06e315fda"
 
 [dependencies.distribute]
 #path = "../distribute"

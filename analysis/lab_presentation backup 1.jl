@@ -4,22 +4,22 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 9c3e3ffa-fb9d-4eb4-828e-c68049b2d88c
+# ╔═╡ aa609cf6-5f95-11ed-114a-55b3518a0639
 using HDF5
 
-# ╔═╡ 9171f7c3-b9b8-48bd-b3df-39cc5148d132
-using Reexport
-
-# ╔═╡ a524e54e-050a-46d2-ae47-d91b54bf3b2f
-using Makie
-
-# ╔═╡ 72a38c24-8f03-47b8-bce1-604e8a26a19e
+# ╔═╡ fdac2300-4ff7-404c-8a82-3a66f355508e
 using CairoMakie
 
-# ╔═╡ a6ffab23-ce0d-489d-bd13-b285ba5fe30e
-using JSON
+# ╔═╡ 986c3d32-e2c9-4cd5-93ca-7afca0ed53b2
+using Makie
 
-# ╔═╡ c3f5306c-4994-11ed-3c5a-f5804205840d
+# ╔═╡ a36bdc3e-a8dc-4e72-8a98-38bed9f0d067
+using Reexport
+
+# ╔═╡ c514365f-e5bf-4ca6-bc03-87e81bae9ec9
+using figure_second
+
+# ╔═╡ 1ca72ff0-4bb0-4955-959f-7d4af0614e48
 function ingredients(path::String)
 	# this is from the Julia source code (evalfile in base/loading.jl)
 	# but with the modification that it returns the module instead of the last object
@@ -34,236 +34,21 @@ function ingredients(path::String)
 	m
 end
 
-# ╔═╡ 1c484032-7c09-45f0-a50c-95082ac6b921
+# ╔═╡ 06675671-6be7-47b2-a39c-b777e217f80d
 analysis = ingredients("./src/analysis.jl").analysis
-
-# ╔═╡ aa909845-6bda-468b-b797-daeb05ad4fb4
-names(analysis)
-
-# ╔═╡ 4a94a12b-2c2a-4166-9b55-14f5cd0fa514
-pwd()
-
-# ╔═╡ 72281877-92fe-49e8-aee5-5ae524512e15
-Base.Filesystem.abspath("../output/distribute_save/flowfields.h5")
-
-# ╔═╡ 06af6a34-6cf4-448a-9dda-53b2de0ba7eb
-loader = analysis.DataLoader("../output/distribute_save")
-
-# ╔═╡ e7cd911e-22ec-46ba-8122-e15e1fb67719
-velocity3d = analysis.velocity3d(loader, true); size(velocity3d)
-
-# ╔═╡ c93925f2-c477-44f1-97bf-4f6ac429a1da
-span_averages = analysis.span_averages(loader, false); size(span_averages)
-
-# ╔═╡ 52c93fe7-87f0-487b-9cf7-cfc86b2e6aa5
-numwrites, nvec, nx, ny, nz = size(velocity3d)
-
-# ╔═╡ b73336ba-e435-4616-968d-a90cc3167ee7
-shear_stress = analysis.shear_stress(loader, false); size(shear_stress)
-
-# ╔═╡ c7c2fc88-27c5-407f-aba7-933cd9715b9e
-span_times = analysis.spans_times(loader, false)
-
-# ╔═╡ cf91f279-e20e-40c4-a967-f88e2bae82c9
-shear_stress[15,:]
-
-# ╔═╡ 0c1b229d-0015-4984-a1ac-b8a5b05680fc
-meta = analysis.metadata(loader)
-
-# ╔═╡ 3d57e1af-000d-47a2-b5a1-738d88cc4ecf
-nz
-
-# ╔═╡ a6d90dfa-e11c-4d62-97c8-6d43c9e0d962
-lx = meta["x_length"]
-
-# ╔═╡ 22cb7ad5-9b24-45c2-b384-8b746a4bb36d
-ly = meta["y_length"]
-
-# ╔═╡ f2b5eac5-f65c-4b1a-8409-cb8e26226dc5
-xgrid = range(0, lx, nx);
-
-# ╔═╡ 38e659e3-c391-4d31-b70f-075df4a16e81
-ygrid = range(0, ly, ny)
-
-# ╔═╡ 8f463099-d412-4673-975f-ca18b62bf59f
-struct Animate{T <: AbstractFloat}
-	idx::Int
-	save_folder::String
-	format_name::Function
-	data::Array{T, 3}
-end
-
-# ╔═╡ effbff40-5a43-4429-8007-38d1da37133b
-function animate(save_folder::String, format_name::Function, data::Array{T, 3})::Animate where T <: AbstractFloat
-	return Animate(
-		0,
-		save_folder,
-		format_name,
-		data
-	)
-end
-
-# ╔═╡ 2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
-size(span_averages)
-
-# ╔═╡ da6c4d34-25bf-461a-beac-5581213272e9
-begin
-	height = 400.
-	width = (height) / ny * nx
-	local fig = Figure(resolution=(width,height), dpi=300)
-
-
-	idx = 3600
-	data = span_averages[idx, 2, :, :] #./ span_averages[idx, 1, :, :]
-	data_shear = shear_stress[idx, :]
-	curr_time = span_times[idx]
-
-	local ax = Axis(fig[1,1], 
-		title = "Span average x velocity t = $curr_time sec",
-		xlabel = "x",
-		ylabel = "y"
-	)
-
-	local maxcolor = max(abs(minimum(data)), abs(maximum(data)))
-	println(minimum(data))
-	local plt = contourf!(
-		ax,
-		xgrid,
-		ygrid,
-		data,
-		colormap = :balance,
-		colorrange = (1 - (maxcolor-1), maxcolor),
-		levels=40
-	)
-	Colorbar(fig[1,2], plt)
-
-	# local ax_shear = Axis(fig[2,1], 
-	# 	title = "wall shear stress",
-	# 	xlabel = "x",
-	# 	ylabel = "τ"
-	# )
-
-	# scatter!(
-	# 	ax_shear,
-	# 	xgrid,
-	# 	data_shear,
-	# 	markersize = 4
-	# )
-
-	# ylims!(ax_shear, -.005, 0.018)
-
-	fig
-end
-
-# ╔═╡ 19b6df33-f67e-4677-9b38-89a4aa3ed422
-function export_all(animate::Animate{T}, fig::Makie.Figure, ax::Makie.Axis) where T<: AbstractFloat
-	nwrite, nx, ny = size(animate.data)
-
-	if Base.Filesystem.ispath(animate.save_folder)
-		Base.Filesystem.rm(animate.save_folder, force=true, recursive=true)
-	end
-
-	Base.Filesystem.mkdir(animate.save_folder)
-
-	local maxcolor = max(abs(minimum(data)), abs(maximum(data)))
-	
-	for i in 1:nwrite
-		currslice = animate.data[i, :, :]
-
-		local plt = contourf!(
-			ax,
-			xgrid,
-			ygrid,
-			currslice,
-			colormap = :balance,
-			colorrange = (1 - (maxcolor-1), maxcolor),
-			levels=40
-		)
-
-		if i == 1
-			local color = Colorbar(fig[1,2], plt);
-		end
-
-		Makie.save(animate.save_folder * "/" * animate.format_name(i), fig)
-
-		empty!(ax)
-	end
-end
-
-# ╔═╡ 88888948-ad23-469b-a2a1-280b85d2d08f
-max(abs(minimum(data)), abs(maximum(data)))
-
-# ╔═╡ e4801414-8818-4eb9-a4fd-07b26a781c44
-NX_MAX = 100
-
-# ╔═╡ 47993d3d-2d82-40a5-9bcd-6e76d908f91c
-NX = 25
-
-# ╔═╡ b6f07343-e63f-4ee5-bc39-21d1218ed98c
-function find_slot_params(rank, xg_start, xg_end)
-	mpi_xstart = NX * rank
-	mpi_xend = mpi_xstart + NX
-
-	if (mpi_xstart <= xg_end) && (xg_start <= mpi_xend)
-		true_slot_start = xg_start - mpi_xstart
-		slot_start_local = max(1, true_slot_start)
-		length = xg_end - xg_start
-		slot_end_local = min(true_slot_start + length, NX)
-	else
-		slot_start_local = -1
-		length = 0
-		slot_end_local = -1
-	end
-
-	LEN = mpi_xend - mpi_xstart
-	println("mpi start ", mpi_xstart, " mpi end ", mpi_xend, "(length) ", LEN)
-	println("slot start local is ", slot_start_local)
-	println("slot length is ", length )
-	println("slot end local is ", slot_end_local)
-	
-end
-
-# ╔═╡ cd661476-6ee2-4ba1-85e3-f72fc82eb770
-X_START = 20
-
-# ╔═╡ d4ee70a5-4e12-48cc-aac1-478df764ecd3
-X_END = 21
-
-# ╔═╡ 23697cd2-8ccb-4c76-a0d0-ce264b357a55
-find_slot_params(0, X_START, X_END)
-
-# ╔═╡ 8da26436-cc20-4fb2-9912-6efa77c6cfdf
-find_slot_params(1, X_START, X_END)
-
-# ╔═╡ c4c97865-712b-409c-8682-f569af8823ef
-find_slot_params(2, X_START, X_END)
-
-# ╔═╡ 9975b300-3174-4bfe-83c4-3f93aef4bcf8
-find_slot_params(3, X_START, X_END)
-
-# ╔═╡ 26a36735-c33b-4f28-8187-7bfc675035ea
-
-
-# ╔═╡ 54c97229-67c4-4421-8810-dde98ca997ef
-
-
-# ╔═╡ 40a7f670-3fe2-4d36-9b52-1bb45ee78275
-
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
-JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
-CairoMakie = "~0.9.0"
+CairoMakie = "~0.9.2"
 HDF5 = "~0.16.12"
-JSON = "~0.21.3"
-Makie = "~0.18.0"
+Makie = "~0.18.2"
 Reexport = "~1.2.2"
 """
 
@@ -273,7 +58,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "29befc1c3402be6c1e3482e42f6f2bab2401ff40"
+project_hash = "7efe9ddddeb3c8f21185cff5176d0674b58a449a"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -282,9 +67,9 @@ uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
 version = "1.2.1"
 
 [[deps.AbstractTrees]]
-git-tree-sha1 = "5c0b629df8a5566a06f5fef5100b53ea56e465a0"
+git-tree-sha1 = "52b3b436f8f73133d7bc3a6c71ee7ed6ab2ab754"
 uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
-version = "0.4.2"
+version = "0.4.3"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
@@ -339,9 +124,9 @@ version = "1.0.5"
 
 [[deps.CairoMakie]]
 deps = ["Base64", "Cairo", "Colors", "FFTW", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "SHA", "SnoopPrecompile"]
-git-tree-sha1 = "f53b586e9489163ece213144a5a6417742f0388e"
+git-tree-sha1 = "d5fcc28d94729c8828c7651e81d6b119fe9e87f5"
 uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-version = "0.9.0"
+version = "0.9.2"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -445,15 +230,15 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "04db820ebcfc1e053bd8cbb8d8bccf0ff3ead3f7"
+git-tree-sha1 = "bee795cdeabc7601776abbd6b9aac2ca62429966"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.76"
+version = "0.25.77"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
-git-tree-sha1 = "5158c2b41018c5f7eb1470d558127ac274eca0c9"
+git-tree-sha1 = "c36550cb29cbe373e95b3f40486b9a4148f89ffd"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-version = "0.9.1"
+version = "0.9.2"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
@@ -847,15 +632,15 @@ version = "2022.2.0+0"
 
 [[deps.Makie]]
 deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "InteractiveUtils", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "MiniQhull", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Serialization", "Showoff", "SignedDistanceFields", "SnoopPrecompile", "SparseArrays", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "TriplotBase", "UnicodeFun"]
-git-tree-sha1 = "51e40869d076fbff25ab61d0aa3e198d80176c75"
+git-tree-sha1 = "0462fdf13cfad9fa6f23a2fb41da38e7a2aa4908"
 uuid = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-version = "0.18.0"
+version = "0.18.2"
 
 [[deps.MakieCore]]
 deps = ["Observables"]
-git-tree-sha1 = "b87650f61f85fc2d4fb5923a479dbf05ba65ae4d"
+git-tree-sha1 = "c1885d865632e7f37e5a1489a164f44c54fb80c9"
 uuid = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
-version = "0.5.0"
+version = "0.5.2"
 
 [[deps.MappedArrays]]
 git-tree-sha1 = "e8b359ef06ec72e8c030463fe02efe5527ee5142"
@@ -924,9 +709,9 @@ uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 version = "1.2.0"
 
 [[deps.Observables]]
-git-tree-sha1 = "5a9ea4b9430d511980c01e9f7173739595bbd335"
+git-tree-sha1 = "6862738f9796b3edc1c09d0890afce4eca9e7e93"
 uuid = "510215fc-4207-5dde-b226-833fc4488ee2"
-version = "0.5.2"
+version = "0.5.4"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
@@ -964,9 +749,9 @@ version = "0.8.1+0"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "e60321e3f2616584ff98f0a4f18d98ae6f89bbb3"
+git-tree-sha1 = "f6e9dba33f9f2c44e08a020b0caf6903be540004"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "1.1.17+0"
+version = "1.1.19+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1021,10 +806,10 @@ uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
 version = "1.50.9+0"
 
 [[deps.Parsers]]
-deps = ["Dates"]
-git-tree-sha1 = "6c01a9b494f6d2a9fc180a08b182fcb06f0958a0"
+deps = ["Dates", "SnoopPrecompile"]
+git-tree-sha1 = "cceb0257b662528ecdf0b4b4302eb00e767b38e7"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.4.2"
+version = "2.5.0"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1090,9 +875,9 @@ version = "8.0.1000+0"
 
 [[deps.QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
-git-tree-sha1 = "3c009334f45dfd546a16a57960a821a1a023d241"
+git-tree-sha1 = "97aa253e65b784fd13e83774cadc95b38011d734"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
-version = "2.5.0"
+version = "2.6.0"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
@@ -1248,9 +1033,9 @@ version = "1.0.1"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArraysCore", "Tables"]
-git-tree-sha1 = "8c6ac65ec9ab781af05b08ff305ddc727c25f680"
+git-tree-sha1 = "13237798b407150a6d2e2bce5d793d7d9576e99e"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.12"
+version = "0.6.13"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -1460,46 +1245,13 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═9c3e3ffa-fb9d-4eb4-828e-c68049b2d88c
-# ╠═9171f7c3-b9b8-48bd-b3df-39cc5148d132
-# ╠═a524e54e-050a-46d2-ae47-d91b54bf3b2f
-# ╠═72a38c24-8f03-47b8-bce1-604e8a26a19e
-# ╠═a6ffab23-ce0d-489d-bd13-b285ba5fe30e
-# ╠═c3f5306c-4994-11ed-3c5a-f5804205840d
-# ╠═1c484032-7c09-45f0-a50c-95082ac6b921
-# ╠═aa909845-6bda-468b-b797-daeb05ad4fb4
-# ╠═4a94a12b-2c2a-4166-9b55-14f5cd0fa514
-# ╠═72281877-92fe-49e8-aee5-5ae524512e15
-# ╠═06af6a34-6cf4-448a-9dda-53b2de0ba7eb
-# ╠═e7cd911e-22ec-46ba-8122-e15e1fb67719
-# ╠═c93925f2-c477-44f1-97bf-4f6ac429a1da
-# ╠═52c93fe7-87f0-487b-9cf7-cfc86b2e6aa5
-# ╠═b73336ba-e435-4616-968d-a90cc3167ee7
-# ╠═c7c2fc88-27c5-407f-aba7-933cd9715b9e
-# ╠═cf91f279-e20e-40c4-a967-f88e2bae82c9
-# ╠═0c1b229d-0015-4984-a1ac-b8a5b05680fc
-# ╠═3d57e1af-000d-47a2-b5a1-738d88cc4ecf
-# ╠═a6d90dfa-e11c-4d62-97c8-6d43c9e0d962
-# ╠═22cb7ad5-9b24-45c2-b384-8b746a4bb36d
-# ╠═f2b5eac5-f65c-4b1a-8409-cb8e26226dc5
-# ╠═38e659e3-c391-4d31-b70f-075df4a16e81
-# ╠═8f463099-d412-4673-975f-ca18b62bf59f
-# ╠═effbff40-5a43-4429-8007-38d1da37133b
-# ╠═19b6df33-f67e-4677-9b38-89a4aa3ed422
-# ╠═2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
-# ╠═da6c4d34-25bf-461a-beac-5581213272e9
-# ╠═88888948-ad23-469b-a2a1-280b85d2d08f
-# ╠═b6f07343-e63f-4ee5-bc39-21d1218ed98c
-# ╠═e4801414-8818-4eb9-a4fd-07b26a781c44
-# ╠═47993d3d-2d82-40a5-9bcd-6e76d908f91c
-# ╠═cd661476-6ee2-4ba1-85e3-f72fc82eb770
-# ╠═d4ee70a5-4e12-48cc-aac1-478df764ecd3
-# ╠═23697cd2-8ccb-4c76-a0d0-ce264b357a55
-# ╠═8da26436-cc20-4fb2-9912-6efa77c6cfdf
-# ╠═c4c97865-712b-409c-8682-f569af8823ef
-# ╠═9975b300-3174-4bfe-83c4-3f93aef4bcf8
-# ╠═26a36735-c33b-4f28-8187-7bfc675035ea
-# ╠═54c97229-67c4-4421-8810-dde98ca997ef
-# ╠═40a7f670-3fe2-4d36-9b52-1bb45ee78275
+# ╠═aa609cf6-5f95-11ed-114a-55b3518a0639
+# ╠═fdac2300-4ff7-404c-8a82-3a66f355508e
+# ╠═986c3d32-e2c9-4cd5-93ca-7afca0ed53b2
+# ╠═a36bdc3e-a8dc-4e72-8a98-38bed9f0d067
+# ╠═c514365f-e5bf-4ca6-bc03-87e81bae9ec9
+# ╠═1ca72ff0-4bb0-4955-959f-7d4af0614e48
+# ╠═06675671-6be7-47b2-a39c-b777e217f80d
+# ╠═c98dc6ff-01a8-40ff-96dc-41bdf20e362c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

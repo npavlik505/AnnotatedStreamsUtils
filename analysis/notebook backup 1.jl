@@ -16,9 +16,6 @@ using Makie
 # ╔═╡ 72a38c24-8f03-47b8-bce1-604e8a26a19e
 using CairoMakie
 
-# ╔═╡ a6ffab23-ce0d-489d-bd13-b285ba5fe30e
-using JSON
-
 # ╔═╡ c3f5306c-4994-11ed-3c5a-f5804205840d
 function ingredients(path::String)
 	# this is from the Julia source code (evalfile in base/loading.jl)
@@ -50,16 +47,22 @@ Base.Filesystem.abspath("../output/distribute_save/flowfields.h5")
 loader = analysis.DataLoader("../output/distribute_save")
 
 # ╔═╡ e7cd911e-22ec-46ba-8122-e15e1fb67719
-velocity3d = analysis.velocity3d(loader, true); size(velocity3d)
+velocity3d = analysis.velocity3d(loader, true)
+
+# ╔═╡ d6f90d6a-10e8-42ac-b490-a44317891a71
+size(velocity3d)
 
 # ╔═╡ c93925f2-c477-44f1-97bf-4f6ac429a1da
-span_averages = analysis.span_averages(loader, false); size(span_averages)
+span_averages = analysis.span_averages(loader, false);
+
+# ╔═╡ 36af2f54-4456-48fa-9a38-4ce1f22135aa
+size(span_averages)
 
 # ╔═╡ 52c93fe7-87f0-487b-9cf7-cfc86b2e6aa5
 numwrites, nvec, nx, ny, nz = size(velocity3d)
 
 # ╔═╡ b73336ba-e435-4616-968d-a90cc3167ee7
-shear_stress = analysis.shear_stress(loader, false); size(shear_stress)
+shear_stress = analysis.shear_stress(loader, false)
 
 # ╔═╡ c7c2fc88-27c5-407f-aba7-933cd9715b9e
 span_times = analysis.spans_times(loader, false)
@@ -67,17 +70,14 @@ span_times = analysis.spans_times(loader, false)
 # ╔═╡ cf91f279-e20e-40c4-a967-f88e2bae82c9
 shear_stress[15,:]
 
-# ╔═╡ 0c1b229d-0015-4984-a1ac-b8a5b05680fc
-meta = analysis.metadata(loader)
-
 # ╔═╡ 3d57e1af-000d-47a2-b5a1-738d88cc4ecf
 nz
 
 # ╔═╡ a6d90dfa-e11c-4d62-97c8-6d43c9e0d962
-lx = meta["x_length"]
+lx = 27.
 
 # ╔═╡ 22cb7ad5-9b24-45c2-b384-8b746a4bb36d
-ly = meta["y_length"]
+ly = 6.0
 
 # ╔═╡ f2b5eac5-f65c-4b1a-8409-cb8e26226dc5
 xgrid = range(0, lx, nx);
@@ -108,13 +108,13 @@ size(span_averages)
 
 # ╔═╡ da6c4d34-25bf-461a-beac-5581213272e9
 begin
-	height = 400.
-	width = (height) / ny * nx
+	height = 800.
+	width = (height/2) / ny * nx
 	local fig = Figure(resolution=(width,height), dpi=300)
 
 
 	idx = 3600
-	data = span_averages[idx, 2, :, :] #./ span_averages[idx, 1, :, :]
+	data = span_averages[idx, 3, :, :] #./ span_averages[idx, 1, :, :]
 	data_shear = shear_stress[idx, :]
 	curr_time = span_times[idx]
 
@@ -137,20 +137,20 @@ begin
 	)
 	Colorbar(fig[1,2], plt)
 
-	# local ax_shear = Axis(fig[2,1], 
-	# 	title = "wall shear stress",
-	# 	xlabel = "x",
-	# 	ylabel = "τ"
-	# )
+	local ax_shear = Axis(fig[2,1], 
+		title = "wall shear stress",
+		xlabel = "x",
+		ylabel = "τ"
+	)
 
-	# scatter!(
-	# 	ax_shear,
-	# 	xgrid,
-	# 	data_shear,
-	# 	markersize = 4
-	# )
+	scatter!(
+		ax_shear,
+		xgrid,
+		data_shear,
+		markersize = 4
+	)
 
-	# ylims!(ax_shear, -.005, 0.018)
+	ylims!(ax_shear, -.005, 0.018)
 
 	fig
 end
@@ -241,28 +241,17 @@ find_slot_params(2, X_START, X_END)
 # ╔═╡ 9975b300-3174-4bfe-83c4-3f93aef4bcf8
 find_slot_params(3, X_START, X_END)
 
-# ╔═╡ 26a36735-c33b-4f28-8187-7bfc675035ea
-
-
-# ╔═╡ 54c97229-67c4-4421-8810-dde98ca997ef
-
-
-# ╔═╡ 40a7f670-3fe2-4d36-9b52-1bb45ee78275
-
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
-JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
 CairoMakie = "~0.9.0"
 HDF5 = "~0.16.12"
-JSON = "~0.21.3"
 Makie = "~0.18.0"
 Reexport = "~1.2.2"
 """
@@ -273,7 +262,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "29befc1c3402be6c1e3482e42f6f2bab2401ff40"
+project_hash = "61a3a0dfa4d1980865cabf9ade6a4aaa90aaf5af"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1464,7 +1453,6 @@ version = "3.5.0+0"
 # ╠═9171f7c3-b9b8-48bd-b3df-39cc5148d132
 # ╠═a524e54e-050a-46d2-ae47-d91b54bf3b2f
 # ╠═72a38c24-8f03-47b8-bce1-604e8a26a19e
-# ╠═a6ffab23-ce0d-489d-bd13-b285ba5fe30e
 # ╠═c3f5306c-4994-11ed-3c5a-f5804205840d
 # ╠═1c484032-7c09-45f0-a50c-95082ac6b921
 # ╠═aa909845-6bda-468b-b797-daeb05ad4fb4
@@ -1472,12 +1460,13 @@ version = "3.5.0+0"
 # ╠═72281877-92fe-49e8-aee5-5ae524512e15
 # ╠═06af6a34-6cf4-448a-9dda-53b2de0ba7eb
 # ╠═e7cd911e-22ec-46ba-8122-e15e1fb67719
+# ╠═d6f90d6a-10e8-42ac-b490-a44317891a71
 # ╠═c93925f2-c477-44f1-97bf-4f6ac429a1da
+# ╠═36af2f54-4456-48fa-9a38-4ce1f22135aa
 # ╠═52c93fe7-87f0-487b-9cf7-cfc86b2e6aa5
 # ╠═b73336ba-e435-4616-968d-a90cc3167ee7
 # ╠═c7c2fc88-27c5-407f-aba7-933cd9715b9e
 # ╠═cf91f279-e20e-40c4-a967-f88e2bae82c9
-# ╠═0c1b229d-0015-4984-a1ac-b8a5b05680fc
 # ╠═3d57e1af-000d-47a2-b5a1-738d88cc4ecf
 # ╠═a6d90dfa-e11c-4d62-97c8-6d43c9e0d962
 # ╠═22cb7ad5-9b24-45c2-b384-8b746a4bb36d
@@ -1486,6 +1475,8 @@ version = "3.5.0+0"
 # ╠═8f463099-d412-4673-975f-ca18b62bf59f
 # ╠═effbff40-5a43-4429-8007-38d1da37133b
 # ╠═19b6df33-f67e-4677-9b38-89a4aa3ed422
+# ╠═95d691d2-289e-48a0-8261-e06a35c34edc
+# ╠═a1139e90-31c7-4eff-b60e-c4f95636b8db
 # ╠═2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
 # ╠═da6c4d34-25bf-461a-beac-5581213272e9
 # ╠═88888948-ad23-469b-a2a1-280b85d2d08f
@@ -1498,8 +1489,5 @@ version = "3.5.0+0"
 # ╠═8da26436-cc20-4fb2-9912-6efa77c6cfdf
 # ╠═c4c97865-712b-409c-8682-f569af8823ef
 # ╠═9975b300-3174-4bfe-83c4-3f93aef4bcf8
-# ╠═26a36735-c33b-4f28-8187-7bfc675035ea
-# ╠═54c97229-67c4-4421-8810-dde98ca997ef
-# ╠═40a7f670-3fe2-4d36-9b52-1bb45ee78275
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

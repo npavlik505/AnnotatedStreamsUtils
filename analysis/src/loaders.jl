@@ -1,8 +1,9 @@
 module Loaders
-    export DataLoader, LazyH5, velocity3d, flowfields_times, span_averages, shear_stress, spans_times, dt_history, Flowfield, all_flowfields
+    export DataLoader, LazyH5, velocity3d, flowfields_times, span_averages, shear_stress, spans_times, dt_history, Flowfield, all_flowfields, metadata
     using ..H5Helpers: load_hdf5_vector_field, load_hdf5_scalar_series, load_hdf5_2d_series
     
     import HDF5
+    import JSON
 
     struct DataLoader
         distribute_save::String
@@ -139,5 +140,12 @@ module Loaders
             h5 = HDF5.h5open(path)
             load_hdf5_scalar_series(h5, dset)
         end
+    end
+
+
+    function metadata(loader::DataLoader)
+        json_path = loader.distribute_save * "/input.json"
+        file = open(json_path)
+        return JSON.parse(file)
     end
 end

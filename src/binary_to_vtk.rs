@@ -1,14 +1,14 @@
 use crate::prelude::*;
 use vtk::DataArray;
 use vtk::ParseArray;
-use vtk::{Field2D, Scalar2D};
+use vtk::{Vector2D, Scalar2D};
 
 #[derive(DataArray, ParseArray)]
 #[vtk_parse(spans = "vtk::Spans2D")]
 /// Information available from a span-wise average of the flowfield
 pub struct SpanVtkInformation {
     pub(crate) rho: Scalar2D<f64>,
-    pub(crate) velocity: Field2D<f64>,
+    pub(crate) velocity: Vector2D<f64>,
     pub(crate) energy: Scalar2D<f64>,
 }
 
@@ -95,7 +95,7 @@ pub(crate) fn convert_binary_to_vtk_information(
 
     Ok(SpanVtkInformation {
         rho: Scalar2D::new(rho_arr),
-        velocity: Field2D::new(velocity_arr),
+        velocity: Vector2D::new(velocity_arr),
         energy: Scalar2D::new(energy_arr),
     })
 }

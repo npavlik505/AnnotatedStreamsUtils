@@ -11,7 +11,7 @@ use rayon::prelude::*;
 #[vtk_write(encoding="binary")]
 struct FlowfieldData {
     rho: vtk::Scalar3D<f32>,
-    velocity: vtk::Field3D<f32>,
+    velocity: vtk::Vector3D<f32>,
     energy: vtk::Scalar3D<f32>
 }
 
@@ -79,7 +79,7 @@ pub(crate) fn hdf5_to_vtk(args: cli::HDF5ToVtk) -> Result<()> {
 
     let data = FlowfieldData {
         rho: vtk::Scalar3D::new(rho),
-        velocity: vtk::Field3D::new(velocity),
+        velocity: vtk::Vector3D::new(velocity),
         energy: vtk::Scalar3D::new(energy),
     };
     
