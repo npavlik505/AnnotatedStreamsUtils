@@ -54,3 +54,6 @@ shell:
 # /streams
 local:
 	apptainer shell --nv --bind $STREAMS_DIR:/streams ./streams.sif
+
+vtk:
+	cargo r --release -- hdf5-to-vtk ./output/distribute_save
