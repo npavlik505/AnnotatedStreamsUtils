@@ -1,5 +1,5 @@
 module Loaders
-    export DataLoader, LazyH5, velocity3d, flowfields_times, span_averages, shear_stress, spans_times, dt_history, Flowfield, all_flowfields, metadata
+    export DataLoader, LazyH5, velocity3d, flowfields_times, span_averages, shear_stress, spans_times, dt_history, Flowfield, all_flowfields, metadata, energy, dissipation_rate, Mesh, mesh
     using ..H5Helpers: load_hdf5_vector_field, load_hdf5_scalar_series, load_hdf5_2d_series
     
     import HDF5
@@ -39,6 +39,10 @@ module Loaders
 
     function spans_path(loader::DataLoader)::String
         return loader.distribute_save * "/span_averages.h5"
+    end
+
+    function mesh_path(loader::DataLoader)::String
+        return loader.distribute_save * "/mesh.h5"
     end
 
     #
@@ -125,6 +129,32 @@ module Loaders
         end
     end
 
+    function energy(loader::DataLoader; lazy::Bool=false)::Union{LazyH5, Array{Float32, 1}}
+        path = spans_path(loader)
+        dset = "energy"
+
+        if lazy
+            return LazyH5(path, dset)
+        else
+            # return the full array (probably bad for large datasets)
+            h5 = HDF5.h5open(path)
+            load_hdf5_scalar_series(h5, dset)
+        end
+    end
+
+    function dissipation_rate(loader::DataLoader; lazy::Bool=false)::Union{LazyH5, Array{Float32, 1}}
+        path = spans_path(loader)
+        dset = "dissipation_rate"
+
+        if lazy
+            return LazyH5(path, dset)
+        else
+            # return the full array (probably bad for large datasets)
+            h5 = HDF5.h5open(path)
+            load_hdf5_scalar_series(h5, dset)
+        end
+    end
+
     #
     # loaders for trajectories
     #
@@ -148,4 +178,26 @@ module Loaders
         file = open(json_path)
         return JSON.parse(file)
     end
+
+    #
+    # Loaders for mesh data
+    #
+
+    struct Mesh
+        x::Vector{Float32}
+        y::Vector{Float32}
+        z::Vector{Float32}
+    end
+
+    function mesh(loader::DataLoader)::Mesh
+        path = mesh_path(loader)
+        h5 = HDF5.h5open(path)
+
+        x = load_hdf5_2d_series(h5, "x_grid")[1, :]
+        y = load_hdf5_2d_series(h5, "y_grid")[1, :]
+        z = load_hdf5_2d_series(h5, "z_grid")[1, :]
+
+        return Mesh(x,y,z)
+    end
+
 end

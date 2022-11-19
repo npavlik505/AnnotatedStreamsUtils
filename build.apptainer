@@ -28,17 +28,6 @@ Stage: build
 	# hack to add cargo to path
 	export PATH="$PATH":"$HOME/.cargo/bin"
 
-	# clone the cuda samples directory
-	which nvcc
-	cd /
-	git clone "https://github.com/Fluid-Dynamics-Group/cuda-samples" --depth 1
-	cd /cuda-samples/Samples/0_Introduction/simpleZeroCopy
-	make
-
-	# make streams-utils
-	cd /streams-utils
-	cargo build --release
-
 	# make streams
 	cd /streams/src
 	# replace (in the makefile)
@@ -68,6 +57,17 @@ Stage: build
 	# FFLAGS is also important here so that we get the correct USE_CUDA declarations in mod_streams.F90
 	LDFLAGS="$FLAGS" FFLAGS="$FLAGS" NPY_DISTUTILS_APPEND_FLAGS=1 make f2py
 	ls -al
+
+	# make streams-utils
+	cd /streams-utils
+	cargo build --release
+
+	# clone the cuda samples directory
+	which nvcc
+	cd /
+	git clone "https://github.com/Fluid-Dynamics-Group/cuda-samples" --depth 1
+	cd /cuda-samples/Samples/0_Introduction/simpleZeroCopy
+	make
 
 	# flush the evidence
 	rm /root/.git-credentials

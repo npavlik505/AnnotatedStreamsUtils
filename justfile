@@ -26,12 +26,12 @@ config_output := "./output/input.json"
 config:
 	echo {{config_output}}
 	cargo r -- config-generator {{config_output}} \
-		--steps 50000 \
+		--steps 80000 \
 		--x-divisions 600 \
 		--y-divisions 208 \
 		--json \
 		--mpi-x-split 4 \
-		--span-average-io-steps 50 \
+		--span-average-io-steps 10 \
 		--python-flowfield-steps 1000 \
 		--use-python
 
@@ -53,7 +53,7 @@ shell:
 # and bind your $STREAMS_DIR environment variable to the folder
 # /streams
 local:
-	apptainer shell --nv --bind $STREAMS_DIR:/streams ./streams.sif
+	apptainer shell --nv --bind $STREAMS_DIR:/streams ./base.sif
 
 vtk:
 	cargo r --release -- hdf5-to-vtk ./output/distribute_save
