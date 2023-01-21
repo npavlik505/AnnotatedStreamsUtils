@@ -201,12 +201,17 @@ begin
 	local fig = Figure(resolution=(width,height), dpi=300)
 
 	local idx = 1
+
+	# time slicing indicies
 	local start_idx = 100
 	local end_idx = 1000
-	data = Statistics.mean(span_averages[1:1, 3, :, 1:5], dims=1)
+	local y_slice = [:]
+	data = Statistics.mean(span_averages[start_idx:end_idx, 3, :, y_slice...], dims=1)
 	data = dropdims(data, dims = 1)
 	data_shear = shear_stress[idx, :]
 	curr_time = span_times[idx]
+
+	local data_max = max(maximum(data), abs(minimum(data)))
 
 	local start_time = span_times[start_idx]
 	local end_time = span_times[end_idx]
@@ -223,11 +228,10 @@ begin
 	local plt = contourf!(
 		ax,
 		mesh.x,
-		mesh.y[1:5],
+		mesh.y[y_slice...],
 		data,
 		colormap = :balance,
-		colorrange = (1 - (maxcolor-1), maxcolor),
-		levels=40
+		levels = range(-maxcolor, maxcolor, 100),
 	)
 	Colorbar(fig[1,2], plt)
 
@@ -278,20 +282,8 @@ begin
 	# y
 end
 
-# ╔═╡ 2a6d31f1-d93f-4736-bff3-0389a86c487e
-maximum(span_averages[10, 3, :, 10])
-
-# ╔═╡ 88888948-ad23-469b-a2a1-280b85d2d08f
-max(abs(minimum(data)), abs(maximum(data)))
-
-# ╔═╡ 09d35148-7074-462d-b5c9-384df96f4cc5
-span_averages[1, 3, 100:200, 1] ./ span_averages[1, 1, 100:200, 1]
-
 # ╔═╡ b91c6497-5bde-4488-9d00-94b514f38334
 shear_stress
-
-# ╔═╡ fd206d63-36aa-445f-be47-ec28a33509a3
-Statistics.mean(shear_stress, dims=2)
 
 # ╔═╡ 2c08ac32-fcfa-499e-8811-aa38e86ad975
 integral_shear_stress = Trapz.trapz((mesh.x), shear_stress); size(integral_shear_stress)
@@ -1700,11 +1692,7 @@ version = "3.5.0+0"
 # ╠═e6abf6a4-b05e-4ce3-90d1-dd181512782b
 # ╠═da6c4d34-25bf-461a-beac-5581213272e9
 # ╠═2ecad180-37c3-4278-8886-e8d2ebeff3b7
-# ╠═2a6d31f1-d93f-4736-bff3-0389a86c487e
-# ╠═88888948-ad23-469b-a2a1-280b85d2d08f
-# ╠═09d35148-7074-462d-b5c9-384df96f4cc5
 # ╠═b91c6497-5bde-4488-9d00-94b514f38334
-# ╠═fd206d63-36aa-445f-be47-ec28a33509a3
 # ╠═2c08ac32-fcfa-499e-8811-aa38e86ad975
 # ╠═c211ea51-65ef-4175-be27-2489e2c70c9c
 # ╠═7ab8a183-adb5-4a1f-acf6-ea774639dcdf
