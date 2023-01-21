@@ -39,6 +39,9 @@ pub(crate) struct ConfigGenerator {
     /// path to write the resulting config file to
     pub(crate) output_path: PathBuf,
 
+    /// type of flow to generate
+    pub(crate) flow_type: FlowType,
+
     /// (friction) Reynolds number (Reynolds in input file)
     #[clap(long, default_value_t = 250.0)]
     pub(crate) reynolds_number: f64,
@@ -214,6 +217,7 @@ impl ConfigGenerator {
             nymax_wr: 201,
             probe_locations_x: Vec::new(),
             probe_locations_z: Vec::new(),
+            flow_type: FlowType::ShockBoundaryLayer
         }
     }
 
@@ -243,6 +247,7 @@ impl ConfigGenerator {
             slot_end,
             probe_locations_x,
             probe_locations_z,
+            flow_type,
             ..
         } = self;
 
@@ -271,6 +276,24 @@ impl ConfigGenerator {
             slot_end,
             probe_locations_x,
             probe_locations_z,
+            flow_type
+        }
+    }
+}
+
+#[derive(ValueEnum, Debug, Clone, Serialize, Deserialize)]
+pub(crate) enum FlowType {
+    ChannelFlow,
+    BoundaryLayer,
+    ShockBoundaryLayer
+}
+
+impl FlowType {
+    pub(crate) fn as_streams_int(&self) -> u8 {
+        match &self {
+            Self::ChannelFlow => 0,
+            Self::BoundaryLayer => 1,
+            Self::ShockBoundaryLayer=> 2,
         }
     }
 }

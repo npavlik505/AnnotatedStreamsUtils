@@ -173,7 +173,7 @@ fn sweep_cases(args: SbliCases) -> Result<()> {
             .with_context(|| format!("failed to create file at {}", output_path.display()))?;
 
         // write the case data to a file so that the actual input file can be generated later
-        serde_json::to_writer(file, &case)?;
+        serde_json::to_writer_pretty(file, &case)?;
     }
 
     distribute_gen(&args, input_files)?;
@@ -200,7 +200,7 @@ fn check_blowing_condition(args: SbliCases) -> Result<()> {
         .with_context(|| format!("failed to create file at {}", output_path.display()))?;
 
     // write the case data to a file so that the actual input file can be generated later
-    serde_json::to_writer(file, &case)?;
+    serde_json::to_writer_pretty(file, &case)?;
 
     distribute_gen(&args, vec![output_path])?;
 
@@ -225,7 +225,7 @@ fn check_probes(args: SbliCases) -> Result<()> {
         .with_context(|| format!("failed to create file at {}", output_path.display()))?;
 
     // write the case data to a file so that the actual input file can be generated later
-    serde_json::to_writer(file, &case)?;
+    serde_json::to_writer_pretty(file, &case)?;
 
     distribute_gen(&args, vec![output_path])?;
 
@@ -252,7 +252,7 @@ fn one_case(args: SbliCases) -> Result<()> {
 
 
     // write the case data to a file so that the actual input file can be generated later
-    serde_json::to_writer(file, &case)?;
+    serde_json::to_writer_pretty(file, &case)?;
 
     distribute_gen(&args, vec![output_path])?;
 

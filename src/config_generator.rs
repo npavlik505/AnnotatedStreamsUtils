@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use cli::ConfigGenerator;
+use cli::FlowType;
 
 #[derive(thiserror::Error, Debug, From)]
 pub(crate) enum ConfigError {
@@ -63,7 +64,7 @@ pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
         if json {
             let file = std::fs::File::create(&output_path)
                 .with_context(||format!("failed to create json output file at {}", output_path.display()))?;
-            serde_json::to_writer(file, &config)
+            serde_json::to_writer_pretty(file, &config)
                 .with_context(|| format!("failed to serialize data to json file. This should not happen"))?;
             Ok(())
         } else {
@@ -101,7 +102,7 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
 !=============================================================
 
  flow_type (0==>channel, 1==>BL, 2==>SBLI)
-   2   
+ {flow_type}   
 
   Lx(rlx)             Ly(rly)         Lz(rlz)
   {lx}          {ly}         {lz}
@@ -145,6 +146,7 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
  sbli_blowing_bc        slot_start_x_global     slot_end_x_global
  {sbli_blowing_bc}              {slot_start}                {slot_end}
    "#,
+        flow_type = config.flow_type.as_streams_int(),
         lx = config.x_length,
         nx = config.x_divisions,
         ly = config.y_length,
@@ -177,6 +179,9 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
 pub(crate) struct Config {
     /// (friction) Reynolds number (Reynolds in input file)
     pub(crate) reynolds_number: f64,
+
+    /// type of flow to generate
+    pub(crate) flow_type: FlowType,
 
     /// Mach number (Mach in input file, rm in code)
     pub(crate) mach_number: f64,

@@ -23,17 +23,32 @@ build:
 
 # build a config json file as input to the solver
 config_output := "./output/input.json"
+streams_flow_type := "boundary-layer"
+
 config:
 	echo {{config_output}}
+
+	# 600, 208, 100
+
 	cargo r -- config-generator {{config_output}} \
-		--steps 80000 \
-		--x-divisions 600 \
+		{{streams_flow_type}} \
+		--steps 50000 \
+		--mach-number 0.0 \
+		--x-divisions 300 \
 		--y-divisions 208 \
+		--z-divisions 100 \
 		--json \
+		--x-length 3.0 \
+		--y-length 5.0 \
 		--mpi-x-split 4 \
 		--span-average-io-steps 10 \
 		--python-flowfield-steps 1000 \
+		--slot-start 100 \
+		--slot-end 200 \
+		--sbli-blowing-bc 1 \
 		--use-python
+
+	cat {{config_output}}
 
 run:
 	cargo r -- run-local \

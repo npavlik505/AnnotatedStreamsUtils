@@ -28,6 +28,13 @@ Stage: build
 	# hack to add cargo to path
 	export PATH="$PATH":"$HOME/.cargo/bin"
 
+	## clone the cuda samples directory
+	#which nvcc
+	#cd /
+	#git clone "https://github.com/Fluid-Dynamics-Group/cuda-samples" --depth 1
+	#cd /cuda-samples/Samples/0_Introduction/simpleZeroCopy
+	#make
+
 	# make streams
 	cd /streams/src
 	# replace (in the makefile)
@@ -62,12 +69,6 @@ Stage: build
 	cd /streams-utils
 	cargo build --release
 
-	# clone the cuda samples directory
-	which nvcc
-	cd /
-	git clone "https://github.com/Fluid-Dynamics-Group/cuda-samples" --depth 1
-	cd /cuda-samples/Samples/0_Introduction/simpleZeroCopy
-	make
 
 	# flush the evidence
 	rm /root/.git-credentials
@@ -80,7 +81,7 @@ From: base.sif
 	/streams-utils/target/release/streams-utils /streams-utils
 	/streams/src/streams.exe /streams.exe
 
-	/cuda-samples/bin/x86_64/linux/release/simpleZeroCopy /simpleZeroCopy
+	#/cuda-samples/bin/x86_64/linux/release/simpleZeroCopy /simpleZeroCopy
 
 	# python files to run streams
 	/streams/src/libstreams.cpython-38-x86_64-linux-gnu.so /libstreams.cpython-38-x86_64-linux-gnu.so
@@ -98,10 +99,9 @@ From: base.sif
 	cd /
 	ls -al
 
-	echo "executing zero copy to initialize the gpu"
-	/simpleZeroCopy
-
-	echo "finished simple zero copy!"
+	#echo "executing zero copy to initialize the gpu"
+	#/simpleZeroCopy
+	#echo "finished simple zero copy!"
 
 	# doing the rest of the stuff
 	/streams-utils run-container

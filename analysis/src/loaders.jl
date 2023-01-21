@@ -18,7 +18,8 @@ module Loaders
         h5 = HDF5.h5open(lazy.h5path, "r")
         dset = h5[lazy.dataset_name]
 
-        dset[reverse(slicing)...]
+        tmp = dset[reverse(slicing)...]
+        return permutedims(tmp, reverse(1:ndims(tmp)))
     end
 
     function Base.size(lazy::LazyH5)

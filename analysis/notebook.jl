@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.16
 
 using Markdown
 using InteractiveUtils
@@ -21,6 +21,9 @@ using JSON
 
 # ╔═╡ 3522fd50-ec9b-49bc-a7b6-eab4af5adaa4
 using LaTeXStrings
+
+# ╔═╡ 854b1497-f598-46b7-8bc6-5fd8e07b5487
+using Printf
 
 # ╔═╡ 8fb2a138-2b49-42e1-832e-dcaf1fadfb97
 # using GLMakie
@@ -65,7 +68,7 @@ loader = analysis.DataLoader("../output/distribute_save")
 velocity3d = analysis.velocity3d(loader, true); size(velocity3d)
 
 # ╔═╡ c93925f2-c477-44f1-97bf-4f6ac429a1da
-span_averages = analysis.span_averages(loader, false); size(span_averages)
+span_averages = analysis.span_averages(loader, true); size(span_averages)
 
 # ╔═╡ 52c93fe7-87f0-487b-9cf7-cfc86b2e6aa5
 numwrites, nvec, nx, ny, nz = size(velocity3d)
@@ -135,59 +138,9 @@ function animate(save_folder::String, format_name::Function, data::Array{T, 3}):
 	)
 end
 
-# ╔═╡ 2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
-size(span_averages)
-
-# ╔═╡ da6c4d34-25bf-461a-beac-5581213272e9
-begin
-	height = 400.
-	width = (height) / ny * nx
-	local fig = Figure(resolution=(width,height), dpi=300)
-
-
-	idx = 100
-	data = span_averages[idx, 2, :, :] ./ span_averages[idx, 1, :, :]
-	data_shear = shear_stress[idx, :]
-	curr_time = span_times[idx]
-
-	local ax = Axis(fig[1,1], 
-		title = "Span average x velocity t = $curr_time sec",
-		xlabel = "x",
-		ylabel = "y"
-	)
-
-	local maxcolor = max(abs(minimum(data)), abs(maximum(data)))
-	println(minimum(data))
-	local plt = contourf!(
-		ax,
-		mesh.x,
-		mesh.y,
-		data,
-		colormap = :balance,
-		colorrange = (1 - (maxcolor-1), maxcolor),
-		levels=40
-	)
-	Colorbar(fig[1,2], plt)
-
-	# local ax_shear = Axis(fig[2,1], 
-	# 	title = "wall shear stress",
-	# 	xlabel = "x",
-	# 	ylabel = "τ"
-	# )
-
-	# scatter!(
-	# 	ax_shear,
-	# 	xgrid,
-	# 	data_shear,
-	# 	markersize = 4
-	# )
-
-	# ylims!(ax_shear, -.005, 0.018)
-
-	fig
-end
-
 # ╔═╡ 19b6df33-f67e-4677-9b38-89a4aa3ed422
+# ╠═╡ disabled = true
+#=╠═╡
 function export_all(animate::Animate{T}, fig::Makie.Figure, ax::Makie.Axis) where T<: AbstractFloat
 	nwrite, nx, ny = size(animate.data)
 
@@ -221,57 +174,118 @@ function export_all(animate::Animate{T}, fig::Makie.Figure, ax::Makie.Axis) wher
 		empty!(ax)
 	end
 end
+  ╠═╡ =#
+
+# ╔═╡ 2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
+size(span_averages)
+
+# ╔═╡ 20c6dbb8-8d4a-4d4f-8ca7-290e6a505174
+size(mesh.z)
+
+# ╔═╡ c12ecc52-6618-41af-8a9e-7ab21d9f331c
+size(mesh.y)
+
+# ╔═╡ 6a8cf949-6e90-40c4-a1d9-e0496a81b019
+size(span_averages[1, :, :, :])
+
+# ╔═╡ 57b50107-97a0-4416-ad22-612933e9ba37
+Statistics.mean
+
+# ╔═╡ e6abf6a4-b05e-4ce3-90d1-dd181512782b
+dropdims(Statistics.mean(span_averages[:, 3, :, :], dims=1), dims=1)
+
+# ╔═╡ da6c4d34-25bf-461a-beac-5581213272e9
+begin
+	height = 400.
+	width = (height) / ny * nx
+	local fig = Figure(resolution=(width,height), dpi=300)
+
+	local idx = 1
+	local start_idx = 100
+	local end_idx = 1000
+	data = Statistics.mean(span_averages[1:1, 3, :, 1:5], dims=1)
+	data = dropdims(data, dims = 1)
+	data_shear = shear_stress[idx, :]
+	curr_time = span_times[idx]
+
+	local start_time = span_times[start_idx]
+	local end_time = span_times[end_idx]
+
+	local ax = Axis(fig[1,1], 
+		# title = "Span average y velocity t = $curr_time sec",
+		title = "Span average y velocity, averaged on t ∈ [$start_time, $end_time]",
+		xlabel = "x",
+		ylabel = "y"
+	)
+
+	local maxcolor = max(abs(minimum(data)), abs(maximum(data)))
+	println(minimum(data))
+	local plt = contourf!(
+		ax,
+		mesh.x,
+		mesh.y[1:5],
+		data,
+		colormap = :balance,
+		colorrange = (1 - (maxcolor-1), maxcolor),
+		levels=40
+	)
+	Colorbar(fig[1,2], plt)
+
+	# local ax_shear = Axis(fig[2,1], 
+	# 	title = "wall shear stress",
+	# 	xlabel = "x",
+	# 	ylabel = "τ"
+	# )
+
+	# scatter!(
+	# 	ax_shear,
+	# 	xgrid,
+	# 	data_shear,
+	# 	markersize = 4
+	# )
+
+	# ylims!(ax_shear, -.005, 0.018)
+
+	fig
+end
+
+# ╔═╡ 2ecad180-37c3-4278-8886-e8d2ebeff3b7
+begin
+	local fig = Figure(resolution = (600, 500))
+
+	
+	local indexes = [1, 2, 3]
+	
+	local ax = Axis(fig[1,1], xlabel = "x location", ylabel = "y velocity")
+	local slot_start = 100
+	local slot_end = 200
+
+	for idx in indexes
+		local x = slot_start:slot_end
+		local y = span_averages[idx, 3, x, 2]
+		local time = span_times[idx]
+	
+		scatter!(
+			ax,
+			x,
+			y,
+			label = @sprintf "t = %.2f s" time
+		)
+	end
+
+	axislegend()
+	fig
+	# y
+end
+
+# ╔═╡ 2a6d31f1-d93f-4736-bff3-0389a86c487e
+maximum(span_averages[10, 3, :, 10])
 
 # ╔═╡ 88888948-ad23-469b-a2a1-280b85d2d08f
 max(abs(minimum(data)), abs(maximum(data)))
 
-# ╔═╡ e4801414-8818-4eb9-a4fd-07b26a781c44
-NX_MAX = 100
-
-# ╔═╡ 47993d3d-2d82-40a5-9bcd-6e76d908f91c
-NX = 25
-
-# ╔═╡ b6f07343-e63f-4ee5-bc39-21d1218ed98c
-function find_slot_params(rank, xg_start, xg_end)
-	mpi_xstart = NX * rank
-	mpi_xend = mpi_xstart + NX
-
-	if (mpi_xstart <= xg_end) && (xg_start <= mpi_xend)
-		true_slot_start = xg_start - mpi_xstart
-		slot_start_local = max(1, true_slot_start)
-		length = xg_end - xg_start
-		slot_end_local = min(true_slot_start + length, NX)
-	else
-		slot_start_local = -1
-		length = 0
-		slot_end_local = -1
-	end
-
-	LEN = mpi_xend - mpi_xstart
-	println("mpi start ", mpi_xstart, " mpi end ", mpi_xend, "(length) ", LEN)
-	println("slot start local is ", slot_start_local)
-	println("slot length is ", length )
-	println("slot end local is ", slot_end_local)
-	
-end
-
-# ╔═╡ cd661476-6ee2-4ba1-85e3-f72fc82eb770
-X_START = 20
-
-# ╔═╡ d4ee70a5-4e12-48cc-aac1-478df764ecd3
-X_END = 21
-
-# ╔═╡ 23697cd2-8ccb-4c76-a0d0-ce264b357a55
-find_slot_params(0, X_START, X_END)
-
-# ╔═╡ 8da26436-cc20-4fb2-9912-6efa77c6cfdf
-find_slot_params(1, X_START, X_END)
-
-# ╔═╡ c4c97865-712b-409c-8682-f569af8823ef
-find_slot_params(2, X_START, X_END)
-
-# ╔═╡ 9975b300-3174-4bfe-83c4-3f93aef4bcf8
-find_slot_params(3, X_START, X_END)
+# ╔═╡ 09d35148-7074-462d-b5c9-384df96f4cc5
+span_averages[1, 3, 100:200, 1] ./ span_averages[1, 1, 100:200, 1]
 
 # ╔═╡ b91c6497-5bde-4488-9d00-94b514f38334
 shear_stress
@@ -285,13 +299,16 @@ integral_shear_stress = Trapz.trapz((mesh.x), shear_stress); size(integral_shear
 # ╔═╡ c211ea51-65ef-4175-be27-2489e2c70c9c
 zeros_length_shear = zeros(length(span_times))
 
+# ╔═╡ 7ab8a183-adb5-4a1f-acf6-ea774639dcdf
+ones_length_shear = ones(length(span_times))
+
 # ╔═╡ 6095ab51-32c0-44b7-9650-217f10a39da7
 normalized_integral_shear_stress = integral_shear_stress ./ Statistics.mean(integral_shear_stress)
 
 # ╔═╡ 26a36735-c33b-4f28-8187-7bfc675035ea
 begin
-	local height = 1000
-	local width = 800
+	local height = 800
+	local width = 1000
 	local fig = Figure(resolution = (width, height))
 
 	local ax = Axis3(fig[1,1], 
@@ -300,84 +317,89 @@ begin
 		zlabel = L"D / \overline{D}"
 	)
 
-	scatter!(
+	Emin = 0.97
+	Emax = 1.17
+
+	Emax = maximum(normalized_energy) * 1.02
+	Emin = minimum(normalized_energy) * 0.98
+	
+	shear_max = maximum(normalized_integral_shear_stress) * 1.02
+	shear_min = minimum(normalized_integral_shear_stress) * 0.98
+
+	dissipation_max = maximum(normalized_dissipation_rate) * 1.02
+	dissipation_min = minimum(normalized_dissipation_rate) * 0.4
+
+	xlims!(ax, Emin, Emax)
+	ylims!(ax, shear_min, shear_max)
+	zlims!(ax, dissipation_min, dissipation_max)
+
+	lines!(
 		ax,
 		normalized_energy,
-		normalized_integral_shear_stress,
-		normalized_dissipation_rate
-	)
-
-	fig
-end
-
-# ╔═╡ 54c97229-67c4-4421-8810-dde98ca997ef
-begin
-	local height = 600
-	local width = 600
-	local fig = Figure(resolution = (width, height))
-
-	local ax = Axis(fig[1,1], 
-		xlabel=L"E / \overline{E}",
-		ylabel=L"\tau_w / \overline{\tau_w}",
-		# ylabel=L"\tau_w / \overline{\tau_w}",
-	)
-
-	scatter!(
-		ax,
-		normalized_energy,
-		normalized_integral_shear_stress,
-		# dissipation_rate
-	)
-
-	fig
-end
-
-# ╔═╡ 40a7f670-3fe2-4d36-9b52-1bb45ee78275
-begin
-	local height = 600
-	local width = 600
-	local fig = Figure(resolution = (width, height))
-
-	local ax = Axis(fig[1,1], 
-		xlabel=L"\tau_w / \overline{\tau_w}",
-		ylabel=L"D / \overline{D}",
-		# ylabel=L"\tau_w / \overline{\tau_w}",
-	)
-
-	scatter!(
-		ax,
 		normalized_integral_shear_stress,
 		normalized_dissipation_rate,
-		# dissipation_rate
+		linewidth=4
 	)
 
-	fig
-end
-
-# ╔═╡ 62e97ccc-a3b2-403e-8886-9bd98860fc14
-begin
-	local height = 600
-	local width = 600
-	local fig = Figure(resolution = (width, height))
-
-	local ax = Axis(fig[1,1], 
-		xlabel=L"E / \overline{E}",
-		ylabel=L"D / \overline{D}",
-		# ylabel=L"\tau_w / \overline{\tau_w}",
-	)
-
-	scatter!(
+	# E vs tau
+	lines!(
 		ax,
 		normalized_energy,
-		normalized_dissipation_rate,
+		normalized_integral_shear_stress,
+		ones_length_shear.*dissipation_min,
+		linestyle = :dash,
+		color = :black
 	)
+
+	# E vs D
+	lines!(
+		ax,
+		normalized_energy,
+		ones_length_shear.*shear_max,
+		normalized_dissipation_rate,
+		linestyle = :dash,
+		color = :black
+	)
+
+	# D vs tau
+	lines!(
+		ax,
+		ones_length_shear*Emax,
+		normalized_integral_shear_stress,
+		normalized_dissipation_rate,
+		linestyle = :dash,
+		color = :black
+	)
+
+	function scatter_for_idx(idx)
+		E_ = normalized_energy[idx]
+		tau_ = normalized_integral_shear_stress[idx]
+		D_ = normalized_dissipation_rate[idx]
+	
+		Evals = [E_, E_, E_, Emax]
+		TauVals = [tau_, tau_, shear_max, tau_]
+		DVals = [D_, dissipation_min, D_, D_]
+		return Evals, TauVals, DVals
+	end
+
+	for i in [1, 460, 2000, 8000] 
+		scatter!(
+			ax,
+			scatter_for_idx(i)...,
+			markersize = 20,
+			label = @sprintf "t = %0.2f" span_times[i]
+		)
+	end
+
+	axislegend()
+
 
 	fig
 end
 
 # ╔═╡ cfabcc4b-b414-4f57-aaed-936794c715be
 begin
-	local height = 400
+	local height = 800
 	local width = 800
 	local fig = Figure(resolution = (width, height))
 
@@ -393,8 +415,24 @@ begin
 		integral_shear_stress,
 	)
 
+	local ax = Axis(fig[2,1], 
+		xlabel="time [s]",
+		ylabel=L"\tau_w / \overline{\tau_w}",
+		title = "Normalized integral shear stress over time"
+	)
+	
+	scatter!(
+		ax,
+		span_times,
+		normalized_integral_shear_stress,
+	)
+
+
 	fig
 end
+
+# ╔═╡ cf01bb77-9691-43e0-be5a-98756586aa9f
+Threads.nthreads()
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -404,6 +442,7 @@ HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Trapz = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
@@ -422,9 +461,9 @@ Trapz = "~2.0.3"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.2"
+julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "83d030c3a652233de872e0a79dee19b09b23bccc"
+project_hash = "51c8fb62e64179d5a70c6324e37e4158c458bf2e"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -495,7 +534,7 @@ uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 version = "0.9.0"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
@@ -557,7 +596,7 @@ version = "4.3.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "0.5.2+0"
+version = "1.0.1+0"
 
 [[deps.Contour]]
 git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
@@ -735,9 +774,9 @@ version = "0.21.0+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "fb83fbe02fe57f2c068013aa94bcdf6760d3a7a7"
+git-tree-sha1 = "d3b3624125c1474292d0d8ed0f65554ac37ddb23"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.74.0+1"
+version = "2.74.0+2"
 
 [[deps.Graphics]]
 deps = ["Colors", "LinearAlgebra", "NaNMath"]
@@ -961,9 +1000,9 @@ version = "1.42.0+0"
 
 [[deps.Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "42b62845d70a619f063a7da093d995ec8e15e778"
+git-tree-sha1 = "c7cb1f5d892775ba13767a87c7ada0b980ea0a71"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.1+1"
+version = "1.16.1+2"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1625,7 +1664,8 @@ version = "3.5.0+0"
 # ╠═3522fd50-ec9b-49bc-a7b6-eab4af5adaa4
 # ╠═dfd1aba5-2db1-490a-94a8-ca24fabd7f31
 # ╠═ea91217d-2994-458c-b35d-6c33b810e047
-# ╠═c3f5306c-4994-11ed-3c5a-f5804205840d
+# ╠═854b1497-f598-46b7-8bc6-5fd8e07b5487
+# ╟─c3f5306c-4994-11ed-3c5a-f5804205840d
 # ╠═1c484032-7c09-45f0-a50c-95082ac6b921
 # ╠═aa909845-6bda-468b-b797-daeb05ad4fb4
 # ╠═4a94a12b-2c2a-4166-9b55-14f5cd0fa514
@@ -1653,26 +1693,24 @@ version = "3.5.0+0"
 # ╠═effbff40-5a43-4429-8007-38d1da37133b
 # ╠═19b6df33-f67e-4677-9b38-89a4aa3ed422
 # ╠═2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
+# ╠═20c6dbb8-8d4a-4d4f-8ca7-290e6a505174
+# ╠═c12ecc52-6618-41af-8a9e-7ab21d9f331c
+# ╠═6a8cf949-6e90-40c4-a1d9-e0496a81b019
+# ╠═57b50107-97a0-4416-ad22-612933e9ba37
+# ╠═e6abf6a4-b05e-4ce3-90d1-dd181512782b
 # ╠═da6c4d34-25bf-461a-beac-5581213272e9
+# ╠═2ecad180-37c3-4278-8886-e8d2ebeff3b7
+# ╠═2a6d31f1-d93f-4736-bff3-0389a86c487e
 # ╠═88888948-ad23-469b-a2a1-280b85d2d08f
-# ╠═b6f07343-e63f-4ee5-bc39-21d1218ed98c
-# ╠═e4801414-8818-4eb9-a4fd-07b26a781c44
-# ╠═47993d3d-2d82-40a5-9bcd-6e76d908f91c
-# ╠═cd661476-6ee2-4ba1-85e3-f72fc82eb770
-# ╠═d4ee70a5-4e12-48cc-aac1-478df764ecd3
-# ╠═23697cd2-8ccb-4c76-a0d0-ce264b357a55
-# ╠═8da26436-cc20-4fb2-9912-6efa77c6cfdf
-# ╠═c4c97865-712b-409c-8682-f569af8823ef
-# ╠═9975b300-3174-4bfe-83c4-3f93aef4bcf8
+# ╠═09d35148-7074-462d-b5c9-384df96f4cc5
 # ╠═b91c6497-5bde-4488-9d00-94b514f38334
 # ╠═fd206d63-36aa-445f-be47-ec28a33509a3
 # ╠═2c08ac32-fcfa-499e-8811-aa38e86ad975
 # ╠═c211ea51-65ef-4175-be27-2489e2c70c9c
+# ╠═7ab8a183-adb5-4a1f-acf6-ea774639dcdf
 # ╠═6095ab51-32c0-44b7-9650-217f10a39da7
 # ╠═26a36735-c33b-4f28-8187-7bfc675035ea
-# ╠═54c97229-67c4-4421-8810-dde98ca997ef
-# ╠═40a7f670-3fe2-4d36-9b52-1bb45ee78275
-# ╠═62e97ccc-a3b2-403e-8886-9bd98860fc14
 # ╠═cfabcc4b-b414-4f57-aaed-936794c715be
+# ╠═cf01bb77-9691-43e0-be5a-98756586aa9f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

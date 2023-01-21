@@ -1,126 +1,185 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.16
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ aa609cf6-5f95-11ed-114a-55b3518a0639
-using HDF5
-
-# ╔═╡ fdac2300-4ff7-404c-8a82-3a66f355508e
+# ╔═╡ 040d9d34-95de-11ed-2e1b-2f67315ca806
 using CairoMakie
 
-# ╔═╡ 986c3d32-e2c9-4cd5-93ca-7afca0ed53b2
-using Makie
+# ╔═╡ 3fabe0ad-d965-456e-864b-406c169abb63
+nz = 10
 
-# ╔═╡ a36bdc3e-a8dc-4e72-8a98-38bed9f0d067
-using Reexport
+# ╔═╡ 1ba1ff91-95a5-4d9e-80b6-e99b03751210
+nx_slot_1 = 3
 
-# ╔═╡ 1732fda4-0854-4c6d-99c4-8fa6b276f17d
-using JSON
+# ╔═╡ b48768cd-a71e-44a1-901d-0631722ef4e8
+nx_slot_2 = 0
 
-# ╔═╡ c44ffeb5-3801-4e20-9bb3-6e8645345ff7
-using PyCall
+# ╔═╡ 7d49e384-f593-46f9-ae79-049134ccf90a
+nx = nx_slot_1 + nx_slot_2
 
-# ╔═╡ 1ca72ff0-4bb0-4955-959f-7d4af0614e48
-function ingredients(path::String)
-	# this is from the Julia source code (evalfile in base/loading.jl)
-	# but with the modification that it returns the module instead of the last object
-	name = Symbol(basename(path))
-	m = Module(name)
-	Core.eval(m,
-        Expr(:toplevel,
-             :(eval(x) = $(Expr(:core, :eval))($name, x)),
-             :(include(x) = $(Expr(:top, :include))($name, x)),
-             :(include(mapexpr::Function, x) = $(Expr(:top, :include))(mapexpr, $name, x)),
-             :(include($path))))
-	m
+# ╔═╡ 539092c2-61c8-406e-bda6-fa3424c248c4
+# NX_MPI_NODE = 100
+
+# ╔═╡ f91bfa37-a3c0-4566-8903-5513c2d95128
+# index at which the slot starts globally
+x_start_slot = 100
+
+# ╔═╡ 28d4965b-58e1-4275-a6ea-20e7dd2d5508
+x_end_slot = x_start_slot + nx-1
+
+# ╔═╡ bea97fa9-5a13-4336-94bf-33c6d3b225dd
+x_points = x_start_slot:x_end_slot
+
+# ╔═╡ 6beec302-981d-410b-aa9e-de20595ea630
+md"### Parabola parameters"
+
+# ╔═╡ e4d97231-4ca1-4bb6-88b7-e55371018d52
+const vertex_x = (x_end_slot + x_start_slot) / 2
+
+# ╔═╡ e2f98fb7-552c-4511-8849-3a0bc5160d0e
+const vertex_y = 5
+
+# ╔═╡ fb09541e-5dda-40a8-a616-45455470f8c1
+struct Vertex
+	a
+	vertex_x
+	vertex_y
 end
 
-# ╔═╡ 06675671-6be7-47b2-a39c-b777e217f80d
-analysis = ingredients("./src/analysis.jl").analysis
-
-# ╔═╡ 070d3d3a-71a4-469d-a1bb-66cac0e5cb0f
-figure_second = ingredients("/home/brooks/github/figure-second/julia/figure_second/src/figure_second.jl")
-
-# ╔═╡ 3d23c11e-ba4f-49ee-95b0-fd3ad9f58bc0
-inkscape = updater("/home/brooks/github/fluids-research/presentations/2022.11.08/slide_2.svg")
-
-# ╔═╡ 28c97d3e-2fe8-4dbc-a839-3103f751fb1b
-loader = analysis.DataLoader("../output/distribute_save")
-
-# ╔═╡ 21995ad2-fc68-4bc7-b601-d08056c7a5f0
-span_averages = analysis.span_averages(loader, false)
-
-# ╔═╡ c6388238-c982-4105-8d96-1f2e46c1f431
-shear_stress = analysis.shear_stress(loader, false)
-
-# ╔═╡ 791ab0ee-4466-450b-85a3-639ac9228fa7
-span_times = analysis.spans_times(loader, false)
-
-# ╔═╡ 5bafce88-9bf8-401f-adc8-860bbeca26d6
-meta = analysis.metadata(loader)
-
-# ╔═╡ 5662dfb6-bdbb-4d7d-a475-3f95c8f4ff60
-
-
-# ╔═╡ 8d78ad2a-83b1-4887-a6a3-efcbe72cb6e5
-begin
-	local table = (
-		x = [1,2, 3],
-		height = [440.3, 74.52, 26.40]
-	)
-
-	local fig = Figure(resolution = (600, 600))
-	local ax = Axis(fig[1,1], xticks = (1:3, ["Original speed", "Apply both optimized routines", "parallelize"]), title = "Converting 50 HDF5 flowfields to VTK files", ylabel = "time [s]")
-
-
-	barplot!(
-		ax,
-		table.x,
-		table.height
-	)
-		
-	fig
+# ╔═╡ 39f51d55-28b7-4e1f-9b16-341696a84a80
+struct Polynomial
+	a
+	b
+	c
 end
 
-# ╔═╡ dd7c9514-560c-459b-a96c-4091d1694315
-begin
-	local table = (
-		x = [1,2],
-		height = [163.39, 97.87]
-	)
-
-	local fig = Figure(resolution = (600, 600))
-	local ax = Axis(fig[1,1], xticks = (1:2, ["Writing to temp vector, then file", "Write to buffered file"]), title = "File writing speeds (150 x 150 x 150)", ylabel = "time [ms]")
-
-
-	barplot!(
-		ax,
-		table.x,
-		table.height
-	)
-		
-	fig
+# ╔═╡ 0a67ad0f-8c03-4f5e-947e-c6c8f48a53df
+function poly(p::Vertex, x::Int)
+	return p.a * (x - p.vertex_x)^2 + p.vertex_y
 end
 
-# ╔═╡ b2a31f33-4068-494a-a653-6480c761e01a
+# ╔═╡ 06eea1d7-c0ca-46bf-b369-f534978f90d6
+function poly(p::Polynomial, x::Int)
+	return p.a * x^2 + p.b * x + p.c
+end
+
+# ╔═╡ 023b8cd1-cc1c-4e27-9e02-d25ef50f176c
+# ╠═╡ disabled = true
+#=╠═╡
+# a = (x_end_slot*x_start_slot - vertex_y)/vertex_x^2
+  ╠═╡ =#
+
+# ╔═╡ 3cd48770-375a-4d6e-ab24-3d7fcd7db5f2
+# ╠═╡ disabled = true
+#=╠═╡
+# b = (x_end_slot*x_start_slot - vertex_y + sqrt(-vertex_y*x_end_slot*x_start_slot + vertex_y^2))/(vertex_x*x_end_slot)
+  ╠═╡ =#
+
+# ╔═╡ a3c419fd-4662-41fa-aaa7-91d0069bf8e7
+# ╠═╡ disabled = true
+#=╠═╡
+# c = (x_end_slot*x_start_slot - vertex_y - sqrt(-vertex_y*x_end_slot*x_start_slot + vertex_y^2))/(vertex_x*x_start_slot)
+  ╠═╡ =#
+
+# ╔═╡ d5692c7e-9420-4712-a745-3fe09fd55d3c
+# ╠═╡ disabled = true
+#=╠═╡
+vertex = Vertex(
+	a,
+	vertex_x,
+	vertex_y
+)
+  ╠═╡ =#
+
+# ╔═╡ 0c720d99-c57c-4cec-821a-5a02cb51e509
+a = vertex_y/(vertex_x^2 - vertex_x*x_end_slot - (vertex_x - x_end_slot)*x_start_slot)
+
+# ╔═╡ 4c44da52-381d-491f-9057-842eb290f3d1
+b = -(vertex_y*x_end_slot + vertex_y*x_start_slot)/(vertex_x^2 - vertex_x*x_end_slot - (vertex_x - x_end_slot)*x_start_slot)
+
+# ╔═╡ 7b15c741-c2c6-4954-a3ab-37001d708ce5
+c = vertex_y*x_end_slot*x_start_slot/(vertex_x^2 - vertex_x*x_end_slot - (vertex_x - x_end_slot)*x_start_slot)
+
+# ╔═╡ a3376a36-e809-49d5-bae5-1970ab13ad70
+polynomial = Polynomial(a,b,c)
+
+# ╔═╡ a8323add-c173-4723-8816-725ae6062e85
+# expected_parabola = [poly(vertex, idx) for idx in x_points]
+expected_parabola = [poly(polynomial, idx) for idx in x_points]
+
+# ╔═╡ b5965cb8-ba66-44e7-897b-14cb897821a9
+# poly(vertex, x_start_slot)
+poly(polynomial, x_start_slot)
+
+# ╔═╡ d8282856-75da-41df-8915-3fbdaeb83b4c
+# poly(vertex, x_end_slot)
+poly(polynomial, x_end_slot)
+
+# ╔═╡ e85c7040-603c-445a-b350-2277ef232644
+function calculate_velocity_at_location(
+	current_local_slot_idx::Int, 
+	slot_start_global::Int,
+	mpi_start_global::Int,
+	polynomial::Polynomial
+)::AbstractFloat
+	global_location = mpi_start_global + current_local_slot_idx - 1
+	velocity = poly(polynomial, global_location)
+	
+	return velocity
+end
+
+# ╔═╡ 76a3e333-7365-4aaa-ae59-8c16a65ad75b
 begin
-	table = (
-		x = [1,2, 3],
-		height = [234.94, 93.89, 62.4]
-	)
+	mpi_1 = zeros(nx_slot_1, nz);
+	for i in 1:nx_slot_1
+		local_index = x_start_slot + i - 1
+		velo = calculate_velocity_at_location(local_index, x_start_slot, 1, polynomial)
+		mpi_1[i, :] .= velo
+	end
+	mpi_1
+end
 
-	fig = Figure(res = (500, 300))
-	ax = Axis(fig[1,1], xticks = (1:3, ["original", "native indexing routines", "no bounds checks"]), title = "Array iterator benchmarking (150 x 150 x 150)", ylabel = "time [s]")
+# ╔═╡ 0f3460f6-52d4-4fef-9eb7-ebcc85f1a892
+begin
+	mpi_2 = zeros(nx_slot_2, nz);
+	
+	for i in 1:nx_slot_2
+		local_index = 
+		velo = calculate_velocity_at_location(local_index, x_start_slot, 1, polynomial)
+		mpi_2[i, :] .= velo
+	end
+	mpi_2
+end
 
+# ╔═╡ 83fcc3c7-31fc-4357-b425-1d550342c742
+jet_profile = [mpi_1 ; mpi_2]; size(jet_profile)
 
-	barplot!(
+# ╔═╡ bca1b6a7-a795-4fd1-9ea1-cc93fd216ab4
+begin
+	fig = Figure(resolution = (800, 600))
+	ax = Axis(fig[1,1], title = "jet velocity discretization", xlabel = "x location idx", ylabel = "jet velocity")
+
+	scatter!(
 		ax,
-		table.x,
-		table.height
+		x_points,
+		jet_profile[:, 1],
+		label = "mpi parabola"
 	)
-		
+	
+	scatter!(
+		ax,
+		x_points,
+		expected_parabola,
+		label = "expected parabola",
+		marker = :cross
+	)
+
+
+	axislegend()
+
+
 	fig
 end
 
@@ -128,28 +187,18 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
-JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
-CairoMakie = "~0.10.0"
-HDF5 = "~0.16.12"
-JSON = "~0.21.3"
-Makie = "~0.19.0"
-PyCall = "~1.94.1"
-Reexport = "~1.2.2"
+CairoMakie = "~0.10.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.3"
+julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "dcf97c5874360db62f71da79dd5bddf99b271746"
+project_hash = "aee6c073eeaa2666f78e3c2fc041b621d5117e87"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -158,9 +207,9 @@ uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
 version = "1.2.1"
 
 [[deps.AbstractTrees]]
-git-tree-sha1 = "52b3b436f8f73133d7bc3a6c71ee7ed6ab2ab754"
+git-tree-sha1 = "faa260e4cb5aba097a73fab382dd4b5819d8ec8c"
 uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
-version = "0.4.3"
+version = "0.4.4"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
@@ -213,6 +262,9 @@ git-tree-sha1 = "eb4cb44a499229b3b8426dcfb5dd85333951ff90"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.4.2"
 
+[[deps.CRC32c]]
+uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
+
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
 git-tree-sha1 = "d0b3f8b4ad16cb0a2988c6788646a5e6a17b6b1b"
@@ -221,12 +273,12 @@ version = "1.0.5"
 
 [[deps.CairoMakie]]
 deps = ["Base64", "Cairo", "Colors", "FFTW", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "SHA", "SnoopPrecompile"]
-git-tree-sha1 = "a1889ac0cfd046d62404ac3e0a1cb718575ee017"
+git-tree-sha1 = "439517f69683932a078b2976ca040e21dd18598c"
 uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-version = "0.10.0"
+version = "0.10.1"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
@@ -269,15 +321,15 @@ version = "0.11.4"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "TensorCore"]
-git-tree-sha1 = "d08c20eef1f2cbc6e60fd3612ac4340b89fea322"
+git-tree-sha1 = "600cc5508d66b78aae350f7accdb58763ac18589"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.9.9"
+version = "0.9.10"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
-git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
+git-tree-sha1 = "fc08e5930ee9a4e03f84bfb5211cb54e7769758a"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
-version = "0.12.8"
+version = "0.12.10"
 
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
@@ -288,13 +340,7 @@ version = "4.5.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "0.5.2+0"
-
-[[deps.Conda]]
-deps = ["Downloads", "JSON", "VersionParsing"]
-git-tree-sha1 = "6e47d11ea2776bc5627421d59cdcc1296c058071"
-uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
-version = "1.7.0"
+version = "1.0.1+0"
 
 [[deps.ConstructionBase]]
 deps = ["LinearAlgebra"]
@@ -308,9 +354,9 @@ uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.2"
 
 [[deps.DataAPI]]
-git-tree-sha1 = "e08915633fcb3ea83bf9d6126292e5bc5c739922"
+git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.13.0"
+version = "1.14.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -339,15 +385,15 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "a7756d098cbabec6b3ac44f369f74915e8cfd70a"
+git-tree-sha1 = "74911ad88921455c6afcad1eefa12bd7b1724631"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.79"
+version = "0.25.80"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
-git-tree-sha1 = "c36550cb29cbe373e95b3f40486b9a4148f89ffd"
+git-tree-sha1 = "2fb1e02f2b635d0845df5d7c167fec4dd739b00d"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-version = "0.9.2"
+version = "0.9.3"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
@@ -412,9 +458,9 @@ uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
-git-tree-sha1 = "802bfc139833d2ba893dd9e62ba1767c88d708ae"
+git-tree-sha1 = "9a0472ec2f5409db243160a8b030f94c380167a3"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.13.5"
+version = "0.13.6"
 
 [[deps.FixedPointNumbers]]
 deps = ["Statistics"]
@@ -462,11 +508,17 @@ version = "1.0.10+0"
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
+[[deps.GPUArraysCore]]
+deps = ["Adapt"]
+git-tree-sha1 = "6872f5ec8fd1a38880f027a26739d42dcda6691f"
+uuid = "46192b85-c4d5-4398-a991-12ede77f4527"
+version = "0.1.2"
+
 [[deps.GeoInterface]]
 deps = ["Extents"]
-git-tree-sha1 = "fb28b5dc239d0174d7297310ef7b84a11804dfab"
+git-tree-sha1 = "e315c4f9d43575cf6b4e511259433803c15ebaa2"
 uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
-version = "1.0.1"
+version = "1.1.0"
 
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "GeoInterface", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
@@ -482,9 +534,9 @@ version = "0.21.0+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "fb83fbe02fe57f2c068013aa94bcdf6760d3a7a7"
+git-tree-sha1 = "d3b3624125c1474292d0d8ed0f65554ac37ddb23"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.74.0+1"
+version = "2.74.0+2"
 
 [[deps.Graphics]]
 deps = ["Colors", "LinearAlgebra", "NaNMath"]
@@ -508,18 +560,6 @@ version = "0.9.1"
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
-
-[[deps.HDF5]]
-deps = ["Compat", "HDF5_jll", "Libdl", "Mmap", "Random", "Requires"]
-git-tree-sha1 = "19effd6b5af759c8aaeb9c77f89422d3f975ab65"
-uuid = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
-version = "0.16.12"
-
-[[deps.HDF5_jll]]
-deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "OpenSSL_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "4cc2bb72df6ff40b055295fdef6d92955f9dede8"
-uuid = "0234f1f7-429e-5d53-9886-15a909be8d59"
-version = "1.12.2+2"
 
 [[deps.HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
@@ -591,9 +631,9 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.Interpolations]]
 deps = ["Adapt", "AxisAlgorithms", "ChainRulesCore", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "Requires", "SharedArrays", "SparseArrays", "StaticArrays", "WoodburyMatrices"]
-git-tree-sha1 = "842dd89a6cb75e02e85fdd75c760cdc43f5d6863"
+git-tree-sha1 = "721ec2cf720536ad005cb38f50dbba7b02419a15"
 uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
-version = "0.14.6"
+version = "0.14.7"
 
 [[deps.IntervalSets]]
 deps = ["Dates", "Random", "Statistics"]
@@ -726,9 +766,9 @@ version = "1.42.0+0"
 
 [[deps.Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "42b62845d70a619f063a7da093d995ec8e15e778"
+git-tree-sha1 = "c7cb1f5d892775ba13767a87c7ada0b980ea0a71"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.1+1"
+version = "1.16.1+2"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -768,16 +808,16 @@ uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 version = "0.5.10"
 
 [[deps.Makie]]
-deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "InteractiveUtils", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "MiniQhull", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Serialization", "Setfield", "Showoff", "SignedDistanceFields", "SnoopPrecompile", "SparseArrays", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "TriplotBase", "UnicodeFun"]
-git-tree-sha1 = "7154536d78dcde1c4321b50e0e8dda90995f1f6f"
+deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "Downloads", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "InteractiveUtils", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "MiniQhull", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Setfield", "Showoff", "SignedDistanceFields", "SnoopPrecompile", "SparseArrays", "StableHashTraits", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "TriplotBase", "UnicodeFun"]
+git-tree-sha1 = "20f42c8f4d70a795cb7927d7312b98a255209155"
 uuid = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-version = "0.19.0"
+version = "0.19.1"
 
 [[deps.MakieCore]]
 deps = ["Observables"]
-git-tree-sha1 = "5357b0696f7c245941389995e193c127190d45f8"
+git-tree-sha1 = "c5b3ce048ee73a08bbca1b9f4a776e64257611d5"
 uuid = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
-version = "0.6.0"
+version = "0.6.1"
 
 [[deps.MappedArrays]]
 git-tree-sha1 = "e8b359ef06ec72e8c030463fe02efe5527ee5142"
@@ -812,9 +852,9 @@ version = "0.4.0"
 
 [[deps.Missings]]
 deps = ["DataAPI"]
-git-tree-sha1 = "bf210ce90b6c9eed32d25dbcae1ebc565df2687f"
+git-tree-sha1 = "f66bdc5de519e8f8ae43bdc598782d35a25b1272"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
-version = "1.0.2"
+version = "1.1.0"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
@@ -926,9 +966,9 @@ version = "0.3.17"
 
 [[deps.Packing]]
 deps = ["GeometryBasics"]
-git-tree-sha1 = "1155f6f937fa2b94104162f01fa400e192e4272f"
+git-tree-sha1 = "ec3edfe723df33528e085e632414499f26650501"
 uuid = "19eb6ba3-879d-56ad-ad62-d5c202156566"
-version = "0.4.2"
+version = "0.5.0"
 
 [[deps.PaddedViews]]
 deps = ["OffsetArrays"]
@@ -944,9 +984,9 @@ version = "1.50.9+0"
 
 [[deps.Parsers]]
 deps = ["Dates", "SnoopPrecompile"]
-git-tree-sha1 = "b64719e8b4504983c7fca6cc9db3ebc8acc2a4d6"
+git-tree-sha1 = "8175fc2b118a3755113c8e68084dc1a9e63c61ee"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.5.1"
+version = "2.5.3"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -991,12 +1031,6 @@ deps = ["Distributed", "Printf"]
 git-tree-sha1 = "d7a7aef8f8f2d537104f170139553b14dfe39fe9"
 uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
 version = "1.7.2"
-
-[[deps.PyCall]]
-deps = ["Conda", "Dates", "Libdl", "LinearAlgebra", "MacroTools", "Serialization", "VersionParsing"]
-git-tree-sha1 = "53b8b07b721b77144a0fbbbc2675222ebf40a02d"
-uuid = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-version = "1.94.1"
 
 [[deps.QOI]]
 deps = ["ColorTypes", "FileIO", "FixedPointNumbers"]
@@ -1075,9 +1109,10 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
 
 [[deps.SIMD]]
-git-tree-sha1 = "bc12e315740f3a36a6db85fa2c0212a848bd239e"
+deps = ["SnoopPrecompile"]
+git-tree-sha1 = "8b20084a97b004588125caebf418d8cab9e393d1"
 uuid = "fdea26ae-647d-5447-a871-4b548cad5224"
-version = "3.4.2"
+version = "3.4.4"
 
 [[deps.ScanByte]]
 deps = ["Libdl", "SIMD"]
@@ -1129,9 +1164,10 @@ uuid = "45858cf5-a6b0-47a3-bbea-62219f50df47"
 version = "0.1.2"
 
 [[deps.SnoopPrecompile]]
-git-tree-sha1 = "f604441450a3c0569830946e5b33b78c928e1a85"
+deps = ["Preferences"]
+git-tree-sha1 = "e760a70afdcd461cf01a575947738d359234665c"
 uuid = "66db9d55-30c0-4569-8b51-7e840670fc0c"
-version = "1.0.1"
+version = "1.0.3"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -1152,6 +1188,12 @@ git-tree-sha1 = "d75bda01f8c31ebb72df80a46c88b25d1c79c56d"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "2.1.7"
 
+[[deps.StableHashTraits]]
+deps = ["CRC32c", "Compat", "Dates", "SHA", "Tables", "TupleTools", "UUIDs"]
+git-tree-sha1 = "0b8b801b8f03a329a4e86b44c5e8a7d7f4fe10a3"
+uuid = "c5dd0088-6c3f-4803-b00e-f31a60c170fa"
+version = "0.3.1"
+
 [[deps.StackViews]]
 deps = ["OffsetArrays"]
 git-tree-sha1 = "46e589465204cd0c08b4bd97385e4fa79a0c770c"
@@ -1160,9 +1202,9 @@ version = "0.1.1"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
-git-tree-sha1 = "ffc098086f35909741f71ce21d03dadf0d2bfa76"
+git-tree-sha1 = "6954a456979f23d05085727adb17c4551c19ecd1"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.5.11"
+version = "1.5.12"
 
 [[deps.StaticArraysCore]]
 git-tree-sha1 = "6b7ba252635a5eff6a0b0664a41ee140a1c9e72a"
@@ -1192,10 +1234,10 @@ uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "1.1.1"
 
 [[deps.StructArrays]]
-deps = ["Adapt", "DataAPI", "StaticArraysCore", "Tables"]
-git-tree-sha1 = "13237798b407150a6d2e2bce5d793d7d9576e99e"
+deps = ["Adapt", "DataAPI", "GPUArraysCore", "StaticArraysCore", "Tables"]
+git-tree-sha1 = "b03a3b745aa49b566f128977a7dd1be8711c5e71"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.13"
+version = "0.6.14"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -1235,20 +1277,25 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.TiffImages]]
 deps = ["ColorTypes", "DataStructures", "DocStringExtensions", "FileIO", "FixedPointNumbers", "IndirectArrays", "Inflate", "Mmap", "OffsetArrays", "PkgVersion", "ProgressMeter", "UUIDs"]
-git-tree-sha1 = "f8cd5b95aae14d3d88da725414bdde342457366f"
+git-tree-sha1 = "7e6b0e3e571be0b4dd4d2a9a3a83b65c04351ccc"
 uuid = "731e570b-9d59-4bfa-96dc-6df516fadf69"
-version = "0.6.2"
+version = "0.6.3"
 
 [[deps.TranscodingStreams]]
 deps = ["Random", "Test"]
-git-tree-sha1 = "e4bdc63f5c6d62e80eb1c0043fcc0360d5950ff7"
+git-tree-sha1 = "94f38103c984f89cf77c402f2a68dbd870f8165f"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.9.10"
+version = "0.9.11"
 
 [[deps.TriplotBase]]
 git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
 uuid = "981d1d27-644d-49a2-9326-4793e63143c3"
 version = "0.1.0"
+
+[[deps.TupleTools]]
+git-tree-sha1 = "3c712976c47707ff893cf6ba4354aa14db1d8938"
+uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
+version = "1.3.0"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
@@ -1263,11 +1310,6 @@ git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
 
-[[deps.VersionParsing]]
-git-tree-sha1 = "58d6e80b4ee071f5efd07fda82cb9fbe17200868"
-uuid = "81def892-9a0e-5fdd-b105-ffc91e053289"
-version = "1.3.0"
-
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "de67fa59e33ad156a590055375a30b23c40299d3"
@@ -1276,9 +1318,9 @@ version = "0.5.5"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "58443b63fb7e465a8a7210828c91c08b92132dff"
+git-tree-sha1 = "93c41695bc1c08c46c5899f4fe06d6ead504bb73"
 uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
-version = "2.9.14+0"
+version = "2.10.3+0"
 
 [[deps.XSLT_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgcrypt_jll", "Libgpg_error_jll", "Libiconv_jll", "Pkg", "XML2_jll", "Zlib_jll"]
@@ -1410,24 +1452,37 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═aa609cf6-5f95-11ed-114a-55b3518a0639
-# ╠═fdac2300-4ff7-404c-8a82-3a66f355508e
-# ╠═986c3d32-e2c9-4cd5-93ca-7afca0ed53b2
-# ╠═a36bdc3e-a8dc-4e72-8a98-38bed9f0d067
-# ╠═1732fda4-0854-4c6d-99c4-8fa6b276f17d
-# ╠═c44ffeb5-3801-4e20-9bb3-6e8645345ff7
-# ╠═1ca72ff0-4bb0-4955-959f-7d4af0614e48
-# ╠═06675671-6be7-47b2-a39c-b777e217f80d
-# ╠═070d3d3a-71a4-469d-a1bb-66cac0e5cb0f
-# ╠═3d23c11e-ba4f-49ee-95b0-fd3ad9f58bc0
-# ╠═28c97d3e-2fe8-4dbc-a839-3103f751fb1b
-# ╠═21995ad2-fc68-4bc7-b601-d08056c7a5f0
-# ╠═c6388238-c982-4105-8d96-1f2e46c1f431
-# ╠═791ab0ee-4466-450b-85a3-639ac9228fa7
-# ╠═5bafce88-9bf8-401f-adc8-860bbeca26d6
-# ╠═5662dfb6-bdbb-4d7d-a475-3f95c8f4ff60
-# ╠═8d78ad2a-83b1-4887-a6a3-efcbe72cb6e5
-# ╠═dd7c9514-560c-459b-a96c-4091d1694315
-# ╠═b2a31f33-4068-494a-a653-6480c761e01a
+# ╠═040d9d34-95de-11ed-2e1b-2f67315ca806
+# ╠═3fabe0ad-d965-456e-864b-406c169abb63
+# ╠═1ba1ff91-95a5-4d9e-80b6-e99b03751210
+# ╠═b48768cd-a71e-44a1-901d-0631722ef4e8
+# ╠═7d49e384-f593-46f9-ae79-049134ccf90a
+# ╠═539092c2-61c8-406e-bda6-fa3424c248c4
+# ╠═f91bfa37-a3c0-4566-8903-5513c2d95128
+# ╠═28d4965b-58e1-4275-a6ea-20e7dd2d5508
+# ╠═bea97fa9-5a13-4336-94bf-33c6d3b225dd
+# ╠═6beec302-981d-410b-aa9e-de20595ea630
+# ╠═e4d97231-4ca1-4bb6-88b7-e55371018d52
+# ╠═e2f98fb7-552c-4511-8849-3a0bc5160d0e
+# ╟─fb09541e-5dda-40a8-a616-45455470f8c1
+# ╠═39f51d55-28b7-4e1f-9b16-341696a84a80
+# ╟─0a67ad0f-8c03-4f5e-947e-c6c8f48a53df
+# ╠═06eea1d7-c0ca-46bf-b369-f534978f90d6
+# ╟─023b8cd1-cc1c-4e27-9e02-d25ef50f176c
+# ╟─3cd48770-375a-4d6e-ab24-3d7fcd7db5f2
+# ╟─a3c419fd-4662-41fa-aaa7-91d0069bf8e7
+# ╠═d5692c7e-9420-4712-a745-3fe09fd55d3c
+# ╠═0c720d99-c57c-4cec-821a-5a02cb51e509
+# ╠═4c44da52-381d-491f-9057-842eb290f3d1
+# ╠═7b15c741-c2c6-4954-a3ab-37001d708ce5
+# ╠═a3376a36-e809-49d5-bae5-1970ab13ad70
+# ╠═a8323add-c173-4723-8816-725ae6062e85
+# ╠═b5965cb8-ba66-44e7-897b-14cb897821a9
+# ╠═d8282856-75da-41df-8915-3fbdaeb83b4c
+# ╠═e85c7040-603c-445a-b350-2277ef232644
+# ╠═76a3e333-7365-4aaa-ae59-8c16a65ad75b
+# ╠═0f3460f6-52d4-4fef-9eb7-ebcc85f1a892
+# ╠═83fcc3c7-31fc-4357-b425-1d550342c742
+# ╠═bca1b6a7-a795-4fd1-9ea1-cc93fd216ab4
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
