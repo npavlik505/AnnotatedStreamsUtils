@@ -5,7 +5,7 @@ mod prelude;
 mod probe;
 mod probe_binary;
 mod run;
-mod sbli;
+mod cases;
 mod spans_to_vtk;
 mod utils;
 mod vtk_to_mat;
@@ -21,7 +21,7 @@ fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     match args.mode {
-        Command::Sbli(x) => sbli::sbli_cases(x)?,
+        Command::Cases(x) => cases::cases(x)?,
         Command::ConfigGenerator(x) => config_generator::config_generator(x)?,
         Command::RunContainer(x) => run::run_container(x)?,
         Command::RunLocal(x) => run::run_local(x)?,
@@ -41,7 +41,7 @@ enum Error {
     #[error("{0}")]
     Config(config_generator::ConfigError),
     #[error("{0}")]
-    Sbli(sbli::SbliError),
+    Sbli(cases::SbliError),
     #[error("{0}")]
     SerializationYaml(distribute::serde_yaml::Error),
     #[error("{0}")]

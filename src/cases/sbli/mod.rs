@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use cli::SbliCases;
+use super::check_options_copy_files;
 
 use anyhow::Result;
 
@@ -65,48 +66,6 @@ fn create_cases<T, V, Val>(
     }
 }
 
-/// verify the cli options passed are valid
-///
-/// this includes the file paths are valid, and whether or not to canonicalize the paths
-fn check_options_copy_files(args: &mut cli::SbliCases) -> Result<(), Error> {
-    // if we are not copying over the .sif file (it takes up lots of space)
-    // then lets make sure that the path specified is global and not relative
-    if !args.copy_sif {
-        args.solver_sif = args
-            .solver_sif
-            .canonicalize()
-            .map_err(|e| FileError::new(args.solver_sif.clone(), e))?;
-    }
-
-    if !args.database_bl.exists() {
-        return Err(SbliError::DatabaseBlMissing(args.database_bl.clone()).into());
-    }
-
-    // error if the directory already exists, otherwise create the directory
-    if args.output_directory.exists() {
-        return Err(SbliError::OutputPathExists(args.output_directory.clone()).into());
-    } else {
-        fs::create_dir(&args.output_directory)
-            .map_err(|e| FileError::new(args.output_directory.clone(), e))?;
-    }
-
-    // copy the database_bl file to the output folder we have created
-    let dest_dir = args.output_directory.join("database_bl.dat");
-    fs::copy(&args.database_bl, &dest_dir)
-        .map_err(|e| CopyFile::new(args.database_bl.clone(), dest_dir.clone(), e))
-        .map_err(|e| SbliError::Copy(e))?;
-    args.database_bl = dest_dir;
-
-    // copy the sif file to the output folder (if requested)
-    if args.copy_sif {
-        let dest_dir = args.output_directory.join("streams.sif");
-        fs::copy(&args.solver_sif, &dest_dir)
-            .map_err(|e| CopyFile::new(args.solver_sif.clone(), dest_dir, e))
-            .map_err(|e| SbliError::Copy(e))?;
-    }
-
-    Ok(())
-}
 
 /// generate a sweep over combinations of shock angles and mach numbers
 fn sweep_cases(args: SbliCases) -> Result<()> {
@@ -188,7 +147,7 @@ fn check_blowing_condition(args: SbliCases) -> Result<()> {
         cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
 
     case.steps = 50_000;
-    case.sbli_blowing_bc = 1;
+    case.blowing_bc = cli::JetActuator::Constant { amplitude: 1., slot_start: 100, slot_end: 200};
 
     let output_path = case.output_path.clone();
     let case = case.into_serializable();
@@ -242,14 +201,13 @@ fn one_case(args: SbliCases) -> Result<()> {
     let mut case = case.into_serializable();
 
     case.steps = 30_000;
-    case.sbli_blowing_bc = 0;
+    case.blowing_bc = cli::JetActuator::None;
 
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
 
     let file = fs::File::create(&output_path)
         .with_context(|| format!("failed to create file at {}", output_path.display()))?;
-
 
     // write the case data to a file so that the actual input file can be generated later
     serde_json::to_writer_pretty(file, &case)?;

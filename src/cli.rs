@@ -14,8 +14,9 @@ pub(crate) struct Args {
 
 #[derive(Subcommand, Debug, Clone)]
 pub(crate) enum Command {
-    /// run case generation for SBLI cases
-    Sbli(SbliCases),
+    /// generate distribute compute cases
+    #[command(subcommand)]
+    Cases(Cases),
     /// generate a config file (input.dat) for use in the solver
     ConfigGenerator(ConfigGenerator),
     /// run the solver once inside the apptainer container
@@ -107,31 +108,14 @@ pub(crate) struct ConfigGenerator {
     /// (n >0 => every n steps)
     pub(crate) span_average_io_steps: usize,
 
-    #[clap(long, default_value_t = 0)]
+    //#[clap(long, default_value_t = JetActuator::None)]
+    #[command(subcommand)]
+    //#[clap(long, default_value_t = JetActuator::None)]
     /// whether or not to use blowing boundary condition on the bottom surface
     /// in the sbli case
-    ///
-    /// (0) => no (default BC)
-    /// (1) => yes (currently no configuration for the location of the blowing)
-    #[arg(requires="slot_start")]
-    #[arg(requires="slot_end")]
-    pub(crate) sbli_blowing_bc: usize,
-
-    #[clap(long, default_value_t = -1)]
-    #[arg(requires="slot_end")]
-    #[arg(requires="sbli_blowing_bc")]
-    /// the x location at which the slot starts blowing
-    ///
-    /// required if slot-end or sbli-blowing-bc is set
-    pub(crate) slot_start: isize,
-
-    #[clap(long, default_value_t = -1)]
-    #[arg(requires="slot_end")]
-    #[arg(requires="sbli_blowing_bc")]
-    /// the x location at which the slot stop blowing
-    ///
-    /// required if slot-start or sbli-blowing-bc is set
-    pub(crate) slot_end: isize,
+    ///#[command(requires="slot_start")]
+    //#[command(requires="slot_end")]
+    pub(crate) blowing_bc: JetActuator,
 
     #[clap(long)]
     /// enable exporting 3D flowfields to VTK files
@@ -203,11 +187,7 @@ impl ConfigGenerator {
             steps: 50_000,
             probe_io_steps: 0,
             span_average_io_steps: 100,
-            // < blowing BC boundary conditions >
-            sbli_blowing_bc: 0,
-            slot_start: -1,
-            slot_end: -1,
-            // < end blowing BC boundary conditions >
+            blowing_bc: JetActuator::None,
             snapshots_3d: true,
             json: false,
             use_python: false,
@@ -236,15 +216,13 @@ impl ConfigGenerator {
             steps,
             probe_io_steps,
             span_average_io_steps,
-            sbli_blowing_bc,
+            blowing_bc,
             snapshots_3d,
             use_python,
             fixed_dt,
             python_flowfield_steps,
             rly_wr,
             nymax_wr,
-            slot_start,
-            slot_end,
             probe_locations_x,
             probe_locations_z,
             flow_type,
@@ -265,15 +243,13 @@ impl ConfigGenerator {
             steps,
             probe_io_steps,
             span_average_io_steps,
-            sbli_blowing_bc,
+            blowing_bc,
             snapshots_3d,
             use_python,
             fixed_dt,
             python_flowfield_steps,
             rly_wr,
             nymax_wr,
-            slot_start,
-            slot_end,
             probe_locations_x,
             probe_locations_z,
             flow_type
@@ -298,8 +274,70 @@ impl FlowType {
     }
 }
 
+#[derive(Subcommand, Debug, Clone, Serialize, Deserialize)]
+pub(crate) enum JetActuator {
+    None,
+    /// jet actuator with constant amplitude
+    Constant {
+        #[clap(long)]
+        amplitude: f64,
+        #[clap(long)]
+        /// the x location (index) at which the slot starts blowing
+        ///
+        /// required if slot-end or sbli-blowing-bc is set
+        slot_start: usize,
+        /// the x location (index) at which the slot stop blowing
+        ///
+        /// required if slot-start or sbli-blowing-bc is set
+        slot_end: usize,
+    },
+    /// use RL controller for the jet amplitude
+    Adaptive {
+        #[clap(long)]
+        /// the x location (index) at which the slot starts blowing
+        ///
+        /// required if slot-end or sbli-blowing-bc is set
+        slot_start: usize,
+        /// the x location (index) at which the slot stop blowing
+        ///
+        /// required if slot-start or sbli-blowing-bc is set
+        slot_end: usize,
+    }
+}
+
+impl JetActuator {
+    pub(crate) fn blowing_bc_as_streams_int(&self) -> u8{
+        match &self {
+            Self::None => 0,
+            _ => 1
+        }
+    }
+
+    pub(crate) fn slot_start_as_streams_int(&self) -> i32 {
+        match &self {
+            Self::None => -1,
+            Self::Constant { slot_start, ..} => *slot_start as i32,
+            Self::Adaptive { slot_start, ..} => *slot_start as i32,
+        }
+    }
+
+    pub(crate) fn slot_end_as_streams_int(&self) -> i32 {
+        match &self {
+            Self::None => -1,
+            Self::Constant { slot_end, ..} => *slot_end as i32,
+            Self::Adaptive { slot_end, ..} => *slot_end as i32,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Parser)]
 pub(crate) struct BlowingSlot {
+}
+
+#[derive(Subcommand, Debug, Clone)]
+pub(crate) enum Cases {
+    Sbli(SbliCases),
+    JetValidation(JetValidation),
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -332,6 +370,34 @@ pub(crate) struct SbliCases {
     /// passed the distribute-jobs.yaml file will reference
     /// the solver .sif file that may change at a later time
     pub(crate) copy_sif: bool,
+}
+
+#[derive(Parser, Debug, Clone)]
+pub(crate) struct JetValidation {
+    /// the location where all `distribute` files will
+    /// be written
+    pub(crate) output_directory: PathBuf,
+
+    /// a matrix_id that you want to ping after the jobs are
+    /// finished. Should look like: `@user_id:matrix.org`
+    #[clap(long)]
+    pub(crate) matrix: Option<distribute::OwnedUserId>,
+
+    /// path to the streams .sif file you wish to use
+    /// to run this batch
+    #[clap(long)]
+    pub(crate) solver_sif: PathBuf,
+
+    #[clap(long)]
+    /// copy the .sif file to the output directory so
+    /// that the run can be replicated later. if not
+    /// passed the distribute-jobs.yaml file will reference
+    /// the solver .sif file that may change at a later time
+    pub(crate) copy_sif: bool,
+
+    #[clap(long)]
+    /// number of steps to include in the simulation
+    pub(crate) steps: usize
 }
 
 #[derive(Debug, Clone, Parser, ValueEnum)]
