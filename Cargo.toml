@@ -12,12 +12,13 @@ derive_more = "0.99.17"
 ndarray = "0.15.4"
 serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"
-thiserror = "1.0.37"
+thiserror = "1.0.38"
 walkdir = "2.3.2"
 rayon = "1.5.1"
 anyhow = "1.0.65"
 xshell = "0.2.2"
 hdf5 = "0.8.1"
+itertools = "0.10.5"
 
 [dependencies.vtk]
 git = "https://github.com/Fluid-Dynamics-Group/vtk"
@@ -26,8 +27,8 @@ rev = "57a18eafc3bade61fcc69cf9959a9bd06e315fda"
 [dependencies.distribute]
 #path = "../distribute"
 git = "https://github.com/Fluid-Dynamics-Group/distribute"
-rev = "46271558d633bd8b8ffc6853b67aacf0b5b0d060"
-default-features = false
+rev = "6fb2f4131013d18073d2c997ea4e719b23387c6e"
+default_features = false
 features = ["config"]
 
 [dependencies.mat5]

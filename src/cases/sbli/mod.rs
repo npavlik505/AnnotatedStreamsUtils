@@ -230,6 +230,7 @@ fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> anyhow::R
         .unwrap()
         .to_string_lossy()
         .to_string();
+
     let meta = distribute::Meta {
         batch_name,
         namespace: "streams_sbli".into(),
@@ -240,7 +241,9 @@ fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> anyhow::R
     // initialization specification
     let mounts = vec![];
     let init = distribute::apptainer::Initialize::new(
-        args.solver_sif.clone(),
+        distribute::common::File::new(
+            args.solver_sif.clone()
+        )?,
         vec![distribute::common::File::with_alias(
             &args.database_bl,
             "database_bl.dat",

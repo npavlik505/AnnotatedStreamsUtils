@@ -50,10 +50,10 @@ pub(crate) fn run_container(_args: cli::RunContainer) -> anyhow::Result<()> {
         let runtime_py = PathBuf::from("/runtimesolver/");
         let static_py = PathBuf::from("/python/");
 
-        let solver_py = if runtime_py.exists() { 
+        let solver_py = if runtime_py.exists() {
             println!("running python bindings with runtime solver");
             runtime_py
-        } else { 
+        } else {
             println!("running static python bindings");
             static_py 
         };

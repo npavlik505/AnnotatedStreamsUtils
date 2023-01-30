@@ -35,20 +35,42 @@ config:
 		--steps 50000 \
 		--mach-number 0.0 \
 		--x-divisions 300 \
-		--y-divisions 208 \
+		--y-divisions 508 \
 		--z-divisions 100 \
 		--json \
 		--x-length 3.0 \
 		--y-length 5.0 \
-		--mpi-x-split 4 \
+		--mpi-x-split 1 \
 		--span-average-io-steps 10 \
 		--python-flowfield-steps 1000 \
-		--slot-start 100 \
-		--slot-end 200 \
-		--sbli-blowing-bc 1 \
-		--use-python
+		--use-python \
+		--sensor-threshold 0.1 \
+		constant \
+			--amplitude 1.0 \
+			--slot-end 200 \
+			--slot-start 100
 
 	cat {{config_output}}
+
+jet_validation_base_path := "./distribute/jet_validation/"
+
+jet_validation_number := "03"
+jet_validation_batch_name := "jet_validation_" + jet_validation_number
+jet_valiation_output_folder := jet_validation_base_path + jet_validation_batch_name
+
+jet_validation:
+	echo {{jet_valiation_output_folder}}
+
+	# 600, 208, 100
+	#--steps 10000 \
+
+	cargo r -- cases jet-validation \
+		{{jet_valiation_output_folder}} \
+		--batch-name {{jet_validation_batch_name}} \
+		--solver-sif ./streams.sif \
+		--steps 10 \
+		--database-bl $STREAMS_DIR/examples/supersonic_sbli/database_bl.dat \
+		--matrix @karlik:matrix.org
 
 run:
 	cargo r -- run-local \

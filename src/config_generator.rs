@@ -42,7 +42,7 @@ pub(crate) struct Memory {
     required_memory: Megabytes,
 }
 
-#[derive(Debug, Display, PartialEq, PartialOrd)]
+#[derive(Debug, Display, PartialEq, PartialOrd, Clone, Copy)]
 #[display(fmt = "{} Mb", _0)]
 pub(crate) struct Megabytes(pub(crate) usize);
 
@@ -120,7 +120,7 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
  {mpi_x_split}               1 
 
  sensor_threshold   xshock_imp   deflec_shock    pgrad (0==>constant bulk)
-  0.1               15.             {angle}              0.
+  {shock_sensitivity}               15.             {angle}              0.
       
  restart   num_iter   cfl   dt_control  print_control  io_type
    0        {steps}      {cfl}      1       1              2
@@ -167,6 +167,7 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
         rly_wr = config.rly_wr,
         slot_start = config.blowing_bc.slot_start_as_streams_int(),
         slot_end = config.blowing_bc.slot_end_as_streams_int(),
+        shock_sensitivity = config.sensor_threshold
     );
 
     std::fs::write(&output_path, output.as_bytes())
@@ -271,6 +272,10 @@ pub(crate) struct Config {
     /// Z locations for vertical probes (along different values of y) at a (X, _, Z) location.
     /// You must provide the same number of z locations here as you do x locations in `--probe-locations-x`
     pub(crate) probe_locations_z: Vec<usize>,
+
+    /// shock capturing sensor threshold. x < 1 enables it (lower is more sensitive), x >= 1
+    /// disables it
+    pub(crate) sensor_threshold: f64,
 }
 
 impl Config {
@@ -366,6 +371,22 @@ impl Config {
         if gpu_mem_required > max_gpu_mem {
             return Err(Memory::new(gpu_mem_required, max_gpu_mem).into());
         }
+
+        Ok(())
+    }
+
+    pub(crate) fn to_writer<W: Write>(&self, writer: &mut W) -> anyhow::Result<()> {
+        serde_json::to_writer_pretty(writer, self)?;
+        Ok(())
+    }
+
+    pub(crate) fn to_file<T: AsRef<Path>>(&self, path: T) -> anyhow::Result<()> {
+        let path = path.as_ref().to_owned();
+        let mut file = std::fs::File::create(&path)
+            .with_context(|| format!("failed to serialize create file at {} for config", path.display()))?;
+
+        self.to_writer(&mut file)
+            .with_context(|| format!("failed to serialize config to file at path {}", path.display()))?;
 
         Ok(())
     }

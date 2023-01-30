@@ -62,6 +62,45 @@ impl PrepareDistribute for cli::SbliCases {
     }
 }
 
+impl PrepareDistribute for cli::JetValidation {
+    fn sif_path(&self) -> &Path {
+        &self.solver_sif
+    }
+
+    fn update_solver_sif(&mut self, new_path: PathBuf) {
+        self.solver_sif = new_path;
+    }
+
+    fn output_directory(&self) -> &Path {
+        &self.output_directory
+    }
+    fn should_copy_sif(&self) -> bool {
+        self.copy_sif
+    }
+    fn setup_output_directory(&mut self) -> Result<()> {
+        if !self.database_bl.exists() {
+            anyhow::bail!("database_bl.dat file at {} was missing", self.database_bl.display());
+        }
+
+        // error if the directory already exists, otherwise create the directory
+        if self.output_directory.exists() {
+            return Err(SbliError::OutputPathExists(self.output_directory.clone()).into());
+        } else {
+            fs::create_dir(&self.output_directory)
+                .with_context(|| format!("failed to create output directory {}", self.output_directory.display()))?;
+        }
+
+        // copy the database_bl file to the output folder we have created
+        let destination_bl= self.output_directory.join("database_bl.dat");
+        fs::copy(&self.database_bl, &destination_bl)
+            .with_context(|| format!("failed to copy database_bl file {} to {}", self.database_bl.display(), destination_bl.display()))?;
+
+        self.database_bl = destination_bl;
+
+        Ok(())
+    }
+}
+
 
 /// verify the cli options passed are valid
 ///

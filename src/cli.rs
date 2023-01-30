@@ -108,13 +108,9 @@ pub(crate) struct ConfigGenerator {
     /// (n >0 => every n steps)
     pub(crate) span_average_io_steps: usize,
 
-    //#[clap(long, default_value_t = JetActuator::None)]
     #[command(subcommand)]
-    //#[clap(long, default_value_t = JetActuator::None)]
     /// whether or not to use blowing boundary condition on the bottom surface
     /// in the sbli case
-    ///#[command(requires="slot_start")]
-    //#[command(requires="slot_end")]
     pub(crate) blowing_bc: JetActuator,
 
     #[clap(long)]
@@ -158,6 +154,11 @@ pub(crate) struct ConfigGenerator {
     /// Z locations for vertical probes (along different values of y) at a (X, _, Z) location.
     /// You must provide the same number of z locations here as you do x locations in `--probe-locations-x`
     pub(crate) probe_locations_z: Vec<usize>,
+
+    /// shock capturing sensor threshold. x < 1 enables it (lower is more sensitive), x >= 1
+    /// disables it
+    #[clap(long, default_value_t = 0.1)]
+    pub(crate) sensor_threshold: f64,
 }
 
 impl ConfigGenerator {
@@ -197,7 +198,8 @@ impl ConfigGenerator {
             nymax_wr: 201,
             probe_locations_x: Vec::new(),
             probe_locations_z: Vec::new(),
-            flow_type: FlowType::ShockBoundaryLayer
+            flow_type: FlowType::ShockBoundaryLayer,
+            sensor_threshold: 0.1
         }
     }
 
@@ -226,6 +228,7 @@ impl ConfigGenerator {
             probe_locations_x,
             probe_locations_z,
             flow_type,
+            sensor_threshold,
             ..
         } = self;
 
@@ -252,7 +255,8 @@ impl ConfigGenerator {
             nymax_wr,
             probe_locations_x,
             probe_locations_z,
-            flow_type
+            flow_type,
+            sensor_threshold
         }
     }
 }
@@ -289,6 +293,7 @@ pub(crate) enum JetActuator {
         /// the x location (index) at which the slot stop blowing
         ///
         /// required if slot-start or sbli-blowing-bc is set
+        #[clap(long)]
         slot_end: usize,
     },
     /// use RL controller for the jet amplitude
@@ -378,6 +383,10 @@ pub(crate) struct JetValidation {
     /// be written
     pub(crate) output_directory: PathBuf,
 
+    /// name of the batch to use in `distribute`
+    #[clap(long)]
+    pub(crate) batch_name: String,
+
     /// a matrix_id that you want to ping after the jobs are
     /// finished. Should look like: `@user_id:matrix.org`
     #[clap(long)]
@@ -397,7 +406,11 @@ pub(crate) struct JetValidation {
 
     #[clap(long)]
     /// number of steps to include in the simulation
-    pub(crate) steps: usize
+    pub(crate) steps: usize,
+
+    #[clap(long)]
+    /// input databse file to use
+    pub(crate) database_bl: PathBuf,
 }
 
 #[derive(Debug, Clone, Parser, ValueEnum)]

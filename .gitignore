@@ -2,4 +2,5 @@
 *.sif
 **/input.json
 output/
+distribute/
 perf.*
