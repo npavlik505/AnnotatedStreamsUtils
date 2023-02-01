@@ -34,27 +34,27 @@ config:
 		{{streams_flow_type}} \
 		--steps 50000 \
 		--mach-number 0.0 \
-		--x-divisions 300 \
-		--y-divisions 508 \
+		--x-divisions 100 \
+		--y-divisions 1200 \
 		--z-divisions 100 \
 		--json \
 		--x-length 3.0 \
-		--y-length 5.0 \
-		--mpi-x-split 1 \
+		--y-length 6.0 \
+		--mpi-x-split 4 \
 		--span-average-io-steps 10 \
 		--python-flowfield-steps 1000 \
 		--use-python \
 		--sensor-threshold 0.1 \
 		constant \
 			--amplitude 1.0 \
-			--slot-end 200 \
-			--slot-start 100
+			--slot-end 66 \
+			--slot-start 33
 
 	cat {{config_output}}
 
 jet_validation_base_path := "./distribute/jet_validation/"
 
-jet_validation_number := "03"
+jet_validation_number := "07"
 jet_validation_batch_name := "jet_validation_" + jet_validation_number
 jet_valiation_output_folder := jet_validation_base_path + jet_validation_batch_name
 
@@ -68,7 +68,7 @@ jet_validation:
 		{{jet_valiation_output_folder}} \
 		--batch-name {{jet_validation_batch_name}} \
 		--solver-sif ./streams.sif \
-		--steps 10 \
+		--steps 10000 \
 		--database-bl $STREAMS_DIR/examples/supersonic_sbli/database_bl.dat \
 		--matrix @karlik:matrix.org
 

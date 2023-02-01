@@ -246,7 +246,7 @@ dependencies = [
 [[package]]
 name = "distribute"
 version = "0.13.0"
-source = "git+https://github.com/Fluid-Dynamics-Group/distribute?rev=6fb2f4131013d18073d2c997ea4e719b23387c6e#6fb2f4131013d18073d2c997ea4e719b23387c6e"
+source = "git+https://github.com/Fluid-Dynamics-Group/distribute?rev=1fed54eb8d98daae865f3ab429f6fc15957750e8#1fed54eb8d98daae865f3ab429f6fc15957750e8"
 dependencies = [
  "base16",
  "derive_more",

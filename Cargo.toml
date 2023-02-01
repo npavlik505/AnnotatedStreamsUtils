@@ -27,7 +27,7 @@ rev = "57a18eafc3bade61fcc69cf9959a9bd06e315fda"
 [dependencies.distribute]
 #path = "../distribute"
 git = "https://github.com/Fluid-Dynamics-Group/distribute"
-rev = "6fb2f4131013d18073d2c997ea4e719b23387c6e"
+rev = "1fed54eb8d98daae865f3ab429f6fc15957750e8"
 default_features = false
 features = ["config"]
 

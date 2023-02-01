@@ -9,7 +9,7 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
 
     let amplitudes = [0.2, 0.4, 0.6, 0.8, 1.0];
     let signs = [1.0, -1.0];
-    let y_points = [208, 400, 600, 800, 900];
+    let y_points = [208, 400, 600, 800, 1000, 1200];
 
     let base_config = Config {
         reynolds_number: 250.0,
@@ -17,7 +17,7 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         shock_angle: 8.0,
         //x_length: 70.0,
         x_length: 3.0,
-        x_divisions: 300,
+        x_divisions: 100,
         y_length: 6.,
         y_divisions: 600,
         z_length: 3.8,
@@ -39,8 +39,8 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         sensor_threshold: 0.1
     };
 
-    let slot_start = 100;
-    let slot_end = 200;
+    let slot_start = 33;
+    let slot_end = 66;
 
     let cases = itertools::iproduct!(amplitudes.into_iter(), signs.into_iter(), y_points.into_iter())
         .map(|(amplitude, sign, y_points)| {
@@ -81,7 +81,7 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         batch_name: args.batch_name,
         namespace: "streams_jet_validation".into(),
         matrix: args.matrix.clone(),
-        capabilities: vec!["gpu", "apptainer"].into_iter().map(Into::into).collect(),
+        capabilities: vec!["gpu", "apptainer", "lab1"].into_iter().map(Into::into).collect(),
     };
 
     let input_files = vec![distribute::common::File::with_alias(
