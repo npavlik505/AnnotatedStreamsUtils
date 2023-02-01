@@ -18,6 +18,9 @@ Stage: build
 	$HOME/.git-credentials /root/.git-credentials
 
 %post
+	echo "NUMPY VERSION:"
+	pip freeze | grep numpy
+
 	# this line must run to let git know that there might be a credential
 	# store already on disk
 	git config --global credential.helper store
@@ -90,6 +93,10 @@ From: base.sif
 	/streams/python/ /python
 
 %post
+
+	echo "NUMPY VERSION:"
+	pip freeze | grep numpy
+
 	# copy the shared object to site packages so it is globally importable
 	cp /libstreams* /usr/local/lib/python3.8/dist-packages/
 

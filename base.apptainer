@@ -26,8 +26,11 @@ From: nv.sif
 
 	# https://github.com/mpi4py/mpi4py/issues/114
 	# CFLAGS is required for nvidia HPC compilers
-	CFLAGS=-noswitcherror pip3 install numpy mpi4py
+	CFLAGS=-noswitcherror pip3 install numpy mpi4py --upgrade
 	f2py
+
+	echo "NUMPY VERSION:"
+	pip freeze | grep numpy
 
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 	export PATH="$PATH":"$HOME/.cargo/bin"
