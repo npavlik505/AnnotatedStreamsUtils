@@ -108,7 +108,8 @@ pub(crate) fn convert_spans(
     let spans_folder = data_location.join("spans");
 
     // currently not possible to write arrays in binary for 2D files
-    let mesh = vtk::Mesh2D::<_, vtk::Ascii>::new(mesh_info.x_data.clone(), mesh_info.y_data.clone());
+    let mesh =
+        vtk::Mesh2D::<_, vtk::Ascii>::new(mesh_info.x_data.clone(), mesh_info.y_data.clone());
 
     let spans = vtk::Spans2D::new(config.x_divisions, config.y_divisions);
     let domain = vtk::Rectilinear2D::new(mesh, spans);

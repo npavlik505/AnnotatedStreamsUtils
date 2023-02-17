@@ -1,15 +1,16 @@
+mod animate;
 mod binary_to_vtk;
+mod cases;
 mod cli;
 mod config_generator;
+mod hdf5_to_vtk;
 mod prelude;
 mod probe;
 mod probe_binary;
 mod run;
-mod cases;
 mod spans_to_vtk;
 mod utils;
 mod vtk_to_mat;
-mod hdf5_to_vtk;
 
 use prelude::*;
 
@@ -29,6 +30,7 @@ fn main() -> anyhow::Result<()> {
         Command::VtkToMat(x) => vtk_to_mat::vtk_to_mat(x)?,
         Command::SpansToVtk(x) => spans_to_vtk::spans_to_vtk(x)?,
         Command::HDF5ToVtk(x) => hdf5_to_vtk::hdf5_to_vtk(x)?,
+        Command::Animate(x) => animate::animate(x)?,
     };
 
     Ok(())

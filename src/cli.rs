@@ -31,7 +31,19 @@ pub(crate) enum Command {
     /// usually this is performed automatically by the `run-solver` subcommand
     SpansToVtk(SpansToVtk),
     /// convert a flowfields.h5 file into a series of vtk files
-    HDF5ToVtk(HDF5ToVtk)
+    HDF5ToVtk(HDF5ToVtk),
+    Animate(Animate),
+}
+
+#[derive(Parser, Debug, Clone)]
+pub(crate) struct Animate {
+    /// path to the output folder for which the data should be animated
+    pub(crate) data_folder: PathBuf,
+
+    #[clap(long, default_value_t = 1)]
+    /// number to adjust the range by when iterating over the slices. If indexing
+    /// from 1:100, and decimate = 5 then it will iterate by 1:5:100
+    pub(crate) decimate: usize
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -135,7 +147,7 @@ pub(crate) struct ConfigGenerator {
     #[clap(long)]
     pub(crate) python_flowfield_steps: Option<usize>,
 
-    /// (currently not well understood): it is required that nymax-wr > y-divisions 
+    /// (currently not well understood): it is required that nymax-wr > y-divisions
     #[clap(long, default_value_t = 201)]
     pub(crate) nymax_wr: usize,
 
@@ -144,13 +156,13 @@ pub(crate) struct ConfigGenerator {
     pub(crate) rly_wr: f64,
 
     #[clap(long)]
-    #[arg(requires="probe_locations_z")]
-    /// X locations for vertical probes (along different values of y) at a (X, _, Z) location. 
+    #[arg(requires = "probe_locations_z")]
+    /// X locations for vertical probes (along different values of y) at a (X, _, Z) location.
     /// You must provide the same number of x locations here as you do z locations in `--probe-locations-z`
     pub(crate) probe_locations_x: Vec<usize>,
 
     #[clap(long)]
-    #[arg(requires="probe_locations_x")]
+    #[arg(requires = "probe_locations_x")]
     /// Z locations for vertical probes (along different values of y) at a (X, _, Z) location.
     /// You must provide the same number of z locations here as you do x locations in `--probe-locations-x`
     pub(crate) probe_locations_z: Vec<usize>,
@@ -159,6 +171,10 @@ pub(crate) struct ConfigGenerator {
     /// disables it
     #[clap(long, default_value_t = 0.1)]
     pub(crate) sensor_threshold: f64,
+
+    /// location where the shock strikes the bottom surface
+    #[clap(long, default_value_t = 15.)]
+    pub(crate) shock_impingement: f64,
 }
 
 impl ConfigGenerator {
@@ -199,7 +215,8 @@ impl ConfigGenerator {
             probe_locations_x: Vec::new(),
             probe_locations_z: Vec::new(),
             flow_type: FlowType::ShockBoundaryLayer,
-            sensor_threshold: 0.1
+            sensor_threshold: 0.1,
+            shock_impingement: 15.,
         }
     }
 
@@ -229,6 +246,7 @@ impl ConfigGenerator {
             probe_locations_z,
             flow_type,
             sensor_threshold,
+            shock_impingement,
             ..
         } = self;
 
@@ -256,7 +274,8 @@ impl ConfigGenerator {
             probe_locations_x,
             probe_locations_z,
             flow_type,
-            sensor_threshold
+            sensor_threshold,
+            shock_impingement,
         }
     }
 }
@@ -265,7 +284,7 @@ impl ConfigGenerator {
 pub(crate) enum FlowType {
     ChannelFlow,
     BoundaryLayer,
-    ShockBoundaryLayer
+    ShockBoundaryLayer,
 }
 
 impl FlowType {
@@ -273,7 +292,7 @@ impl FlowType {
         match &self {
             Self::ChannelFlow => 0,
             Self::BoundaryLayer => 1,
-            Self::ShockBoundaryLayer=> 2,
+            Self::ShockBoundaryLayer => 2,
         }
     }
 }
@@ -284,7 +303,30 @@ pub(crate) enum JetActuator {
     /// jet actuator with constant amplitude
     Constant {
         #[clap(long)]
+        /// amplitude of the parabolic jet velocity
         amplitude: f64,
+        #[clap(long)]
+        /// the x location (index) at which the slot starts blowing
+        ///
+        /// required if slot-end or sbli-blowing-bc is set
+        slot_start: usize,
+        /// the x location (index) at which the slot stop blowing
+        ///
+        /// required if slot-start or sbli-blowing-bc is set
+        #[clap(long)]
+        slot_end: usize,
+    },
+    Sinusoidal {
+        #[clap(long)]
+        /// amplitude of the parabolic jet velocity
+        amplitude: f64,
+
+        #[clap(long)]
+        /// angular frqeuency \omega of the sin wave. An angular frequency of pi
+        /// has a period of 2 seconds (1 second is positive velocity, 1 second is negative
+        /// velocity)
+        angular_frequency: f64,
+
         #[clap(long)]
         /// the x location (index) at which the slot starts blowing
         ///
@@ -307,42 +349,45 @@ pub(crate) enum JetActuator {
         ///
         /// required if slot-start or sbli-blowing-bc is set
         slot_end: usize,
-    }
+    },
 }
 
 impl JetActuator {
-    pub(crate) fn blowing_bc_as_streams_int(&self) -> u8{
+    pub(crate) fn blowing_bc_as_streams_int(&self) -> u8 {
         match &self {
             Self::None => 0,
-            _ => 1
+            _ => 1,
         }
     }
 
     pub(crate) fn slot_start_as_streams_int(&self) -> i32 {
         match &self {
             Self::None => -1,
-            Self::Constant { slot_start, ..} => *slot_start as i32,
-            Self::Adaptive { slot_start, ..} => *slot_start as i32,
+            Self::Constant { slot_start, .. } => *slot_start as i32,
+            Self::Sinusoidal { slot_start, .. } => *slot_start as i32,
+            Self::Adaptive { slot_start, .. } => *slot_start as i32,
         }
     }
 
     pub(crate) fn slot_end_as_streams_int(&self) -> i32 {
         match &self {
             Self::None => -1,
-            Self::Constant { slot_end, ..} => *slot_end as i32,
-            Self::Adaptive { slot_end, ..} => *slot_end as i32,
+            Self::Constant { slot_end, .. } => *slot_end as i32,
+            Self::Sinusoidal { slot_end, .. } => *slot_end as i32,
+            Self::Adaptive { slot_end, .. } => *slot_end as i32,
         }
     }
 }
 
 #[derive(Debug, Clone, Parser)]
-pub(crate) struct BlowingSlot {
-}
+pub(crate) struct BlowingSlot {}
 
 #[derive(Subcommand, Debug, Clone)]
 pub(crate) enum Cases {
     Sbli(SbliCases),
     JetValidation(JetValidation),
+    VariableDt(JetValidation),
+    AiInstitute(JetValidation),
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -449,7 +494,7 @@ pub(crate) struct RunLocal {
     pub(crate) database: PathBuf,
 
     #[clap(long)]
-    /// mount some python code into the container to run instead of the 
+    /// mount some python code into the container to run instead of the
     /// code contained in the solver image
     pub(crate) python_mount: Option<PathBuf>,
 }
@@ -493,9 +538,9 @@ pub(crate) struct SpansToVtk {
 
 #[derive(Parser, Debug, Clone, Constructor)]
 pub(crate) struct HDF5ToVtk {
-    /// the path to the solver results. 
+    /// the path to the solver results.
     ///
-    /// if run with streams-utils, this will be `./distribute_save` locally. 
+    /// if run with streams-utils, this will be `./distribute_save` locally.
     ///
     /// This folder should contain a flowfields.h5 file. Results are written to a `vtks` folder
     /// within solver-results

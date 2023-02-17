@@ -1,6 +1,6 @@
+use super::check_options_copy_files;
 use crate::prelude::*;
 use cli::SbliCases;
-use super::check_options_copy_files;
 
 use anyhow::Result;
 
@@ -65,7 +65,6 @@ fn create_cases<T, V, Val>(
         cases.push(config)
     }
 }
-
 
 /// generate a sweep over combinations of shock angles and mach numbers
 fn sweep_cases(args: SbliCases) -> Result<()> {
@@ -147,7 +146,11 @@ fn check_blowing_condition(args: SbliCases) -> Result<()> {
         cli::ConfigGenerator::with_path(args.output_directory.join("check_blowing_condition.json"));
 
     case.steps = 50_000;
-    case.blowing_bc = cli::JetActuator::Constant { amplitude: 1., slot_start: 100, slot_end: 200};
+    case.blowing_bc = cli::JetActuator::Constant {
+        amplitude: 1.,
+        slot_start: 100,
+        slot_end: 200,
+    };
 
     let output_path = case.output_path.clone();
     let case = case.into_serializable();
@@ -241,9 +244,7 @@ fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> anyhow::R
     // initialization specification
     let mounts = vec![];
     let init = distribute::apptainer::Initialize::new(
-        distribute::common::File::new(
-            args.solver_sif.clone()
-        )?,
+        distribute::common::File::new(args.solver_sif.clone())?,
         vec![distribute::common::File::with_alias(
             &args.database_bl,
             "database_bl.dat",
@@ -251,16 +252,13 @@ fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> anyhow::R
         mounts,
     );
 
-    let jobs : Result<Vec<_>> = input_files
+    let jobs: Result<Vec<_>> = input_files
         .into_iter()
         .map(|file| {
             let job_name = file.file_stem().unwrap().to_string_lossy().to_string();
             let job = distribute::apptainer::Job::new(
                 job_name,
-                vec![distribute::common::File::with_alias(
-                    file,
-                    "input.json",
-                )?],
+                vec![distribute::common::File::with_alias(file, "input.json")?],
             );
             Ok(job)
         })
@@ -268,7 +266,7 @@ fn distribute_gen(args: &cli::SbliCases, input_files: Vec<PathBuf>) -> anyhow::R
     let jobs = jobs?;
 
     let apptainer = distribute::apptainer::Description::new(init, jobs);
-    let jobs = distribute::ApptainerConfig::new(meta,apptainer);
+    let jobs = distribute::ApptainerConfig::new(meta, apptainer);
 
     let jobs_path = args.output_directory.join("distribute-jobs.yaml");
     let file = fs::File::create(&jobs_path)

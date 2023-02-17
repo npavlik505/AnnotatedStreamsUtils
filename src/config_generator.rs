@@ -62,10 +62,15 @@ pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
 
     if !dry {
         if json {
-            let file = std::fs::File::create(&output_path)
-                .with_context(||format!("failed to create json output file at {}", output_path.display()))?;
-            serde_json::to_writer_pretty(file, &config)
-                .with_context(|| format!("failed to serialize data to json file. This should not happen"))?;
+            let file = std::fs::File::create(&output_path).with_context(|| {
+                format!(
+                    "failed to create json output file at {}",
+                    output_path.display()
+                )
+            })?;
+            serde_json::to_writer_pretty(file, &config).with_context(|| {
+                format!("failed to serialize data to json file. This should not happen")
+            })?;
             Ok(())
         } else {
             _config_generator(&config, output_path)
@@ -77,7 +82,7 @@ pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
 
 /// create a streams config file to be used in the solver
 pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow::Result<()> {
-    const CFL : f64 = 0.75;
+    const CFL: f64 = 0.75;
 
     let cfl = if let Some(fixed_dt) = config.fixed_dt {
         -1. * fixed_dt
@@ -120,7 +125,7 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
  {mpi_x_split}               1 
 
  sensor_threshold   xshock_imp   deflec_shock    pgrad (0==>constant bulk)
-  {shock_sensitivity}               15.             {angle}              0.
+  {shock_sensitivity}               {shock_imp}             {angle}              0.
       
  restart   num_iter   cfl   dt_control  print_control  io_type
    0        {steps}      {cfl}      1       1              2
@@ -167,7 +172,8 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
         rly_wr = config.rly_wr,
         slot_start = config.blowing_bc.slot_start_as_streams_int(),
         slot_end = config.blowing_bc.slot_end_as_streams_int(),
-        shock_sensitivity = config.sensor_threshold
+        shock_sensitivity = config.sensor_threshold,
+        shock_imp = config.shock_impingement
     );
 
     std::fs::write(&output_path, output.as_bytes())
@@ -242,7 +248,7 @@ pub(crate) struct Config {
     pub(crate) span_average_io_steps: usize,
 
     /// information on how to setup the blowing boundary condition on the
-    /// bottom surface. 
+    /// bottom surface.
     pub(crate) blowing_bc: cli::JetActuator,
 
     /// enable exporting 3D flowfields to VTK files
@@ -259,13 +265,13 @@ pub(crate) struct Config {
     /// how often to export full flowfields to hdf5 files (PYTHON ONLY!)
     pub(crate) python_flowfield_steps: Option<usize>,
 
-    /// (currently not well understood): it is required that nymax-wr > y-divisions 
+    /// (currently not well understood): it is required that nymax-wr > y-divisions
     pub(crate) nymax_wr: usize,
 
     /// (currently not well understood): it is required that rly-wr > y-length
     pub(crate) rly_wr: f64,
 
-    /// X locations for vertical probes (along different values of y) at a (X, _, Z) location. 
+    /// X locations for vertical probes (along different values of y) at a (X, _, Z) location.
     /// You must provide the same number of x locations here as you do z locations in `--probe-locations-z`
     pub(crate) probe_locations_x: Vec<usize>,
 
@@ -276,6 +282,9 @@ pub(crate) struct Config {
     /// shock capturing sensor threshold. x < 1 enables it (lower is more sensitive), x >= 1
     /// disables it
     pub(crate) sensor_threshold: f64,
+
+    /// location where the shock strikes the bottom surface
+    pub(crate) shock_impingement: f64,
 }
 
 impl Config {
@@ -303,11 +312,10 @@ impl Config {
         }
 
         // from config file
-        let nymax_wr = 201;
-        if self.y_divisions < nymax_wr {
+        if self.y_divisions < self.nymax_wr {
             return Err(ConfigError::Custom(format!(
                 "y-divisions ({}) must be greater than {}",
-                self.y_divisions, nymax_wr
+                self.y_divisions, self.nymax_wr
             )));
         }
 
@@ -321,7 +329,7 @@ impl Config {
         if self.y_divisions <= self.nymax_wr {
             return Err(ConfigError::Custom(format!(
                 "y-divisions ({}) must be greater than nymax-wr {}",
-                self.y_divisions , self.nymax_wr
+                self.y_divisions, self.nymax_wr
             )));
         }
 
@@ -382,11 +390,19 @@ impl Config {
 
     pub(crate) fn to_file<T: AsRef<Path>>(&self, path: T) -> anyhow::Result<()> {
         let path = path.as_ref().to_owned();
-        let mut file = std::fs::File::create(&path)
-            .with_context(|| format!("failed to serialize create file at {} for config", path.display()))?;
+        let mut file = std::fs::File::create(&path).with_context(|| {
+            format!(
+                "failed to serialize create file at {} for config",
+                path.display()
+            )
+        })?;
 
-        self.to_writer(&mut file)
-            .with_context(|| format!("failed to serialize config to file at path {}", path.display()))?;
+        self.to_writer(&mut file).with_context(|| {
+            format!(
+                "failed to serialize config to file at path {}",
+                path.display()
+            )
+        })?;
 
         Ok(())
     }

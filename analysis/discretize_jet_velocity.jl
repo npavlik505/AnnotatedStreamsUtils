@@ -65,34 +65,6 @@ function poly(p::Polynomial, x::Int)
 	return p.a * x^2 + p.b * x + p.c
 end
 
-# ╔═╡ 023b8cd1-cc1c-4e27-9e02-d25ef50f176c
-# ╠═╡ disabled = true
-#=╠═╡
-# a = (x_end_slot*x_start_slot - vertex_y)/vertex_x^2
-  ╠═╡ =#
-
-# ╔═╡ 3cd48770-375a-4d6e-ab24-3d7fcd7db5f2
-# ╠═╡ disabled = true
-#=╠═╡
-# b = (x_end_slot*x_start_slot - vertex_y + sqrt(-vertex_y*x_end_slot*x_start_slot + vertex_y^2))/(vertex_x*x_end_slot)
-  ╠═╡ =#
-
-# ╔═╡ a3c419fd-4662-41fa-aaa7-91d0069bf8e7
-# ╠═╡ disabled = true
-#=╠═╡
-# c = (x_end_slot*x_start_slot - vertex_y - sqrt(-vertex_y*x_end_slot*x_start_slot + vertex_y^2))/(vertex_x*x_start_slot)
-  ╠═╡ =#
-
-# ╔═╡ d5692c7e-9420-4712-a745-3fe09fd55d3c
-# ╠═╡ disabled = true
-#=╠═╡
-vertex = Vertex(
-	a,
-	vertex_x,
-	vertex_y
-)
-  ╠═╡ =#
-
 # ╔═╡ 0c720d99-c57c-4cec-821a-5a02cb51e509
 a = vertex_y/(vertex_x^2 - vertex_x*x_end_slot - (vertex_x - x_end_slot)*x_start_slot)
 

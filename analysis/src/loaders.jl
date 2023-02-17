@@ -161,7 +161,7 @@ module Loaders
     #
 
     function dt_history(loader::DataLoader, lazy::Bool)::Union{LazyH5, Array{Float32, 1}}
-        path = spans_path(loader)
+        path = trajectories_path(loader)
         dset = "dt"
 
         if lazy

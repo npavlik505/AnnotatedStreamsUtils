@@ -55,14 +55,13 @@ pub(crate) fn run_container(_args: cli::RunContainer) -> anyhow::Result<()> {
             runtime_py
         } else {
             println!("running static python bindings");
-            static_py 
+            static_py
         };
 
         let exec = xshell::cmd!(sh, "mpirun -np {nproc} {solver_py}/main.py");
 
         println!("Now running solver, STDOUT will be hidden until it finishes");
         exec.run()?;
-
     } else {
         // TODO: make this command share the current stdout
         let exec = xshell::cmd!(sh, "mpirun -np {nproc} /streams.exe");

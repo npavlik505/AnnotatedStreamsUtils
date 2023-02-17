@@ -1,19 +1,22 @@
 use crate::prelude::*;
 use anyhow::Result;
-use cli::JetActuator;
 use cli::FlowType;
+use cli::JetActuator;
 
 pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
     super::check_options_copy_files(&mut args)?;
     let args = args;
 
-    let amplitudes = [0.2, 0.4, 0.6, 0.8, 1.0];
-    let signs = [1.0, -1.0];
-    let y_points = [208, 400, 600, 800, 1000, 1200];
+    //let amplitudes = [0.2, 0.4, 0.6, 0.8, 1.0];
+    let amplitudes = [1.0];
+    //let signs = [1.0, -1.0];
+    let signs = [1.0];
+    //let y_points = [208, 400, 600, 800, 1000, 1200];
+    let y_points = [600];
 
     let base_config = Config {
         reynolds_number: 250.0,
-        mach_number: 2.28,
+        mach_number: 0.0,
         shock_angle: 8.0,
         //x_length: 70.0,
         x_length: 3.0,
@@ -28,39 +31,56 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         span_average_io_steps: 100,
         blowing_bc: JetActuator::None,
         snapshots_3d: true,
-        use_python: false,
+        use_python: true,
         fixed_dt: None,
-        python_flowfield_steps: None,
+        python_flowfield_steps: Some(1000),
         rly_wr: 2.5,
         nymax_wr: 201,
         probe_locations_x: Vec::new(),
         probe_locations_z: Vec::new(),
         flow_type: FlowType::BoundaryLayer,
-        sensor_threshold: 0.1
+        sensor_threshold: 0.1,
+        shock_impingement: 15.,
     };
 
     let slot_start = 33;
     let slot_end = 66;
 
-    let cases = itertools::iproduct!(amplitudes.into_iter(), signs.into_iter(), y_points.into_iter())
-        .map(|(amplitude, sign, y_points)| {
-            let mut new_config = base_config.clone();
-            new_config.blowing_bc = JetActuator::Constant { slot_start, slot_end, amplitude: amplitude * sign };
-            new_config.y_divisions = y_points;
-            let case_name = if sign > 0. {
-                format!("jet_validation_pos_{}_amplitude_{y_points}_points", amplitude * sign)
-            } else {
-                format!("jet_validation_neg_{}_amplitude_{y_points}_points", amplitude * sign)
-            };
+    let cases = itertools::iproduct!(
+        amplitudes.into_iter(),
+        signs.into_iter(),
+        y_points.into_iter()
+    )
+    .map(|(amplitude, sign, y_points)| {
+        let mut new_config = base_config.clone();
+        new_config.blowing_bc = JetActuator::Constant {
+            slot_start,
+            slot_end,
+            amplitude: amplitude * sign,
+        };
+        new_config.y_divisions = y_points;
+        let case_name = if sign > 0. {
+            format!(
+                "jet_validation_pos_{}_amplitude_{y_points}_points",
+                amplitude * sign
+            )
+        } else {
+            format!(
+                "jet_validation_neg_{}_amplitude_{y_points}_points",
+                amplitude * sign
+            )
+        };
 
-            (new_config, case_name)
-        }).collect::<Vec<_>>();
+        (new_config, case_name)
+    })
+    .collect::<Vec<_>>();
 
     let mem = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     let mut jobs = Vec::new();
 
     for (config, case_name) in cases {
-        config.validate(mem)
+        config
+            .validate(mem)
             .with_context(|| format!("failed to validate case {case_name}"))?;
 
         let output_path = args.output_directory.join(format!("{case_name}.json"));
@@ -77,11 +97,14 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         jobs.push(job);
     }
 
-    let meta =  distribute::Meta {
+    let meta = distribute::Meta {
         batch_name: args.batch_name,
         namespace: "streams_jet_validation".into(),
         matrix: args.matrix.clone(),
-        capabilities: vec!["gpu", "apptainer", "lab1"].into_iter().map(Into::into).collect(),
+        capabilities: vec!["gpu", "apptainer", "lab1"]
+            .into_iter()
+            .map(Into::into)
+            .collect(),
     };
 
     let input_files = vec![distribute::common::File::with_alias(
@@ -94,7 +117,7 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         // files
         input_files,
         // mounts
-        vec![]
+        vec![],
     );
 
     let apptainer = distribute::apptainer::Description::new(init, jobs);
@@ -107,4 +130,3 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
 
     Ok(())
 }
-

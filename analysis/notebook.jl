@@ -52,17 +52,45 @@ end
 # ╔═╡ 1c484032-7c09-45f0-a50c-95082ac6b921
 analysis = ingredients("./src/analysis.jl").analysis
 
+# ╔═╡ f0dc3b51-5041-4f07-8058-065bfb86ad67
+anim = analysis.animation
+
 # ╔═╡ aa909845-6bda-468b-b797-daeb05ad4fb4
 names(analysis)
 
+# ╔═╡ 402bc98c-8741-4426-8348-0fb9619b03c2
+names(analysis.animation)
+
 # ╔═╡ 4a94a12b-2c2a-4166-9b55-14f5cd0fa514
 pwd()
+
+# ╔═╡ b41f5510-a79a-43d6-b7bc-4be57c089502
+const DPI = 300
+
+# ╔═╡ 50b0266b-0a66-42c6-8273-6b779998c74f
+md"# Data Loading"
+
+# ╔═╡ 9d385399-ffd7-4e0b-a143-1a49119a5280
+BASE_PATH = "/home/brooks/github/streams-utils/distribute/"
+
+# ╔═╡ dd5a54f7-5773-4983-a1e4-08e60231198c
+mode = "ai_institute"
+
+# ╔═╡ 824ff024-6a7f-40fc-b242-7ee24a7b3d31
+batch_name = @sprintf "%s_%02i" mode 1
+
+# ╔═╡ 2591ee3d-1eca-4f36-b385-c32c8415a8ba
+folder = "no_actuator"
+
+# ╔═╡ 85c118eb-a71c-40be-abbd-d665015926cd
+# PATH = "../output/distribute_save"
+PATH = "$BASE_PATH/$mode/$batch_name/$batch_name/$folder/"
 
 # ╔═╡ 72281877-92fe-49e8-aee5-5ae524512e15
 Base.Filesystem.abspath("../output/distribute_save/flowfields.h5")
 
 # ╔═╡ 06af6a34-6cf4-448a-9dda-53b2de0ba7eb
-loader = analysis.DataLoader("../output/distribute_save")
+loader = analysis.DataLoader(PATH)
 
 # ╔═╡ e7cd911e-22ec-46ba-8122-e15e1fb67719
 velocity3d = analysis.velocity3d(loader, true); size(velocity3d)
@@ -109,7 +137,7 @@ span_times = analysis.spans_times(loader, false)
 meta = analysis.metadata(loader)
 
 # ╔═╡ cd76152a-92f5-4e3b-94b5-6c5f47c6db15
-mesh = analysis.mesh(loader)
+const mesh = analysis.mesh(loader)
 
 # ╔═╡ 3d57e1af-000d-47a2-b5a1-738d88cc4ecf
 nz
@@ -120,94 +148,138 @@ lx = meta["x_length"]
 # ╔═╡ 22cb7ad5-9b24-45c2-b384-8b746a4bb36d
 ly = meta["y_length"]
 
-# ╔═╡ 8f463099-d412-4673-975f-ca18b62bf59f
-struct Animate{T <: AbstractFloat}
-	idx::Int
-	save_folder::String
-	format_name::Function
-	data::Array{T, 3}
+# ╔═╡ 33ceb38a-f492-4f0f-b86d-6f5429065f9f
+md"# Animations"
+
+# ╔═╡ cbd9fa26-7063-47f3-8091-f898636d8e42
+const should_animate = false
+
+# ╔═╡ 54c36eac-4e16-4c41-95fd-1528a4304ed2
+begin
+if should_animate
+	local height = 300.
+	local width = (height) / ly * lx |> floor |> Int
+	local res = (width, height)
+	local framerate = 120
+
+	local fig = Figure(resolution = (height * 4, width), dpi = 300)
+
+	local rho_ax = anim.setup_ax(fig, anim.Rho(), span_averages, 1)
+	local u_ax = anim.setup_ax(fig, anim.XVelocity(), span_averages, 2)
+	local v_ax = anim.setup_ax(fig, anim.YVelocity(), span_averages, 3)
+	local energy_ax = anim.setup_ax(fig, anim.Energy(), span_averages,4)
+
+	local plottable_group = anim.PlottableGroup(span_averages, mesh, fig, rho_ax, u_ax, v_ax, energy_ax)
+
+	local save_folder = PATH * "/animation_bak/"
+	fmt = anim.Formatter("rho_u_v_w")
+
+	local animate = anim.Animate(save_folder, fmt, plottable_group)
+
+	@time anim.export_all(animate, 60, 1000, 1010)
 end
-
-# ╔═╡ effbff40-5a43-4429-8007-38d1da37133b
-function animate(save_folder::String, format_name::Function, data::Array{T, 3})::Animate where T <: AbstractFloat
-	return Animate(
-		0,
-		save_folder,
-		format_name,
-		data
-	)
 end
-
-# ╔═╡ 19b6df33-f67e-4677-9b38-89a4aa3ed422
-# ╠═╡ disabled = true
-#=╠═╡
-function export_all(animate::Animate{T}, fig::Makie.Figure, ax::Makie.Axis) where T<: AbstractFloat
-	nwrite, nx, ny = size(animate.data)
-
-	if Base.Filesystem.ispath(animate.save_folder)
-		Base.Filesystem.rm(animate.save_folder, force=true, recursive=true)
-	end
-
-	Base.Filesystem.mkdir(animate.save_folder)
-
-	local maxcolor = max(abs(minimum(data)), abs(maximum(data)))
-	
-	for i in 1:nwrite
-		currslice = animate.data[i, :, :]
-
-		local plt = contourf!(
-			ax,
-			xgrid,
-			ygrid,
-			currslice,
-			colormap = :balance,
-			colorrange = (1 - (maxcolor-1), maxcolor),
-			levels=40
-		)
-
-		if i == 1
-			local color = Colorbar(fig[1,2], plt);
-		end
-
-		Makie.save(animate.save_folder * "/" * animate.format_name(i), fig)
-
-		empty!(ax)
-	end
-end
-  ╠═╡ =#
-
-# ╔═╡ 2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
-size(span_averages)
-
-# ╔═╡ 20c6dbb8-8d4a-4d4f-8ca7-290e6a505174
-size(mesh.z)
-
-# ╔═╡ c12ecc52-6618-41af-8a9e-7ab21d9f331c
-size(mesh.y)
-
-# ╔═╡ 6a8cf949-6e90-40c4-a1d9-e0496a81b019
-size(span_averages[1, :, :, :])
-
-# ╔═╡ 57b50107-97a0-4416-ad22-612933e9ba37
-Statistics.mean
 
 # ╔═╡ e6abf6a4-b05e-4ce3-90d1-dd181512782b
 dropdims(Statistics.mean(span_averages[:, 3, :, :], dims=1), dims=1)
 
+# ╔═╡ a90e8c14-97d0-48a1-8765-905e37ba2be6
+md"# Span wise plots"
+
+# ╔═╡ aa859cd0-6eab-49b4-9ccc-61475085a0be
+md"## Simple Span Average"
+
+# ╔═╡ ffed6dfd-1dd8-4cd0-aa62-bb5ca021de54
+const span_height = 500
+
+# ╔═╡ 6b629692-820b-4d9e-bb1c-bad15aae3a04
+const span_width = span_height *lx / ly * 5/6 |> floor |> Int
+
+# ╔═╡ 338fc8c2-72ff-49e1-b402-a2d3cca306ee
+const span_res = (span_width, span_height+100)
+
+# ╔═╡ 8a251a3d-7c0f-483b-9c71-091606fad315
+const span_fontsize = 40
+
+# ╔═╡ a367f9d4-30da-4134-9e9b-d76e3ce90a07
+component = anim.XVelocity()
+
+# ╔═╡ 88e1422f-08ac-48c2-8583-3e76cee6c3de
+begin
+	local fig = Figure(
+		resolution=span_res, 
+		dpi=300, fontsize = span_fontsize)
+
+	local idx = 1000
+
+
+	local data = span_averages[idx, anim.component_idx(component), :, :]
+
+	# data_shear = shear_stress[idx, :]
+	# curr_time = span_times[idx]
+
+	local data_max = max(maximum(data), abs(minimum(data)))
+
+	local time = span_times[idx]
+
+	local ax = Axis(fig[1,1], 
+		# title = "Span average y velocity t = $curr_time sec",
+		title = "Span average $(anim.component_name(component)) at t = $time",
+		xlabel = "x",
+		ylabel = "y"
+	)
+	xlims!(ax, 0, lx)
+	ylims!(ax, 0, ly)
+	# colsize!(fig.layout, 1, Aspect(1, lx/ly))
+	# resize_to_layout!(fig)
+
+	local maxcolor = max(abs(minimum(data)), abs(maximum(data)))
+	println(minimum(data))
+	local plt = contourf!(
+		ax,
+		mesh.x,
+		mesh.y,
+		data,
+		colormap = :balance,
+		levels = range(-maxcolor, maxcolor, 100),
+	)
+	Colorbar(fig[1,2], plt)
+
+	# local ax_shear = Axis(fig[2,1], 
+	# 	title = "wall shear stress",
+	# 	xlabel = "x",
+	# 	ylabel = "τ"
+	# )
+
+	# scatter!(
+	# 	ax_shear,
+	# 	xgrid,
+	# 	data_shear,
+	# 	markersize = 4
+	# )
+
+	# ylims!(ax_shear, -.005, 0.018)
+
+	fig
+end
+
+# ╔═╡ badd1101-8d44-4961-a22b-651819d5c927
+md"## Time Averaged Span Average"
+
 # ╔═╡ da6c4d34-25bf-461a-beac-5581213272e9
 begin
-	height = 400.
-	width = (height) / ny * nx
-	local fig = Figure(resolution=(width,height), dpi=300)
+	local fig = Figure(resolution=span_res, dpi=300, fontsize = span_fontsize)
 
 	local idx = 1
 
 	# time slicing indicies
-	local start_idx = 100
-	local end_idx = 1000
+	local start_idx = 1000
+	local end_idx = 5000
 	local y_slice = [:]
-	data = Statistics.mean(span_averages[start_idx:end_idx, 3, :, y_slice...], dims=1)
+	data = Statistics.mean(span_averages[start_idx:end_idx, anim.component_idx(component), :, y_slice...], dims=1)
 	data = dropdims(data, dims = 1)
+
+	# data = span_averages[start_idx, 3, :, y_slice...]
 	data_shear = shear_stress[idx, :]
 	curr_time = span_times[idx]
 
@@ -218,10 +290,13 @@ begin
 
 	local ax = Axis(fig[1,1], 
 		# title = "Span average y velocity t = $curr_time sec",
-		title = "Span average y velocity, averaged on t ∈ [$start_time, $end_time]",
+		title = "Span average $(anim.component_name(component)) averaged over steady state",
 		xlabel = "x",
 		ylabel = "y"
 	)
+	
+	xlims!(ax, 0, lx)
+	ylims!(ax, 0, ly)
 
 	local maxcolor = max(abs(minimum(data)), abs(maximum(data)))
 	println(minimum(data))
@@ -253,20 +328,23 @@ begin
 	fig
 end
 
+# ╔═╡ f6cfea66-7879-46d2-bc71-077662da21a7
+width
+
 # ╔═╡ 2ecad180-37c3-4278-8886-e8d2ebeff3b7
 begin
 	local fig = Figure(resolution = (600, 500))
 
 	
-	local indexes = [1, 2, 3]
+	local indexes = [1, 120, 240, 360]
 	
 	local ax = Axis(fig[1,1], xlabel = "x location", ylabel = "y velocity")
 	local slot_start = 100
-	local slot_end = 200
+	local slot_end = 149
 
 	for idx in indexes
 		local x = slot_start:slot_end
-		local y = span_averages[idx, 3, x, 2]
+		local y = span_averages[idx, 3, x, 1]
 		local time = span_times[idx]
 	
 		scatter!(
@@ -277,10 +355,19 @@ begin
 		)
 	end
 
+	lines!(
+		ax,
+		[slot_start, slot_end],
+		[1.0, 1.0]
+	)
+
 	axislegend()
 	fig
 	# y
 end
+
+# ╔═╡ 0e9baa98-67e6-4fe4-a4b3-12da025981eb
+md"## Shear Stress / Dissipation / Energy Plots"
 
 # ╔═╡ b91c6497-5bde-4488-9d00-94b514f38334
 shear_stress
@@ -299,9 +386,9 @@ normalized_integral_shear_stress = integral_shear_stress ./ Statistics.mean(inte
 
 # ╔═╡ 26a36735-c33b-4f28-8187-7bfc675035ea
 begin
-	local height = 800
-	local width = 1000
-	local fig = Figure(resolution = (width, height))
+	local height = 1200
+	local width = 1600
+	local fig = Figure(resolution = (width, height), dpi = DPI, fontsize = 30)
 
 	local ax = Axis3(fig[1,1], 
 		xlabel=L"E / \overline{E} ", 
@@ -374,7 +461,7 @@ begin
 		return Evals, TauVals, DVals
 	end
 
-	for i in [1, 460, 2000, 8000] 
+	for i in [1, 460, 2000, 5000] 
 		scatter!(
 			ax,
 			scatter_for_idx(i)...,
@@ -425,6 +512,38 @@ end
 
 # ╔═╡ cf01bb77-9691-43e0-be5a-98756586aa9f
 Threads.nthreads()
+
+# ╔═╡ 29ba1511-0b1c-473f-a7f8-f2a88408ca1b
+md"## Determine timestep to use"
+
+# ╔═╡ 60163a70-1970-4855-b176-3c400a75c93c
+dt_values = analysis.dt_history(loader, false)
+
+# ╔═╡ b7274ebd-b883-4cdc-a8a7-42f491b4bfa6
+begin
+	res = 800, 600
+	local fig = Figure(resolution=res)
+
+	min_dt = minimum(dt_values)
+	local ax = Axis(fig[1,1], title = "time step frequency ($nx, $ny, $nz). min dt = $min_dt", xlabel = "dt", ylabel = "frequency")
+
+	hist!(
+		ax,
+		dt_values,
+		bins=30
+	)
+
+	fig
+end
+
+# ╔═╡ e3b84623-d9b2-4b1e-8b0f-07cdd0fc069f
+min_dt
+
+# ╔═╡ a7d759c4-4287-4259-834d-58859655cf20
+min_dt *0.9
+
+# ╔═╡ eeef4d2e-3f6a-4f82-9d58-920ab38aecde
+0.0009377425f0 + 0.0
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1657,10 +1776,19 @@ version = "3.5.0+0"
 # ╠═dfd1aba5-2db1-490a-94a8-ca24fabd7f31
 # ╠═ea91217d-2994-458c-b35d-6c33b810e047
 # ╠═854b1497-f598-46b7-8bc6-5fd8e07b5487
-# ╟─c3f5306c-4994-11ed-3c5a-f5804205840d
+# ╠═c3f5306c-4994-11ed-3c5a-f5804205840d
 # ╠═1c484032-7c09-45f0-a50c-95082ac6b921
+# ╠═f0dc3b51-5041-4f07-8058-065bfb86ad67
 # ╠═aa909845-6bda-468b-b797-daeb05ad4fb4
+# ╠═402bc98c-8741-4426-8348-0fb9619b03c2
 # ╠═4a94a12b-2c2a-4166-9b55-14f5cd0fa514
+# ╠═b41f5510-a79a-43d6-b7bc-4be57c089502
+# ╠═50b0266b-0a66-42c6-8273-6b779998c74f
+# ╠═9d385399-ffd7-4e0b-a143-1a49119a5280
+# ╠═dd5a54f7-5773-4983-a1e4-08e60231198c
+# ╠═824ff024-6a7f-40fc-b242-7ee24a7b3d31
+# ╠═2591ee3d-1eca-4f36-b385-c32c8415a8ba
+# ╠═85c118eb-a71c-40be-abbd-d665015926cd
 # ╠═72281877-92fe-49e8-aee5-5ae524512e15
 # ╠═06af6a34-6cf4-448a-9dda-53b2de0ba7eb
 # ╠═e7cd911e-22ec-46ba-8122-e15e1fb67719
@@ -1681,17 +1809,23 @@ version = "3.5.0+0"
 # ╠═3d57e1af-000d-47a2-b5a1-738d88cc4ecf
 # ╠═a6d90dfa-e11c-4d62-97c8-6d43c9e0d962
 # ╠═22cb7ad5-9b24-45c2-b384-8b746a4bb36d
-# ╠═8f463099-d412-4673-975f-ca18b62bf59f
-# ╠═effbff40-5a43-4429-8007-38d1da37133b
-# ╠═19b6df33-f67e-4677-9b38-89a4aa3ed422
-# ╠═2c9be9d4-bb45-4e55-b9c6-b74f2af75c5a
-# ╠═20c6dbb8-8d4a-4d4f-8ca7-290e6a505174
-# ╠═c12ecc52-6618-41af-8a9e-7ab21d9f331c
-# ╠═6a8cf949-6e90-40c4-a1d9-e0496a81b019
-# ╠═57b50107-97a0-4416-ad22-612933e9ba37
+# ╠═33ceb38a-f492-4f0f-b86d-6f5429065f9f
+# ╠═cbd9fa26-7063-47f3-8091-f898636d8e42
+# ╠═54c36eac-4e16-4c41-95fd-1528a4304ed2
 # ╠═e6abf6a4-b05e-4ce3-90d1-dd181512782b
+# ╠═a90e8c14-97d0-48a1-8765-905e37ba2be6
+# ╠═aa859cd0-6eab-49b4-9ccc-61475085a0be
+# ╠═ffed6dfd-1dd8-4cd0-aa62-bb5ca021de54
+# ╠═6b629692-820b-4d9e-bb1c-bad15aae3a04
+# ╠═338fc8c2-72ff-49e1-b402-a2d3cca306ee
+# ╠═8a251a3d-7c0f-483b-9c71-091606fad315
+# ╠═a367f9d4-30da-4134-9e9b-d76e3ce90a07
+# ╠═88e1422f-08ac-48c2-8583-3e76cee6c3de
+# ╠═badd1101-8d44-4961-a22b-651819d5c927
 # ╠═da6c4d34-25bf-461a-beac-5581213272e9
+# ╠═f6cfea66-7879-46d2-bc71-077662da21a7
 # ╠═2ecad180-37c3-4278-8886-e8d2ebeff3b7
+# ╠═0e9baa98-67e6-4fe4-a4b3-12da025981eb
 # ╠═b91c6497-5bde-4488-9d00-94b514f38334
 # ╠═2c08ac32-fcfa-499e-8811-aa38e86ad975
 # ╠═c211ea51-65ef-4175-be27-2489e2c70c9c
@@ -1700,5 +1834,11 @@ version = "3.5.0+0"
 # ╠═26a36735-c33b-4f28-8187-7bfc675035ea
 # ╠═cfabcc4b-b414-4f57-aaed-936794c715be
 # ╠═cf01bb77-9691-43e0-be5a-98756586aa9f
+# ╠═29ba1511-0b1c-473f-a7f8-f2a88408ca1b
+# ╠═60163a70-1970-4855-b176-3c400a75c93c
+# ╠═b7274ebd-b883-4cdc-a8a7-42f491b4bfa6
+# ╠═e3b84623-d9b2-4b1e-8b0f-07cdd0fc069f
+# ╠═a7d759c4-4287-4259-834d-58859655cf20
+# ╠═eeef4d2e-3f6a-4f82-9d58-920ab38aecde
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

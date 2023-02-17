@@ -105,7 +105,10 @@ pub(crate) fn run_local(args: cli::RunLocal) -> Result<()> {
     // if a directory was specified to run the solver then we format it to a binding for the
     // `apptainer run` comamnd, otherwise an empty string will not change the output
     let python_mount = if let Some(mount_path) = args.python_mount {
-        format!(",{}:/runtimesolver", mount_path.to_string_lossy().into_owned())
+        format!(
+            ",{}:/runtimesolver",
+            mount_path.to_string_lossy().into_owned()
+        )
     } else {
         "".to_string()
     };

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use vtk::DataArray;
 use vtk::ParseArray;
-use vtk::{Vector2D, Scalar2D};
+use vtk::{Scalar2D, Vector2D};
 
 #[derive(DataArray, ParseArray)]
 #[vtk_parse(spans = "vtk::Spans2D")]
