@@ -32,6 +32,10 @@ From: nv.sif
 	echo "NUMPY VERSION:"
 	pip freeze | grep numpy
 
+	pip3 install torch torchvision torchaudio gymnasium
+	echo "checking pytorch install and GPU availablility"
+	python3 -c "import torch; print(torch.cuda.is_available())"
+
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 	export PATH="$PATH":"$HOME/.cargo/bin"
 

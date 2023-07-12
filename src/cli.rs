@@ -43,7 +43,7 @@ pub(crate) struct Animate {
     #[clap(long, default_value_t = 1)]
     /// number to adjust the range by when iterating over the slices. If indexing
     /// from 1:100, and decimate = 5 then it will iterate by 1:5:100
-    pub(crate) decimate: usize
+    pub(crate) decimate: usize,
 }
 
 #[derive(Parser, Debug, Clone)]

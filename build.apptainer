@@ -13,30 +13,15 @@ Stage: build
 	${STREAMS_UTILS_DIR}/src/ /streams-utils/src
 	${STREAMS_UTILS_DIR}/Cargo.toml /streams-utils/Cargo.toml
 	${STREAMS_UTILS_DIR}/Cargo.lock /streams-utils/Cargo.lock
-	
-	# required to build distribute as a dependency
-	$HOME/.git-credentials /root/.git-credentials
 
 %post
 	echo "NUMPY VERSION:"
 	pip freeze | grep numpy
 
-	# this line must run to let git know that there might be a credential
-	# store already on disk
-	git config --global credential.helper store
-	cat /root/.git-credentials
-
 	echo "$HOME"
 
 	# hack to add cargo to path
 	export PATH="$PATH":"$HOME/.cargo/bin"
-
-	## clone the cuda samples directory
-	#which nvcc
-	#cd /
-	#git clone "https://github.com/Fluid-Dynamics-Group/cuda-samples" --depth 1
-	#cd /cuda-samples/Samples/0_Introduction/simpleZeroCopy
-	#make
 
 	# make streams
 	cd /streams/src
@@ -72,10 +57,6 @@ Stage: build
 	cd /streams-utils
 	cargo build --release
 
-
-	# flush the evidence
-	rm /root/.git-credentials
-
 Bootstrap: localimage
 From: base.sif 
 # use base here so that we have access to python still
@@ -90,7 +71,8 @@ From: base.sif
 	/streams/src/libstreams.cpython-38-x86_64-linux-gnu.so /libstreams.cpython-38-x86_64-linux-gnu.so
 
 	# copy python source code into container
-	/streams/python/ /python
+	/streams/streamspy/ /streamspy
+	/streams/pyproject.toml /
 
 %post
 
@@ -101,6 +83,14 @@ From: base.sif
 	cp /libstreams* /usr/local/lib/python3.8/dist-packages/
 
 	ls /usr/local/lib/python3.8/dist-packages/
+
+	## install streamspy as a package
+	#python3 -m pip install flit
+	#cd /
+	#export FLIT_ROOT_INSTALL=1
+	#pip install .
+	#python3 -c "import streamspy; print(dir(streamspy))"
+
 
 %apprun distribute
 	cd /

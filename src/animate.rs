@@ -14,8 +14,12 @@ pub(crate) fn animate(args: cli::Animate) -> Result<()> {
         std::fs::remove_dir_all(&animation_output_folder).ok();
     }
 
-    std::fs::create_dir(&animation_output_folder)
-        .with_context(|| format!("failed to create animation output folder at {}", animation_output_folder.display()))?;
+    std::fs::create_dir(&animation_output_folder).with_context(|| {
+        format!(
+            "failed to create animation output folder at {}",
+            animation_output_folder.display()
+        )
+    })?;
 
     let span_averages_path = args.data_folder.join("span_averages.h5");
 
@@ -40,7 +44,11 @@ pub(crate) fn animate(args: cli::Animate) -> Result<()> {
 
     partitions.into_par_iter().for_each(|partition| {
         let sh = Shell::new().unwrap();
-        let AnimationSpan { start_idx, end_idx, cpu_number } = partition;
+        let AnimationSpan {
+            start_idx,
+            end_idx,
+            cpu_number,
+        } = partition;
         let start_idx = start_idx.to_string();
         let end_idx = end_idx.to_string();
 
@@ -48,7 +56,10 @@ pub(crate) fn animate(args: cli::Animate) -> Result<()> {
         // of memory to compile so we stagger them here
         std::thread::sleep(std::time::Duration::from_secs(30 * cpu_number as u64));
 
-        let cmd = cmd!(sh, "julia {ANIMATE_SCRIPT} {start_idx} {end_idx} {decimate} {folder_list}");
+        let cmd = cmd!(
+            sh,
+            "julia {ANIMATE_SCRIPT} {start_idx} {end_idx} {decimate} {folder_list}"
+        );
         cmd.run().unwrap();
     });
 
@@ -72,8 +83,13 @@ fn reorganize_folder(animation_folder: &Path) -> Result<()> {
     for (idx, file) in entries.into_iter().enumerate() {
         let new_path = animation_folder.join(format!("anim_{idx:05}.png"));
 
-        std::fs::rename(&file, &new_path)
-            .with_context(|| format!("failed to rename {} to {}", file.display(), new_path.display()))?;
+        std::fs::rename(&file, &new_path).with_context(|| {
+            format!(
+                "failed to rename {} to {}",
+                file.display(),
+                new_path.display()
+            )
+        })?;
     }
 
     Ok(())
@@ -110,13 +126,21 @@ fn partition_animation_indicies(num_cpus: usize, total_indicies: usize) -> Vec<A
 
         last_end_idx = end_idx;
 
-        spans.push(AnimationSpan { start_idx, end_idx, cpu_number });
+        spans.push(AnimationSpan {
+            start_idx,
+            end_idx,
+            cpu_number,
+        });
     }
 
     let start_idx = last_end_idx + 1;
     let end_idx = total_indicies;
 
-    spans.push(AnimationSpan { start_idx, end_idx, cpu_number: num_cpus-1 });
+    spans.push(AnimationSpan {
+        start_idx,
+        end_idx,
+        cpu_number: num_cpus - 1,
+    });
 
     spans
 }

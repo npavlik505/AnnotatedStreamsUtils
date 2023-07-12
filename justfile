@@ -25,41 +25,43 @@ build:
 
 # build a config json file as input to the solver
 config_output := "./output/input.json"
-streams_flow_type := "shock-boundary-layer"
+#streams_flow_type := "shock-boundary-layer"
+streams_flow_type := "boundary-layer"
 
 config:
 	echo {{config_output}}
 
 	# 600, 208, 100
+	#--fixed-dt 0.0008439 \
 
 	cargo r -- config-generator {{config_output}} \
 		{{streams_flow_type}} \
-		--steps 100 \
-		--mach-number 2.28 \
-		--x-divisions 600 \
-		--y-divisions 208 \
+		--steps 10 \
+		--reynolds-number 250 \
+		--mach-number 0. \
+		--x-divisions 300 \
+		--y-divisions 300 \
 		--z-divisions 100 \
 		--json \
-		--x-length 27.0 \
-		--y-length 6.0 \
-		--mpi-x-split 4 \
-		--span-average-io-steps 10 \
+		--x-length 3.0 \
+		--y-length 3.0 \
+		--rly-wr 0.5 \
+		--mpi-x-split 1 \
+		--span-average-io-steps 1 \
 		--python-flowfield-steps 1000 \
 		--use-python \
 		--nymax-wr 99 \
 		--sensor-threshold 0.1 \
-		--fixed-dt 0.0008439 \
-		sinusoidal \
+		constant \
 			--amplitude 1.0 \
-			--angular-frequency 1.57 \
 			--slot-start 100 \
-			--slot-end 149
+			--slot-end 200
 
 	cat {{config_output}}
 
 jet_validation_base_path := "./distribute/jet_validation/"
 
-jet_validation_number := "12"
+jet_validation_number := "20"
 jet_validation_batch_name := "jet_validation_" + jet_validation_number
 jet_valiation_output_folder := jet_validation_base_path + jet_validation_batch_name
 
@@ -73,7 +75,7 @@ jet_validation:
 		{{jet_valiation_output_folder}} \
 		--batch-name {{jet_validation_batch_name}} \
 		--solver-sif ./streams.sif \
-		--steps 10000 \
+		--steps 50000 \
 		--database-bl {{database_bl}} \
 		--matrix @karlik:matrix.org
 
@@ -118,7 +120,7 @@ run:
 		--workdir ./output/ \
 		--config ./output/input.json \
 		--database {{database_bl}} \
-		--python-mount $STREAMS_DIR/python \
+		--python-mount $STREAMS_DIR/streamspy \
 		16
 
 # get a shell inside the container

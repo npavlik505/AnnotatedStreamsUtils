@@ -11,8 +11,10 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
     let amplitudes = [1.0];
     //let signs = [1.0, -1.0];
     let signs = [1.0];
-    //let y_points = [208, 400, 600, 800, 1000, 1200];
-    let y_points = [600];
+    let y_points = [300];
+
+    // smaller number means better grid concentration towards the bottom
+    let rly_wr = 0.5;
 
     let base_config = Config {
         reynolds_number: 250.0,
@@ -20,9 +22,9 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         shock_angle: 8.0,
         //x_length: 70.0,
         x_length: 3.0,
-        x_divisions: 100,
-        y_length: 6.,
-        y_divisions: 600,
+        x_divisions: 300,
+        y_length: 3.,
+        y_divisions: 300,
         z_length: 3.8,
         z_divisions: 100,
         mpi_x_split: 4,
@@ -34,8 +36,8 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         use_python: true,
         fixed_dt: None,
         python_flowfield_steps: Some(1000),
-        rly_wr: 2.5,
-        nymax_wr: 201,
+        rly_wr,
+        nymax_wr: 99,
         probe_locations_x: Vec::new(),
         probe_locations_z: Vec::new(),
         flow_type: FlowType::BoundaryLayer,
@@ -43,8 +45,8 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         shock_impingement: 15.,
     };
 
-    let slot_start = 33;
-    let slot_end = 66;
+    let slot_start = 100;
+    let slot_end = 200;
 
     let cases = itertools::iproduct!(
         amplitudes.into_iter(),
