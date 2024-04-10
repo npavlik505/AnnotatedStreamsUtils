@@ -262,8 +262,6 @@ impl ConfigGenerator {
             z_divisions,
             mpi_x_split,
             steps,
-            probe_io_steps,
-            span_average_io_steps,
             blowing_bc,
             snapshots_3d,
             use_python,

@@ -177,8 +177,6 @@ fn check_probes(args: SbliCases) -> Result<()> {
     let mut case = case.into_serializable();
 
     case.steps = 100;
-    case.probe_io_steps = 5;
-    case.span_average_io_steps = 5;
 
     let gpu_memory = Some(crate::config_generator::Megabytes(11 * 10usize.pow(3)));
     case.validate(gpu_memory)?;
