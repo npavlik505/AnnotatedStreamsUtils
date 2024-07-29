@@ -1,9 +1,11 @@
 use crate::prelude::*;
+// Bring various clap traits into scope
 use clap::Parser;
 use clap::Subcommand;
 use clap::ValueEnum;
 use std::path::PathBuf;
 
+// The Args struct, with the field called Command, is used in main to determine the module and function to run based on justfile terminal command that was run.
 /// utilities for working with the streams solver
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -12,6 +14,7 @@ pub(crate) struct Args {
     pub(crate) mode: Command,
 }
 
+// Command is an enum with variants for every terminal commmand available to run in the justfile. Each variant contains a struct, listed below, with info that will be passed forward in the code via Args.mode
 #[derive(Subcommand, Debug, Clone)]
 pub(crate) enum Command {
     /// generate distribute compute cases
@@ -46,6 +49,7 @@ pub(crate) struct Animate {
     pub(crate) decimate: usize,
 }
 
+// Struct for ConfigGenerator command
 #[derive(Parser, Debug, Clone)]
 /// Fields that are configurable for generating input.dat files for the solver
 pub(crate) struct ConfigGenerator {
@@ -177,6 +181,7 @@ pub(crate) struct ConfigGenerator {
     pub(crate) shock_impingement: f64,
 }
 
+// implementation of ConfigGenerator struct with
 impl ConfigGenerator {
     /// create a default config to be written to a given path
     pub(crate) fn with_path(output_path: PathBuf) -> Self {
@@ -479,6 +484,8 @@ pub(crate) struct RunLocal {
     /// the number of processes that this program is allowed to use
     pub(crate) nproc: usize,
 
+    // #[clap(long)] means that the command line argument with a long flag and of the corresonding field (e.g. --workdir)...
+    // will be assigned to the struct field.
     #[clap(long)]
     /// working dir to run the solver in
     pub(crate) workdir: PathBuf,

@@ -60,19 +60,24 @@ pub(crate) fn config_generator(args: ConfigGenerator) -> anyhow::Result<()> {
     // validate that the parameters can be run on the gpu
     config.validate(gpu_memory)?;
 
-    if !dry {
-        if json {
+    if !dry { // dry, which is a boolean in the justfile and currented housed in the args struct, skips cofig file generation if true.
+        if json { // saves output to json format if true
+            // creates a file at output path or, if Err, returns error message
             let file = std::fs::File::create(&output_path).with_context(|| {
                 format!(
                     "failed to create json output file at {}",
                     output_path.display()
                 )
             })?;
+            // Using the file that was just created and referencing config, which is housing justfile config args,...
+            // the json file is created or an error message is returned. 
             serde_json::to_writer_pretty(file, &config).with_context(|| {
                 format!("failed to serialize data to json file. This should not happen")
             })?;
             Ok(())
-        } else {
+        // If json false, then a json file is not created and more or less equivalent function (directly below) is run...
+        // to create a config text file to be run in the solver     
+        } else { 
             _config_generator(&config, output_path)
         }
     } else {

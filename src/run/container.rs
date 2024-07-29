@@ -5,8 +5,10 @@ use super::postprocess;
 
 /// running routine for the solver once activated within the container
 pub(crate) fn run_container(_args: cli::RunContainer) -> anyhow::Result<()> {
+    // records the time so that the total elapsed time can later be calculated
     let start = std::time::Instant::now();
 
+    // assigns file paths to three variables
     let path = PathBuf::from("/input/input.json");
     let dist_save = PathBuf::from("/distribute_save");
     let input_dat = PathBuf::from("/distribute_save/input.dat");
@@ -43,16 +45,21 @@ pub(crate) fn run_container(_args: cli::RunContainer) -> anyhow::Result<()> {
 
     let sh = xshell::Shell::new()?;
 
-    // choose the nproc
+    // choose the nproc (i.e. number of processors)
     let nproc = (config.mpi_x_split * 1).to_string();
 
+    // if use_python set to true, then main.py will be the point of entry to the streams code
     if config.use_python {
+        // assigns runtimesolver (type path) to the runtime_py variable
         let runtime_py = PathBuf::from("/runtimesolver/");
+        // assigns streamspy (type path) to the static_py variable
         let static_py = PathBuf::from("/streamspy/");
 
+        // solver_py is set to runtime_py if it exists (i.e. runtimesolver, which is $STREAMS_DIR/streamspy)
         let solver_py = if runtime_py.exists() {
             println!("running python bindings with runtime solver");
             runtime_py
+        // or solver_py is set to static_py (i.e. streamspy)
         } else {
             println!("running static python bindings");
             static_py
@@ -62,6 +69,8 @@ pub(crate) fn run_container(_args: cli::RunContainer) -> anyhow::Result<()> {
 
         println!("Now running solver, STDOUT will be hidden until it finishes");
         exec.run()?;
+    
+    // if use_python set to false, then standard streams will be run using streams.exe
     } else {
         // TODO: make this command share the current stdout
         let exec = xshell::cmd!(sh, "mpirun -np {nproc} /streams.exe");

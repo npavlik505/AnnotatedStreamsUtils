@@ -1,8 +1,12 @@
 use crate::prelude::*;
+
+// imports container.rs and local.rs
 mod container;
 mod local;
 
+// The run_container function called by main.rs is brought into scope from container.rs
 pub(crate) use container::run_container;
+// The run_local function called by main.rs is brought into scope from local.rs
 pub(crate) use local::run_local;
 
 use anyhow::Result;
