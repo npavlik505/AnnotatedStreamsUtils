@@ -1,1 +1,0 @@
-/usr/bin/cc   -std=c99  -ffunction-sections -fdata-sections -fPIC -m64 -Og -ftrapv -fno-common -fmessage-length=0 -g CMakeFiles/H5detect.dir/H5detect.c.o -o ../bin/H5detect  -Wl,-rpath,"\$ORIGIN/../lib:\$ORIGIN/" 

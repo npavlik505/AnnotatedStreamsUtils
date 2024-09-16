@@ -7,7 +7,8 @@ nv:
 
 	sudo apptainer build \
 		nv.sif \
-		"docker://nvcr.io/nvidia/nvhpc:22.1-devel-cuda_multi-ubuntu20.04"
+		"docker://nvcr.io/nvidia/nvhpc:24.7-devel-cuda_multi-ubuntu22.04"
+#"docker://nvcr.io/nvidia/nvhpc:22.1-devel-cuda_multi-ubuntu20.04"
 
 base:
 	mkdir -p $APPTAINER_TMPDIR
