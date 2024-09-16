@@ -1,0 +1,573 @@
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    CMAKE_ASM_COMPILER
+    CMAKE_ASM_FLAGS
+    HDF5_BUILD_EXAMPLES
+
+
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c: In function ‘H5B2__iterate_node’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c:1521:68: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1521 |         if(NULL == (internal = H5B2__protect_internal(hdr, parent, (H5B2_node_ptr_t *)curr_node, depth, FALSE, H5AC__READ_ONLY_FLAG))) /* Casting away const OK -QAK */
+      |                                                                    ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c:1540:60: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1540 |         if(NULL == (leaf = H5B2__protect_leaf(hdr, parent, (H5B2_node_ptr_t *)curr_node, FALSE, H5AC__READ_ONLY_FLAG)))   /* Casting away const OK -QAK */
+      |                                                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Adense.c: In function ‘H5A__dense_fnd_cb’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Adense.c:314:27: warning: initialization discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  314 |         H5A_t *old_attr = *user_attr;
+      |                           ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c: In function ‘H5B2__delete_node’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c:1630:68: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1630 |         if(NULL == (internal = H5B2__protect_internal(hdr, parent, (H5B2_node_ptr_t *)curr_node, depth, FALSE, H5AC__NO_FLAGS_SET)))   /* Casting away const OK -QAK */
+      |                                                                    ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c:1647:60: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1647 |         if(NULL == (leaf = H5B2__protect_leaf(hdr, parent, (H5B2_node_ptr_t *)curr_node, FALSE, H5AC__NO_FLAGS_SET)))     /* Casting away const OK -QAK */
+      |                                                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c: In function ‘H5B2__node_size’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c:1706:64: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1706 |     if(NULL == (internal = H5B2__protect_internal(hdr, parent, (H5B2_node_ptr_t *)curr_node, depth, FALSE, H5AC__READ_ONLY_FLAG)))     /* Casting away const OK -QAK */
+      |                                                                ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c: In function ‘H5B2__update_flush_depend’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c:1808:77: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1808 |             if(NULL == (child_int = H5B2__protect_internal(hdr, new_parent, (H5B2_node_ptr_t *)node_ptr, (uint16_t)(depth - 1), FALSE, H5AC__NO_FLAGS_SET)))      /* Casting away const OK -QAK */
+      |                                                                             ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c:1824:74: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1824 |             if(NULL == (child_leaf = H5B2__protect_leaf(hdr, new_parent, (H5B2_node_ptr_t *)node_ptr, FALSE, H5AC__NO_FLAGS_SET)))    /* Casting away const OK -QAK */
+      |                                                                          ^
+In file included from /usr/include/stdio.h:980,
+                 from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:56,
+                 from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c:32:
+In function ‘sprintf’,
+    inlined from ‘H5_timer_get_time_string’ at /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c:658:9:
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:30:10: warning: ‘days’ may be used uninitialized [-Wmaybe-uninitialized]
+   30 |   return __builtin___sprintf_chk (__s, __USE_FORTIFY_LEVEL - 1,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   31 |                                   __glibc_objsize (__s), __fmt,
+      |                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   32 |                                   __va_arg_pack ());
+      |                                   ~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c: In function ‘H5_timer_get_time_string’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c:600:12: note: ‘days’ was declared here
+  600 |     double days;
+      |            ^~~~
+In function ‘sprintf’,
+    inlined from ‘H5_timer_get_time_string’ at /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c:658:9:
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:30:10: warning: ‘hours’ may be used uninitialized [-Wmaybe-uninitialized]
+   30 |   return __builtin___sprintf_chk (__s, __USE_FORTIFY_LEVEL - 1,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   31 |                                   __glibc_objsize (__s), __fmt,
+      |                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   32 |                                   __va_arg_pack ());
+      |                                   ~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c: In function ‘H5_timer_get_time_string’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c:601:12: note: ‘hours’ was declared here
+  601 |     double hours;
+      |            ^~~~~
+In function ‘sprintf’,
+    inlined from ‘H5_timer_get_time_string’ at /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c:658:9:
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:30:10: warning: ‘minutes’ may be used uninitialized [-Wmaybe-uninitialized]
+   30 |   return __builtin___sprintf_chk (__s, __USE_FORTIFY_LEVEL - 1,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   31 |                                   __glibc_objsize (__s), __fmt,
+      |                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   32 |                                   __va_arg_pack ());
+      |                                   ~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c: In function ‘H5_timer_get_time_string’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c:602:12: note: ‘minutes’ was declared here
+  602 |     double minutes;
+      |            ^~~~~~~
+In function ‘sprintf’,
+    inlined from ‘H5_timer_get_time_string’ at /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c:658:9:
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:30:10: warning: ‘remainder_sec’ may be used uninitialized [-Wmaybe-uninitialized]
+   30 |   return __builtin___sprintf_chk (__s, __USE_FORTIFY_LEVEL - 1,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   31 |                                   __glibc_objsize (__s), __fmt,
+      |                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   32 |                                   __va_arg_pack ());
+      |                                   ~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c: In function ‘H5_timer_get_time_string’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5timer.c:603:12: note: ‘remainder_sec’ was declared here
+  603 |     double remainder_sec;
+      |            ^~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c:1845:25: warning: ‘parent_ptr’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1845 |             *parent_ptr = new_parent;
+      |             ~~~~~~~~~~~~^~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5B2int.c:1800:16: note: ‘parent_ptr’ was declared here
+ 1800 |         void **parent_ptr;                  /* Pointer to child node's parent */
+      |                ^~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c: In function ‘H5D__chunk_io_init’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:1129:60: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1129 |     if((file_space_normalized = H5S_hyper_normalize_offset((H5S_t *)file_space, old_offset)) < 0)
+      |                                                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:1166:41: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1166 |         if(H5S_hyper_denormalize_offset((H5S_t *)file_space, old_offset) < 0)       /* (Casting away const OK -QAK) */
+      |                                         ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c: In function ‘H5D__create_chunk_map_single’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:1590:26: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1590 |     chunk_info->mspace = (H5S_t *)fm->mem_space;
+      |                          ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c: In function ‘H5D__create_chunk_file_map_hyper’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:1873:40: warning: passing argument 1 of ‘H5S_combine_hyperslab’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+ 1873 |             if(H5S_combine_hyperslab(fm->file_space, H5S_SELECT_AND, coords, NULL, fm->chunk_dim, NULL, &tmp_fchunk) < 0)
+      |                                      ~~^~~~~~~~~~~~
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Rprivate.h:26,
+                 from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tprivate.h:32,
+                 from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Zprivate.h:28,
+                 from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5CXprivate.h:30,
+                 from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:55:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Sprivate.h:313:44: note: expected ‘H5S_t *’ but argument is of type ‘const H5S_t *’
+  313 | H5_DLL herr_t H5S_combine_hyperslab(H5S_t *old_space, H5S_seloper_t op,
+      |                                     ~~~~~~~^~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c: In function ‘H5D__create_chunk_mem_map_hyper’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:2023:30: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 2023 |         chunk_info->mspace = (H5S_t *)fm->mem_space;
+      |                              ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c: In function ‘H5D__create_chunk_mem_map_1d’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:2146:30: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 2146 |         chunk_info->mspace = (H5S_t *)fm->mem_space;
+      |                              ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c: In function ‘H5D__chunk_allocate’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:4433:17: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 4433 |                 (void *)pline, (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline,
+      |                 ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:4433:32: warning: cast between incompatible function types from ‘void * (*)(void *, const H5O_pline_t *)’ to ‘void (*)(void *, void *)’ [-Wcast-function-type]
+ 4433 |                 (void *)pline, (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline,
+      |                                ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:4433:67: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 4433 |                 (void *)pline, (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline,
+      |                                                                   ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:4482:22: warning: assignment discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+ 4482 |     idx_info.storage = sc;
+      |                      ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c: In function ‘H5D__chunk_copy_cb’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:6159:111: warning: passing argument 5 of ‘H5D__chunk_file_alloc’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+ 6159 |     if(H5D__chunk_file_alloc(udata->idx_info_dst, NULL, &udata_dst.chunk_block, &need_insert, udata_dst.common.scaled) < 0)
+      |                                                                                               ~~~~~~~~~~~~~~~~^~~~~~~
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dchunk.c:56:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dpkg.h:653:59: note: expected ‘hsize_t *’ {aka ‘long long unsigned int *’} but argument is of type ‘const hsize_t *’ {aka ‘const long long unsigned int *’}
+  653 |     H5F_block_t *new_chunk, hbool_t *need_insert, hsize_t scaled[]);
+      |                                                   ~~~~~~~~^~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dint.c: In function ‘H5D__init_type’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dint.c:563:30: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  563 |         dset->shared->type = (H5T_t *)type; /* (Cast away const OK - QAK) */
+      |                              ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dio.c: In function ‘H5D__read’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dio.c:524:66: warning: to be safe all intermediate pointers in cast from ‘void **’ to ‘const void **’ must be ‘const’ qualified [-Wcast-qual]
+  524 |                 (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, (const void **)&adj_buf, type_info.dst_type_size) < 0)
+      |                                                                  ^
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dint.c:24:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dint.c: In function ‘H5D_nameof’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dint.c:2230:49: warning: return discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+ 2230 |     FUNC_LEAVE_NOAPI(dataset ? &(dataset->path) : NULL)
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2437:12: note: in definition of macro ‘FUNC_LEAVE_NOAPI’
+ 2437 |     return(ret_value);                                                        \
+      |            ^~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dio.c: In function ‘H5D__write’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dio.c:756:66: warning: to be safe all intermediate pointers in cast from ‘void **’ to ‘const void **’ must be ‘const’ qualified [-Wcast-qual]
+  756 |                 (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, (const void **)&adj_buf, type_info.src_type_size) < 0)
+      |                                                                  ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dint.c: In function ‘H5D_flush_all’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dint.c:3327:52: warning: passing argument 3 of ‘H5I_iterate’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+ 3327 |     if(H5I_iterate(H5I_DATASET, H5D__flush_all_cb, f, FALSE) < 0) /* Casting away const OK -QAK */
+      |                                                    ^
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Dint.c:31:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Iprivate.h:70:74: note: expected ‘void *’ but argument is of type ‘const H5F_t *’
+   70 | H5_DLL herr_t H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_ref);
+      |                                                                    ~~~~~~^~~~~
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDdirect.c:26:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDdrvr_module.h:27:25: warning: ‘H5FD__init_package’ declared ‘static’ but never defined [-Wunused-function]
+   27 | #define H5_MY_PKG       H5FD
+      |                         ^~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1662:28: note: in definition of macro ‘H5_GLUE’
+ 1662 | #define H5_GLUE(x,y)       x##y
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2498:52: note: in expansion of macro ‘H5_PACKAGE_INIT_FUNC’
+ 2498 | #define H5_PKG_DECLARE_YES_FUNC(pkg) static herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
+      |                                                    ^~~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1663:28: note: in expansion of macro ‘H5_PKG_DECLARE_YES_FUNC’
+ 1663 | #define H5_GLUE3(x,y,z)    x##y##z
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2513:1: note: in expansion of macro ‘H5_PKG_DECLARE_FUNC’
+ 2513 | H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
+      | ^~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2513:37: note: in expansion of macro ‘H5_MY_PKG’
+ 2513 | H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
+      |                                     ^~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDhdfs.c: In function ‘H5Pget_fapl_hdfs’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDhdfs.c:1761:24: warning: unused parameter ‘fapl_id’ [-Wunused-parameter]
+ 1761 | H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
+      |                  ~~~~~~^~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDhdfs.c:1761:51: warning: unused parameter ‘fa_out’ [-Wunused-parameter]
+ 1761 | H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
+      |                                 ~~~~~~~~~~~~~~~~~~^~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDhdfs.c: In function ‘H5Pset_fapl_hdfs’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDhdfs.c:1775:24: warning: unused parameter ‘fapl_id’ [-Wunused-parameter]
+ 1775 | H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
+      |                  ~~~~~~^~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDhdfs.c:1775:51: warning: unused parameter ‘fa’ [-Wunused-parameter]
+ 1775 | H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
+      |                                 ~~~~~~~~~~~~~~~~~~^~
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDmirror.c:20:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDdrvr_module.h:27:25: warning: ‘H5FD__init_package’ declared ‘static’ but never defined [-Wunused-function]
+   27 | #define H5_MY_PKG       H5FD
+      |                         ^~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1662:28: note: in definition of macro ‘H5_GLUE’
+ 1662 | #define H5_GLUE(x,y)       x##y
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2498:52: note: in expansion of macro ‘H5_PACKAGE_INIT_FUNC’
+ 2498 | #define H5_PKG_DECLARE_YES_FUNC(pkg) static herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
+      |                                                    ^~~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1663:28: note: in expansion of macro ‘H5_PKG_DECLARE_YES_FUNC’
+ 1663 | #define H5_GLUE3(x,y,z)    x##y##z
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2513:1: note: in expansion of macro ‘H5_PKG_DECLARE_FUNC’
+ 2513 | H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
+      | ^~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2513:37: note: in expansion of macro ‘H5_MY_PKG’
+ 2513 | H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
+      |                                     ^~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDdrvr_module.h:27:25: warning: ‘H5FD_init_g’ defined but not used [-Wunused-variable]
+   27 | #define H5_MY_PKG       H5FD
+      |                         ^~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1662:28: note: in definition of macro ‘H5_GLUE’
+ 1662 | #define H5_GLUE(x,y)       x##y
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2506:56: note: in expansion of macro ‘H5_PACKAGE_INIT_VAR’
+ 2506 | #define H5_PKG_DECLARE_VAR(pkg)         static hbool_t H5_PACKAGE_INIT_VAR(pkg);
+      |                                                        ^~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2512:1: note: in expansion of macro ‘H5_PKG_DECLARE_VAR’
+ 2512 | H5_PKG_DECLARE_VAR(H5_MY_PKG)
+      | ^~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2512:20: note: in expansion of macro ‘H5_MY_PKG’
+ 2512 | H5_PKG_DECLARE_VAR(H5_MY_PKG)
+      |                    ^~~~~~~~~
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDros3.c:28:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDdrvr_module.h:27:25: warning: ‘H5FD__init_package’ declared ‘static’ but never defined [-Wunused-function]
+   27 | #define H5_MY_PKG       H5FD
+      |                         ^~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1662:28: note: in definition of macro ‘H5_GLUE’
+ 1662 | #define H5_GLUE(x,y)       x##y
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2498:52: note: in expansion of macro ‘H5_PACKAGE_INIT_FUNC’
+ 2498 | #define H5_PKG_DECLARE_YES_FUNC(pkg) static herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
+      |                                                    ^~~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1663:28: note: in expansion of macro ‘H5_PKG_DECLARE_YES_FUNC’
+ 1663 | #define H5_GLUE3(x,y,z)    x##y##z
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2513:1: note: in expansion of macro ‘H5_PKG_DECLARE_FUNC’
+ 2513 | H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
+      | ^~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2513:37: note: in expansion of macro ‘H5_MY_PKG’
+ 2513 | H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
+      |                                     ^~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDdrvr_module.h:27:25: warning: ‘H5FD_init_g’ defined but not used [-Wunused-variable]
+   27 | #define H5_MY_PKG       H5FD
+      |                         ^~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1662:28: note: in definition of macro ‘H5_GLUE’
+ 1662 | #define H5_GLUE(x,y)       x##y
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2506:56: note: in expansion of macro ‘H5_PACKAGE_INIT_VAR’
+ 2506 | #define H5_PKG_DECLARE_VAR(pkg)         static hbool_t H5_PACKAGE_INIT_VAR(pkg);
+      |                                                        ^~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2512:1: note: in expansion of macro ‘H5_PKG_DECLARE_VAR’
+ 2512 | H5_PKG_DECLARE_VAR(H5_MY_PKG)
+      | ^~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2512:20: note: in expansion of macro ‘H5_MY_PKG’
+ 2512 | H5_PKG_DECLARE_VAR(H5_MY_PKG)
+      |                    ^~~~~~~~~
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDmpio.c:25:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FDdrvr_module.h:27:25: warning: ‘H5FD__init_package’ declared ‘static’ but never defined [-Wunused-function]
+   27 | #define H5_MY_PKG       H5FD
+      |                         ^~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1662:28: note: in definition of macro ‘H5_GLUE’
+ 1662 | #define H5_GLUE(x,y)       x##y
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2498:52: note: in expansion of macro ‘H5_PACKAGE_INIT_FUNC’
+ 2498 | #define H5_PKG_DECLARE_YES_FUNC(pkg) static herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
+      |                                                    ^~~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:1663:28: note: in expansion of macro ‘H5_PKG_DECLARE_YES_FUNC’
+ 1663 | #define H5_GLUE3(x,y,z)    x##y##z
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2513:1: note: in expansion of macro ‘H5_PKG_DECLARE_FUNC’
+ 2513 | H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
+      | ^~~~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5private.h:2513:37: note: in expansion of macro ‘H5_MY_PKG’
+ 2513 | H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
+      |                                     ^~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gent.c: In function ‘H5G__ent_copy’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gent.c:338:24: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  338 |         H5G__ent_reset((H5G_entry_t *)src);
+      |                        ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gloc.c: In function ‘H5G__loc_insert’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gloc.c:565:16: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  565 |     lnk.name = (char *)name;
+      |                ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gloc.c: In function ‘H5G__loc_set_comment_cb’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gloc.c:775:21: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  775 |         comment.s = (char *)udata->comment;
+      |                     ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gname.c: In function ‘H5G_name_copy’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gname.c:532:24: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  532 |         H5G_name_reset((H5G_name_t *)src);
+      |                        ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gobj.c: In function ‘H5G__obj_create_real’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gobj.c:264:67: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  264 |         if(H5O_msg_create(oloc, H5O_LINFO_ID, 0, H5O_UPDATE_TIME, (void *)linfo) < 0)
+      |                                                                   ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gobj.c:269:73: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  269 |         if(H5O_msg_create(oloc, H5O_GINFO_ID, H5O_MSG_FLAG_CONSTANT, 0, (void *)ginfo) < 0)
+      |                                                                         ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gobj.c:275:77: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  275 |             if(H5O_msg_create(oloc, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, (void *)pline) < 0)
+      |                                                                             ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gobj.c: In function ‘H5G_obj_stab_to_new_cb’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gobj.c:422:51: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  422 |     if(H5G_obj_insert(udata->grp_oloc, lnk->name, (H5O_link_t *)lnk, FALSE, H5O_TYPE_UNKNOWN, NULL) < 0)
+      |                                                   ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gnode.c: In function ‘H5G__node_copy’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gnode.c:1255:28: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1255 |             grp_loc.oloc = (H5O_loc_t *)src_oloc;
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gobj.c: In function ‘H5G__obj_info’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gobj.c:735:37: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  735 |     if(H5O_loc_copy_deep(&grp_oloc, (H5O_loc_t *)oloc) < 0)
+      |                                     ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gtraverse.c: In function ‘H5G__traverse_real’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gtraverse.c:726:52: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  726 |                     if(H5O_msg_reset(H5O_GINFO_ID, (void *)ginfo) < 0)
+      |                                                    ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gtraverse.c:730:52: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  730 |                     if(H5O_msg_reset(H5O_LINFO_ID, (void *)linfo) < 0)
+      |                                                    ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gtraverse.c:734:52: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  734 |                     if(H5O_msg_reset(H5O_PLINE_ID, (void *)pline) < 0)
+      |                                                    ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HF.c: In function ‘H5HF_op_write’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HF.c:132:17: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  132 |     H5MM_memcpy((void *)obj, op_data, obj_len);    /* Casting away const OK -QAK */
+      |                 ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HF.c: In function ‘H5HF_insert’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HF.c:371:41: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  371 |         if(H5HF__huge_insert(hdr, size, (void *)obj, id) < 0)
+      |                                         ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HFcache.c: In function ‘H5HF__cache_hdr_serialize’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HFcache.c:770:12: warning: assignment discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  770 |     hdr->f = f;
+      |            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HFcache.c: In function ‘H5HF__cache_iblock_serialize’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HFcache.c:1360:12: warning: assignment discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+ 1360 |     hdr->f = f;
+      |            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HFcache.c: In function ‘H5HF__cache_dblock_verify_chksum’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HFcache.c:1689:20: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1689 |         read_buf = (void *)image;       /* Casting away const OK - QAK */
+      |                    ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HFman.c: In function ‘H5HF__man_write’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5HFman.c:500:50: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  500 |     if(H5HF__man_op_real(hdr, id, H5HF_op_write, (void *)obj, H5HF_OP_MODIFY) < 0)
+      |                                                  ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5L.c: In function ‘H5L__link_cb’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5L.c:1685:24: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1685 |     udata->lnk->name = (char *)name;
+      |                        ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5L.c: In function ‘H5L__move_dest_cb’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5L.c:2477:24: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 2477 |     udata->lnk->name = (char *)name;
+      |                        ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5L.c: In function ‘H5L__link_copy_file’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5L.c:3231:28: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 3231 |         lnk_grp_loc.oloc = (H5O_loc_t *)src_oloc;    /* Casting away const OK -QAK */
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5O.c: In function ‘H5Oget_info_by_idx’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5O.c:1169:17: warning: unused variable ‘obj_oloc’ [-Wunused-variable]
+ 1169 |     H5O_loc_t   obj_oloc;               /* Opened object object location */
+      |                 ^~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: In function ‘H5I__clear_type_cb’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:548:81: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  548 |         if(udata->type_ptr->cls->free_func && (udata->type_ptr->cls->free_func)((void *)id->obj_ptr) < 0) { /* (Casting away const OK -QAK) */
+      |                                                                                 ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5O.c:1168:17: warning: unused variable ‘obj_path’ [-Wunused-variable]
+ 1168 |     H5G_name_t  obj_path;               /* Opened object group hier. path */
+      |                 ^~~~~~~~
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:37:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: In function ‘H5I__destroy_type’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:654:48: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  654 |         type_ptr->cls = H5FL_FREE(H5I_class_t, (void *)type_ptr->cls);
+      |                                                ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5FLprivate.h:128:65: note: in definition of macro ‘H5FL_FREE’
+  128 | #define H5FL_FREE(t,obj) (t *)H5FL_reg_free(&(H5FL_REG_NAME(t)),obj)
+      |                                                                 ^~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: In function ‘H5I_subst’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:850:17: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  850 |     ret_value = (void *)id_ptr->obj_ptr;        /* (Casting away const OK -QAK) */
+      |                 ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: In function ‘H5I_object’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:883:21: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  883 |         ret_value = (void *)id_ptr->obj_ptr;        /* (Casting away const OK -QAK) */
+      |                     ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: In function ‘H5I_object_verify’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:952:21: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  952 |         ret_value = (void *)id_ptr->obj_ptr;        /* (Casting away const OK -QAK) */
+      |                     ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: In function ‘H5I__remove_common’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:1125:17: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1125 |     ret_value = (void *)curr_id->obj_ptr;       /* (Casting away const OK -QAK) */
+      |                 ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: In function ‘H5I_dec_ref’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:1261:68: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1261 |         if(!type_ptr->cls->free_func || (type_ptr->cls->free_func)((void *)id_ptr->obj_ptr) >= 0) {
+      |                                                                    ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Ocache.c: In function ‘H5O__chunk_deserialize’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Ocache.c:1464:25: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1464 |             mesg->raw = (uint8_t *)chunk_image;        /* Casting away const OK - QAK */
+      |                         ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Ocache.c: In function ‘H5O__chunk_serialize’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Ocache.c:1666:30: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1666 |             if(H5O_msg_flush((H5F_t *)f, oh, curr_msg) < 0)
+      |                              ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: In function ‘H5I__iterate_cb’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:1877:42: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1877 |         cb_ret_val = (*udata->user_func)((void *)item->obj_ptr, item->id, udata->user_udata);     /* (Casting away const OK) */
+      |                                          ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: In function ‘H5I__id_dump_cb’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:2135:31: warning: passing argument 1 of ‘H5G_nameof’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+ 2135 |             path = H5G_nameof((const H5G_t *)item->obj_ptr);
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tprivate.h:31,
+                 from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Zprivate.h:28,
+                 from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5CXprivate.h:30,
+                 from /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:34:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Gprivate.h:190:39: note: expected ‘H5G_t *’ but argument is of type ‘const H5G_t *’
+  190 | H5_DLL H5G_name_t * H5G_nameof(H5G_t *grp);
+      |                                ~~~~~~~^~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c: At top level:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5I.c:125:12: warning: ‘H5I__debug_cb’ declared ‘static’ but never defined [-Wunused-function]
+  125 | static int H5I__debug_cb(void *_item, void *_key, void *_udata);
+      |            ^~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Odeprec.c: In function ‘H5Oget_info_by_idx1’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Odeprec.c:175:17: warning: unused variable ‘obj_oloc’ [-Wunused-variable]
+  175 |     H5O_loc_t   obj_oloc;               /* Opened object object location */
+      |                 ^~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Odeprec.c:174:17: warning: unused variable ‘obj_path’ [-Wunused-variable]
+  174 |     H5G_name_t  obj_path;               /* Opened object group hier. path */
+      |                 ^~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Ofill.c: In function ‘H5O_fill_old_decode’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Ofill.c:347:71: warning: ordered comparison of pointer with integer zero [-Wpedantic]
+  347 |             if((dt = H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)) < 0)
+      |                                                                       ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Ofill.c:350:27: warning: comparison of integer expressions of different signedness: ‘ssize_t’ {aka ‘long int’} and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+  350 |             if(fill->size != H5T_GET_SIZE(dt))
+      |                           ^~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Oint.c: In function ‘H5O_create’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Oint.c:285:17: warning: unused variable ‘store_msg_crt_idx’ [-Wunused-variable]
+  285 |     hbool_t     store_msg_crt_idx;      /* Whether to always store message crea tion indices for this file */
+      |                 ^~~~~~~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Oint.c:284:17: warning: unused variable ‘insert_flags’ [-Wunused-variable]
+  284 |     unsigned    insert_flags = H5AC__NO_FLAGS_SET; /* Flags for inserting objec t header into cache */
+      |                 ^~~~~~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Oint.c:283:16: warning: unused variable ‘oh_flags’ [-Wunused-variable]
+  283 |     uint8_t    oh_flags;               /* Object header's initial status flags */
+      |                ^~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Oint.c:282:17: warning: unused variable ‘oh_size’ [-Wunused-variable]
+  282 |     size_t      oh_size;                /* Size of initial object header */
+      |                 ^~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Oint.c:281:17: warning: unused variable ‘oh_addr’ [-Wunused-variable]
+  281 |     haddr_t     oh_addr;                /* Address of initial object header */
+      |                 ^~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Oint.c:278:22: warning: unused variable ‘oc_plist’ [-Wunused-variable]
+  278 |     H5P_genplist_t  *oc_plist;          /* Object creation property list */
+      |                      ^~~~~~~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Pfapl.c: In function ‘H5P__file_driver_free’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Pfapl.c:1141:44: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1141 |                     if((driver->fapl_free)((void *)info->driver_info) < 0)      /* Casting away const OK -QAK */
+      |                                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Pfapl.c:1145:32: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 1145 |                     H5MM_xfree((void *)info->driver_info);      /* Casting away const OK -QAK */
+      |                                ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5RS.c: In function ‘H5RS_wrap’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5RS.c:151:20: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  151 |     ret_value->s = (char *)s;
+      |                    ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Rint.c: In function ‘H5R__get_name’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Rint.c:709:31: warning: unused parameter ‘id’ [-Wunused-parameter]
+  709 | H5R__get_name(H5F_t *f, hid_t id, H5R_type_t ref_type, const void *_ref,
+      |                         ~~~~~~^~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c: In function ‘H5S__hyper_iter_init’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:602:28: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  602 |         H5S__hyper_rebuild((H5S_t *)space);     /* Casting away const OK -NAF */
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5SL.c: In function ‘H5SL_release_common’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5SL.c:896:36: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+  896 |             (void)(op)(node->item, (void *)node->key, op_data);
+      |                                    ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5SL.c: In function ‘H5SL_iterate’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5SL.c:2210:46: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 2210 |             if((ret_value = (op)(node->item, (void *)node->key, op_data)) != 0)
+      |                                              ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5SL.c: In function ‘H5SL_try_free_safe’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5SL.c:2369:44: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 2369 |             if((op_ret = (op)(node->item , (void *)node->key, op_data)) < 0)
+      |                                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c: In function ‘H5S__hyper_is_regular’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:5181:28: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 5181 |         H5S__hyper_rebuild((H5S_t *)space);     /* Casting away const OK -NAF */
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c: In function ‘H5S__hyper_shape_same’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:5447:28: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 5447 |         H5S__hyper_rebuild((H5S_t *)space1);    /* Casting away const OK -QAK */
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:5449:28: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 5449 |         H5S__hyper_rebuild((H5S_t *)space2);    /* Casting away const OK -QAK */
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:5494:42: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 5494 |             if(H5S__hyper_generate_spans((H5S_t *)space1) < 0)  /* Casting away const OK -QAK */
+      |                                          ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:5497:42: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 5497 |             if(H5S__hyper_generate_spans((H5S_t *)space2) < 0)  /* Casting away const OK -QAK */
+      |                                          ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c: In function ‘H5S__hyper_intersect_block’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:6118:28: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+ 6118 |         H5S__hyper_rebuild((H5S_t *)space);     /* Casting away const OK -QAK */
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5T.c: In function ‘H5T_nameof’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5T.c:5246:23: warning: assignment discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+ 5246 |             ret_value = &(dt->path);
+      |                       ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c: In function ‘H5S__hyper_proj_int_iterate’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:11249:74: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+11249 |         H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper((H5S_hyper_span_info_t *)ss_span_info, 0, udata->op_gen) * count, FAIL); /* Casting away const OK -NAF */
+      |                                                                          ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:74:27: note: in definition of macro ‘H5S_HYPER_PROJ_INT_ADD_SKIP’
+   74 |         (UDATA)->skip += (ADD);                                 \
+      |                           ^~~
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c: In function ‘H5S__hyper_project_intersection’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:11338:42: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+11338 |             if(H5S__hyper_generate_spans((H5S_t *)src_space) < 0)  /* Casting away const OK -NAF */
+      |                                          ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:11358:42: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+11358 |             if(H5S__hyper_generate_spans((H5S_t *)dst_space) < 0)  /* Casting away const OK -NAF */
+      |                                          ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:11376:38: warning: cast discards ‘const’ qualifier from pointer target type [-Wcast-qual]
+11376 |         if(H5S__hyper_generate_spans((H5S_t *)src_intersect_space) < 0)  /* Casting away const OK -NAF */
+      |                                      ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tvlen.c: In function ‘H5T_vlen_disk_isnull’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tvlen.c:852:24: warning: to be safe all intermediate pointers in cast from ‘uint8_t **’ {aka ‘unsigned char **’} to ‘const uint8_t **’ {aka ‘const unsigned char **’} must be ‘const’ qualified [-Wcast-qual]
+  852 |     H5F_addr_decode(f, (const uint8_t **)&vl, &addr);
+      |                        ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tvlen.c: In function ‘H5T_vlen_disk_read’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tvlen.c:888:24: warning: to be safe all intermediate pointers in cast from ‘uint8_t **’ {aka ‘unsigned char **’} to ‘const uint8_t **’ {aka ‘const unsigned char **’} must be ‘const’ qualified [-Wcast-qual]
+  888 |     H5F_addr_decode(f, (const uint8_t **)&vl, &(hobjid.addr));
+      |                        ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tvlen.c: In function ‘H5T_vlen_disk_write’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tvlen.c:939:28: warning: to be safe all intermediate pointers in cast from ‘uint8_t **’ {aka ‘unsigned char **’} to ‘const uint8_t **’ {aka ‘const unsigned char **’} must be ‘const’ qualified [-Wcast-qual]
+  939 |         H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tvlen.c: In function ‘H5T_vlen_disk_setnull’:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Tvlen.c:1000:28: warning: to be safe all intermediate pointers in cast from ‘uint8_t **’ {aka ‘unsigned char **’} to ‘const uint8_t **’ {aka ‘const unsigned char **’} must be ‘const’ qualified [-Wcast-qual]
+ 1000 |         H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
+      |                            ^
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c: At top level:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/src/H5Shyper.c:3531:1: warning: ‘H5S__hyper_get_enc_size_real’ defined but not used [-Wunused-function]
+ 3531 | H5S__hyper_get_enc_size_real(hsize_t max_size)
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~

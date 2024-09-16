@@ -1,0 +1,14 @@
+prefix=/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: hdf5
+Description: HDF5 (Hierarchical Data Format 5) Software Library
+Version: 1.10.7
+
+Cflags: -I${includedir}
+Libs: -L${libdir} 
+Requires: 
+Libs.private:  -lm -ldl  -lhdf5
+Requires.private: 

@@ -1,0 +1,80 @@
+Performing Other Test HAVE_TM_ZONE failed with the following output:
+Change Dir: '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_16bec/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_16bec.dir/build.make CMakeFiles/cmTC_16bec.dir/build
+gmake[1]: Entering directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_16bec.dir/HDFTests.c.o
+/usr/bin/cc   -ffunction-sections -fdata-sections -fPIC -m64    -DHAVE_TM_ZONE  -DHAVE_SYS_TIME_H -DHAVE_UNISTD_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_SOCKET_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -o CMakeFiles/cmTC_16bec.dir/HDFTests.c.o -c /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/config/cmake_ext_mod/HDFTests.c
+Linking C executable cmTC_16bec
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_16bec.dir/link.txt --verbose=1
+/usr/bin/cc  -ffunction-sections -fdata-sections -fPIC -m64  CMakeFiles/cmTC_16bec.dir/HDFTests.c.o -o cmTC_16bec  -lm -ldl 
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
+(.text+0x1b): undefined reference to `main'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_16bec.dir/build.make:99: cmTC_16bec] Error 1
+gmake[1]: Leaving directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_16bec/fast] Error 2
+
+
+Performing Other Test HAVE_STRUCT_TM_TM_ZONE failed with the following output:
+Change Dir: '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_42a81/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_42a81.dir/build.make CMakeFiles/cmTC_42a81.dir/build
+gmake[1]: Entering directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_42a81.dir/HDFTests.c.o
+/usr/bin/cc   -ffunction-sections -fdata-sections -fPIC -m64    -DHAVE_STRUCT_TM_TM_ZONE  -DHAVE_SYS_TIME_H -DHAVE_UNISTD_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_SOCKET_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -o CMakeFiles/cmTC_42a81.dir/HDFTests.c.o -c /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/config/cmake_ext_mod/HDFTests.c
+Linking C executable cmTC_42a81
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_42a81.dir/link.txt --verbose=1
+/usr/bin/cc  -ffunction-sections -fdata-sections -fPIC -m64  CMakeFiles/cmTC_42a81.dir/HDFTests.c.o -o cmTC_42a81  -lm -ldl 
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
+(.text+0x1b): undefined reference to `main'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_42a81.dir/build.make:99: cmTC_42a81] Error 1
+gmake[1]: Leaving directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_42a81/fast] Error 2
+
+
+Test H5_LDOUBLE_TO_LONG_SPECIAL Run failed with the following output and exit code:
+ Change Dir: '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_747be/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_747be.dir/build.make CMakeFiles/cmTC_747be.dir/build
+gmake[1]: Entering directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_747be.dir/ConversionTests.c.o
+/usr/bin/cc   -ffunction-sections -fdata-sections -fPIC -m64 -DH5_LDOUBLE_TO_LONG_SPECIAL_TEST -o CMakeFiles/cmTC_747be.dir/ConversionTests.c.o -c /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/config/cmake/ConversionTests.c
+Linking C executable cmTC_747be
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_747be.dir/link.txt --verbose=1
+/usr/bin/cc  -ffunction-sections -fdata-sections -fPIC -m64 -DH5_LDOUBLE_TO_LONG_SPECIAL_TEST CMakeFiles/cmTC_747be.dir/ConversionTests.c.o -o cmTC_747be 
+gmake[1]: Leaving directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+
+
+Test H5_LONG_TO_LDOUBLE_SPECIAL Run failed with the following output and exit code:
+ Change Dir: '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_b5d3e/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_b5d3e.dir/build.make CMakeFiles/cmTC_b5d3e.dir/build
+gmake[1]: Entering directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b5d3e.dir/ConversionTests.c.o
+/usr/bin/cc   -ffunction-sections -fdata-sections -fPIC -m64 -DH5_LONG_TO_LDOUBLE_SPECIAL_TEST -o CMakeFiles/cmTC_b5d3e.dir/ConversionTests.c.o -c /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/config/cmake/ConversionTests.c
+Linking C executable cmTC_b5d3e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b5d3e.dir/link.txt --verbose=1
+/usr/bin/cc  -ffunction-sections -fdata-sections -fPIC -m64 -DH5_LONG_TO_LDOUBLE_SPECIAL_TEST CMakeFiles/cmTC_b5d3e.dir/ConversionTests.c.o -o cmTC_b5d3e 
+gmake[1]: Leaving directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+
+
+Test H5_DISABLE_SOME_LDOUBLE_CONV Run failed with the following output and exit code:
+ Change Dir: '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ed4c3/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_ed4c3.dir/build.make CMakeFiles/cmTC_ed4c3.dir/build
+gmake[1]: Entering directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ed4c3.dir/ConversionTests.c.o
+/usr/bin/cc   -ffunction-sections -fdata-sections -fPIC -m64 -DH5_DISABLE_SOME_LDOUBLE_CONV_TEST -o CMakeFiles/cmTC_ed4c3.dir/ConversionTests.c.o -c /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hdf5-src-0.8.1/ext/hdf5/config/cmake/ConversionTests.c
+Linking C executable cmTC_ed4c3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ed4c3.dir/link.txt --verbose=1
+/usr/bin/cc  -ffunction-sections -fdata-sections -fPIC -m64 -DH5_DISABLE_SOME_LDOUBLE_CONV_TEST CMakeFiles/cmTC_ed4c3.dir/ConversionTests.c.o -o cmTC_ed4c3 
+gmake[1]: Leaving directory '/home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out/build/CMakeFiles/CMakeTmp'
+
+

@@ -1,0 +1,90 @@
+        SUMMARY OF THE HDF5 CONFIGURATION
+        =================================
+
+General Information:
+-------------------
+                   HDF5 Version: 1.10.7
+                  Configured on: 2024-08-21
+                  Configured by: Unix Makefiles
+                    Host system: Linux-6.8.0-40-generic
+              Uname information: Linux
+                       Byte sex: little-endian
+             Installation point: /home/nate/Desktop/StreamsUtilsNP/target/debug/build/hdf5-src-794a3d6b46e0bae9/out
+
+Compiling Options:
+------------------
+                     Build Mode: Debug
+              Debugging Symbols: OFF
+                        Asserts: OFF
+                      Profiling: OFF
+             Optimization Level: OFF
+
+Linking Options:
+----------------
+                      Libraries: 
+  Statically Linked Executables: OFF
+                        LDFLAGS: 
+                     H5_LDFLAGS: 
+                     AM_LDFLAGS: 
+                Extra libraries: m;dl
+                       Archiver: /usr/bin/ar
+                         Ranlib: /usr/bin/ranlib
+
+Languages:
+----------
+                              C: YES
+                     C Compiler: /usr/bin/cc 13.2.0
+                       CPPFLAGS: 
+                    H5_CPPFLAGS: 
+                    AM_CPPFLAGS: 
+                         CFLAGS:   -std=c99  -ffunction-sections -fdata-sections -fPIC -m64 -Og -ftrapv -fno-common -fmessage-length=0
+                      H5_CFLAGS: -Wall;-Wcast-qual;-Wconversion;-Wextra;-Wfloat-equal;-Wformat=2;-Winit-self;-Winvalid-pch;-Wmissing-include-dirs;-Wno-c++-compat;-Wno-format-nonliteral;-Wshadow;-Wundef;-Wwrite-strings;-pedantic
+                      AM_CFLAGS: 
+               Shared C Library: NO
+               Static C Library: YES
+
+                        Fortran: OFF
+               Fortran Compiler:  
+                  Fortran Flags: 
+               H5 Fortran Flags: 
+               AM Fortran Flags: 
+         Shared Fortran Library: NO
+         Static Fortran Library: YES
+
+                            C++: OFF
+                   C++ Compiler: /usr/bin/c++ 
+                      C++ Flags:   -ffunction-sections -fdata-sections -fPIC -m64
+                   H5 C++ Flags: 
+                   AM C++ Flags: 
+             Shared C++ Library: NO
+             Static C++ Library: YES
+
+                            JAVA: OFF
+                 JAVA Compiler:  
+
+Features:
+---------
+                   Parallel HDF5: OFF
+Parallel Filtered Dataset Writes: 
+              Large Parallel I/O: 
+              High-level library: OFF
+                Build HDF5 Tests: OFF
+                Build HDF5 Tools: OFF
+                    Threadsafety: OFF
+             Default API mapping: v110
+  With deprecated public symbols: OFF
+          I/O filters (external): 
+                             MPE: 
+                      Direct VFD: 
+                      Mirror VFD: 
+              (Read-Only) S3 VFD: 
+            (Read-Only) HDFS VFD: 
+                         dmalloc: 
+  Packages w/ extra debug output: 
+                     API Tracing: OFF
+            Using memory checker: OFF
+ Memory allocation sanity checks: OFF
+          Function Stack Tracing: OFF
+                Use file locking: best-effort
+       Strict File Format Checks: OFF
+    Optimization Instrumentation: 

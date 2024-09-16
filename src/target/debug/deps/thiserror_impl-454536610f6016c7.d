@@ -1,0 +1,12 @@
+/home/nate/Desktop/StreamsUtilsNP/target/debug/deps/libthiserror_impl-454536610f6016c7.so: /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/lib.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/ast.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/attr.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/expand.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/fmt.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/generics.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/prop.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/valid.rs
+
+/home/nate/Desktop/StreamsUtilsNP/target/debug/deps/thiserror_impl-454536610f6016c7.d: /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/lib.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/ast.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/attr.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/expand.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/fmt.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/generics.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/prop.rs /home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/valid.rs
+
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/lib.rs:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/ast.rs:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/attr.rs:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/expand.rs:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/fmt.rs:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/generics.rs:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/prop.rs:
+/home/nate/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.38/src/valid.rs:
